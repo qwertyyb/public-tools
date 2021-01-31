@@ -1,4 +1,5 @@
 import 'package:sqflite/sqflite.dart';
+import '../config.dart';
 
 enum ContentType { text, image }
 
@@ -10,7 +11,9 @@ class PasteItem {
   ContentType contentType;
   String text;
 
-  PasteItem({this.summary, this.updatedAt, this.contentType, this.text});
+  PasteItem({this.summary, this.updatedAt, this.contentType, this.text}) {
+    print(getDatabase());
+  }
 
   Map<String, dynamic> toMap() {
     var map = <String, dynamic>{
@@ -34,8 +37,7 @@ class PasteItem {
   }
 
   Future<Database> getDatabase() async {
-    var path = await getDatabasesPath();
-    print(path);
+    var path = await Config.getDatabasePath();
     return openDatabase(path, version: 1,
         onCreate: (Database db, int version) async {
       await db.execute('''
