@@ -1,8 +1,5 @@
 import 'package:flutter/material.dart';
-import 'package:ypaste_flutter/controllers/ClipboardController.dart';
-import 'package:ypaste_flutter/controllers/HistoryController.dart';
-import './models/PasteItem.dart';
-import './views/PasteItemView.dart';
+import './views/PasteItemListView.dart';
 
 void main() {
   runApp(MyApp());
@@ -27,45 +24,6 @@ class MyApp extends StatelessWidget {
         primarySwatch: Colors.blue,
       ),
       home: MyHomePage(title: 'Flutter Demo Home Page'),
-    );
-  }
-}
-
-class PasteItemList extends StatefulWidget {
-  @override
-  State<StatefulWidget> createState() => _PasteItemListState();
-}
-
-class _PasteItemListState extends State<PasteItemList> {
-  List<PasteItem> _list = [
-    PasteItem(
-        contentType: ContentType.text,
-        summary: "hello world",
-        updatedAt: DateTime.now())
-  ];
-
-  _PasteItemListState() {
-    _listenClipboardChange();
-    HistoryController();
-  }
-
-  void _listenClipboardChange() async {
-    // ClipboardController.startListener().listen((event) {
-    //   print("new text $event");
-    // });
-    var text = (await ClipboardController.getText()).text;
-    setState(() {
-      _list[0].summary = text;
-    });
-  }
-
-  @override
-  Widget build(BuildContext context) {
-    return Container(
-      height: 500,
-      child: ListView(
-        children: [PasteItemView(pasteItem: _list[0])],
-      ),
     );
   }
 }
@@ -136,7 +94,7 @@ class _MyHomePageState extends State<MyHomePage> {
           // axis because Columns are vertical (the cross axis would be
           // horizontal).
           mainAxisAlignment: MainAxisAlignment.start,
-          children: <Widget>[PasteItemList()],
+          children: <Widget>[PasteItemListView()],
         ),
       ),
       floatingActionButton: FloatingActionButton(

@@ -1,19 +1,27 @@
 import 'package:flutter/material.dart';
 import '../models/PasteItem.dart';
+import 'package:intl/intl.dart';
+
 
 class PasteItemViewHeader extends StatelessWidget {
-  PasteItemViewHeader({Key key, this.title}) : super(key: key);
+  PasteItemViewHeader({Key key, this.title, this.subTitle}) : super(key: key);
 
   final String title;
+  final String subTitle;
   @override
   Widget build(BuildContext context) {
     return Container(
-      height: 40,
       color: Theme.of(context).primaryColor,
-      padding: EdgeInsets.only(left: 10, right: 10),
+      padding: EdgeInsets.symmetric(vertical: 8, horizontal: 10),
       child: Row(
         children: [
-          Text(title, style: Theme.of(context).primaryTextTheme.headline6),
+          Column(
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+              Text(title, style: Theme.of(context).primaryTextTheme.subtitle1),
+              Text(subTitle, style: Theme.of(context).primaryTextTheme.caption)
+            ]
+          ),
           Spacer(),
           IconButton(
             icon: Icon(Icons.assessment_rounded,
@@ -37,18 +45,23 @@ class PasteItemView extends StatelessWidget {
   Widget build(BuildContext context) {
     return Container(
       clipBehavior: Clip.antiAlias,
+      margin: EdgeInsets.only(bottom: 20),
       decoration: BoxDecoration(
           borderRadius: BorderRadius.circular(10), color: Colors.black12),
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
-          PasteItemViewHeader(title: '此处是标题'),
+          PasteItemViewHeader(
+            title: pasteItem.contentType == ContentType.text ? '文本' : '图片',
+            subTitle: DateFormat('yyyy-MM-dd HH:mm:ss')
+              .format(pasteItem.updatedAt),
+          ),
           Container(
             height: 160,
             child: Padding(
               padding: EdgeInsets.all(16),
               child: Text(
-                pasteItem.summary,
+                pasteItem.text,
               ),
             ),
           )
