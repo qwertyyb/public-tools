@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:ypaste_flutter/controllers/ClipboardController.dart';
+import 'package:ypaste_flutter/controllers/HistoryController.dart';
 import './models/PasteItem.dart';
 import './views/PasteItemView.dart';
 
@@ -45,9 +46,13 @@ class _PasteItemListState extends State<PasteItemList> {
 
   _PasteItemListState() {
     _listenClipboardChange();
+    HistoryController();
   }
 
   void _listenClipboardChange() async {
+    // ClipboardController.startListener().listen((event) {
+    //   print("new text $event");
+    // });
     var text = (await ClipboardController.getText()).text;
     setState(() {
       _list[0].summary = text;
