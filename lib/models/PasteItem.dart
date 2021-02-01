@@ -29,21 +29,41 @@ class PasteItem {
   PasteItem.fromMap(Map<String, dynamic> map) {
     id = map['id'];
     summary = map['summary'];
-    text = map['text'];
+    text = map['text'].toString();
     contentType = ContentType.values[map['contentType']];
     updatedAt = DateTime.parse(map['updatedAt']);
   }
+}
 
-  Future<int> save() async {
-    if (id != null) {
-      return this.update();
-    }
-    var insertId = await Utils.instance.getDatabase().then((db) {
-      return db.insert(PasteItem.tableName, this.toMap());
-    });
-    return insertId;
+class PasteItemHelper {
+  // 工厂模式
+  factory PasteItemHelper() => _getInstance();
+  static PasteItemHelper get instance => _getInstance();
+  static PasteItemHelper _instance;
+  PasteItemHelper._internal() {
+    // 初始化
   }
-  Future<PasteItem> get() async {
+  static PasteItemHelper _getInstance() {
+    if (_instance == null) {
+      _instance = new PasteItemHelper._internal();
+    }
+    return _instance;
+  }
+
+  Future<List<PasteItem>> query(
+      {String where, List whereArgs, List<String> columns}) async {
+    var db = await Utils.instance.getDatabase();
+    var results = await db.query(PasteItem.tableName,
+        orderBy: 'updatedAt desc',
+        columns: columns,
+        where: where,
+        whereArgs: whereArgs);
+    return results.map((e) {
+      return PasteItem.fromMap(e);
+    }).toList();
+  }
+
+  Future<PasteItem> get(int id) async {
     return Utils.instance.getDatabase().then((db) async {
       var maps = await db.query(PasteItem.tableName,
           columns: ['id', 'updatedAt', 'summary', 'text', 'contentType'],
@@ -56,20 +76,26 @@ class PasteItem {
     });
   }
 
-  Future<int> delete() async {
+  Future<int> delete(int id) async {
     return Utils.instance.getDatabase().then((db) {
       return db.delete(PasteItem.tableName, where: 'id = ?', whereArgs: [id]);
     });
   }
 
-  Future<int> update() async {
+  Future<int> update(PasteItem pasteItem) async {
     return Utils.instance.getDatabase().then((db) {
-      return db.update(PasteItem.tableName, toMap(),
-          where: 'id = ?', whereArgs: [id]);
+      return db.update(PasteItem.tableName, pasteItem.toMap(),
+          where: 'id = ?', whereArgs: [pasteItem.id]);
     });
   }
 
-  Future close() async => Utils.instance.getDatabase().then((db) {
-        return db.close();
-      });
+  Future<int> save(PasteItem pasteItem) async {
+    if (pasteItem.id != null) {
+      return this.update(pasteItem);
+    }
+    var insertId = await Utils.instance.getDatabase().then((db) {
+      return db.insert(PasteItem.tableName, pasteItem.toMap());
+    });
+    return insertId;
+  }
 }

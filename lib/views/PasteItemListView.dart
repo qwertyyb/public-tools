@@ -10,12 +10,7 @@ class PasteItemListView extends StatefulWidget {
 
 class _PasteItemListState extends State<PasteItemListView> {
   final HistoryController _history = HistoryController();
-  List<PasteItem> _list = [
-    PasteItem(
-        contentType: ContentType.text,
-        summary: "hello world",
-        updatedAt: DateTime.now())
-  ];
+  List<PasteItem> _list = [];
 
   _PasteItemListState() {
     _history.onChange = _onHistoryChange;
@@ -30,19 +25,17 @@ class _PasteItemListState extends State<PasteItemListView> {
 
   @override
   Widget build(BuildContext context) {
-    return Column(
-      children: [
-        Container(
-          height: 500,
-          child: ListView.builder(
-            itemCount: _list.length,
-            itemBuilder: (BuildContext context, int index) {
-              return PasteItemView(pasteItem: _list[index]);
-            },
-          )
+    return Column(children: [
+      Expanded(
+        flex: 1,
+        child: ListView.builder(
+          itemCount: _list.length,
+          itemBuilder: (BuildContext context, int index) {
+            return PasteItemView(pasteItem: _list[index]);
+          },
         ),
-        Text("hello")
-      ]
-    );
+      ),
+      Text("共有${_list.length}条历史记录")
+    ]);
   }
 }

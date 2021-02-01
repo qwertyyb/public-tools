@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import './views/PasteItemListView.dart';
+import './controllers/ShortcutsController.dart';
 
 void main() {
   runApp(MyApp());
@@ -23,7 +24,7 @@ class MyApp extends StatelessWidget {
         // is not restarted.
         primarySwatch: Colors.blue,
       ),
-      home: MyHomePage(title: 'Flutter Demo Home Page'),
+      home: MyHomePage(title: '粘贴板'),
     );
   }
 }
@@ -48,6 +49,7 @@ class MyHomePage extends StatefulWidget {
 
 class _MyHomePageState extends State<MyHomePage> {
   int _counter = 0;
+  ShortcutsController shortcutsController = ShortcutsController.instance;
 
   void _incrementCounter() {
     setState(() {
@@ -94,7 +96,7 @@ class _MyHomePageState extends State<MyHomePage> {
           // axis because Columns are vertical (the cross axis would be
           // horizontal).
           mainAxisAlignment: MainAxisAlignment.start,
-          children: <Widget>[PasteItemListView()],
+          children: <Widget>[Expanded(child: PasteItemListView())],
         ),
       ),
       floatingActionButton: FloatingActionButton(

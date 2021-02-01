@@ -6,12 +6,17 @@ class ClipboardController {
     return Clipboard.getData(Clipboard.kTextPlain);
   }
 
+  static void writeText(String text) async {
+    return Clipboard.setData(ClipboardData(text: text));
+  }
+
   static StreamController<String> streamController = StreamController<String>();
 
   static Stream<String> startListener() {
     String lastText;
     var callback = (Timer timer) {
       Clipboard.getData(Clipboard.kTextPlain).then((data) {
+        if (data == null) return;
         if (lastText == data.text) {
           return print('数据一致');
         }

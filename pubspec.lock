@@ -76,13 +76,6 @@ packages:
     description: flutter
     source: sdk
     version: "0.0.0"
-  flutter_redux:
-    dependency: "direct main"
-    description:
-      name: flutter_redux
-      url: "https://pub.flutter-io.cn"
-    source: hosted
-    version: "0.7.0"
   flutter_test:
     dependency: "direct dev"
     description: flutter
@@ -93,6 +86,13 @@ packages:
     description: flutter
     source: sdk
     version: "0.0.0"
+  hotkey_shortcuts:
+    dependency: "direct main"
+    description:
+      path: "../hotkey_shortcuts"
+      relative: true
+    source: path
+    version: "0.0.1"
   intl:
     dependency: transitive
     description:
@@ -121,6 +121,13 @@ packages:
       url: "https://pub.flutter-io.cn"
     source: hosted
     version: "1.3.0-nullsafety.6"
+  nested:
+    dependency: transitive
+    description:
+      name: nested
+      url: "https://pub.flutter-io.cn"
+    source: hosted
+    version: "0.0.4"
   path:
     dependency: transitive
     description:
@@ -184,13 +191,13 @@ packages:
       url: "https://pub.flutter-io.cn"
     source: hosted
     version: "3.0.13"
-  redux:
-    dependency: transitive
+  provider:
+    dependency: "direct main"
     description:
-      name: redux
+      name: provider
       url: "https://pub.flutter-io.cn"
     source: hosted
-    version: "4.0.0+3"
+    version: "4.3.3"
   shared_preferences:
     dependency: "direct main"
     description:
@@ -322,6 +329,13 @@ packages:
       url: "https://pub.flutter-io.cn"
     source: hosted
     version: "1.7.4+1"
+  window_activator:
+    dependency: "direct main"
+    description:
+      name: window_activator
+      url: "https://pub.flutter-io.cn"
+    source: hosted
+    version: "0.2.0"
   xdg_directories:
     dependency: transitive
     description:

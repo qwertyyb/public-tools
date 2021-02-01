@@ -1,13 +1,22 @@
 import 'package:flutter/material.dart';
+import 'package:ypaste_flutter/controllers/ClipboardController.dart';
+import 'package:ypaste_flutter/controllers/HistoryController.dart';
 import '../models/PasteItem.dart';
 import 'package:intl/intl.dart';
 
-
 class PasteItemViewHeader extends StatelessWidget {
-  PasteItemViewHeader({Key key, this.title, this.subTitle}) : super(key: key);
+  PasteItemViewHeader(
+      {Key key,
+      this.title,
+      this.subTitle,
+      this.onCopyBtnPressed,
+      this.onDeleteBtnPressed})
+      : super(key: key);
 
   final String title;
   final String subTitle;
+  final void Function() onCopyBtnPressed;
+  final void Function() onDeleteBtnPressed;
   @override
   Widget build(BuildContext context) {
     return Container(
@@ -15,23 +24,23 @@ class PasteItemViewHeader extends StatelessWidget {
       padding: EdgeInsets.symmetric(vertical: 8, horizontal: 10),
       child: Row(
         children: [
-          Column(
-            crossAxisAlignment: CrossAxisAlignment.start,
-            children: [
-              Text(title, style: Theme.of(context).primaryTextTheme.subtitle1),
-              Text(subTitle, style: Theme.of(context).primaryTextTheme.caption)
-            ]
-          ),
+          Column(crossAxisAlignment: CrossAxisAlignment.start, children: [
+            Text(title, style: Theme.of(context).primaryTextTheme.subtitle1),
+            Text(subTitle, style: Theme.of(context).primaryTextTheme.caption)
+          ]),
           Spacer(),
           IconButton(
-            icon: Icon(Icons.assessment_rounded,
+            tooltip: '复制',
+            icon: Icon(Icons.content_copy,
                 color: Theme.of(context).primaryIconTheme.color),
-            onPressed: () {},
+            onPressed: onCopyBtnPressed,
           ),
           IconButton(
-              icon: Icon(Icons.delete_forever,
-                  color: Theme.of(context).primaryIconTheme.color),
-              onPressed: () {}),
+            tooltip: '删除',
+            icon: Icon(Icons.delete_forever,
+                color: Theme.of(context).primaryIconTheme.color),
+            onPressed: onDeleteBtnPressed,
+          ),
         ],
       ),
     );
@@ -52,10 +61,15 @@ class PasteItemView extends StatelessWidget {
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
           PasteItemViewHeader(
-            title: pasteItem.contentType == ContentType.text ? '文本' : '图片',
-            subTitle: DateFormat('yyyy-MM-dd HH:mm:ss')
-              .format(pasteItem.updatedAt),
-          ),
+              title: pasteItem.contentType == ContentType.text ? '文本' : '图片',
+              subTitle:
+                  DateFormat('yyyy-MM-dd HH:mm:ss').format(pasteItem.updatedAt),
+              onCopyBtnPressed: () {
+                ClipboardController.writeText(pasteItem.text);
+              },
+              onDeleteBtnPressed: () {
+                HistoryController.instance.deleteItem(pasteItem.id);
+              }),
           Container(
             height: 160,
             child: Padding(
