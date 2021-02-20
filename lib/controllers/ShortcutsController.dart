@@ -20,7 +20,7 @@ class ShortcutsController {
 
   void _init() async {
     print(await HotkeyShortcuts.platformVersion);
-    HotkeyShortcuts.register("command+shift+v", () async {
+    HotkeyShortcuts.register("command+shift+r", () async {
       print("hotkey entered");
       await WindowActivator.activateWindow();
     });

@@ -1,7 +1,12 @@
 import 'package:flutter/material.dart';
+
+import 'package:oktoast/oktoast.dart';
+
+import 'package:ypaste_flutter/core/PluginManager.dart';
+import 'package:ypaste_flutter/plugins/clipboard.dart';
 import './views/MainView.dart';
 // import './views/PasteItemListView.dart';
-// import './controllers/ShortcutsController.dart';
+import './controllers/ShortcutsController.dart';
 
 void main() {
   runApp(MyApp());
@@ -11,7 +16,8 @@ class MyApp extends StatelessWidget {
   // This widget is the root of your application.
   @override
   Widget build(BuildContext context) {
-    return MaterialApp(
+    return OKToast(
+        child: MaterialApp(
       title: 'Flutter Demo',
       theme: ThemeData(
         // This is the theme of your application.
@@ -25,8 +31,8 @@ class MyApp extends StatelessWidget {
         // is not restarted.
         primarySwatch: Colors.blue,
       ),
-      home: MyHomePage(title: '粘贴板'),
-    );
+      home: MyHomePage(title: 'Public'),
+    ));
   }
 }
 
@@ -49,18 +55,11 @@ class MyHomePage extends StatefulWidget {
 }
 
 class _MyHomePageState extends State<MyHomePage> {
-  int _counter = 0;
-  // ShortcutsController shortcutsController = ShortcutsController.instance;
+  ShortcutsController shortcutsController = ShortcutsController.instance;
+  PluginManager pluginManager = PluginManager.instance;
 
-  void _incrementCounter() {
-    setState(() {
-      // This call to setState tells the Flutter framework that something has
-      // changed in this State, which causes it to rerun the build method below
-      // so that the display can reflect the updated values. If we changed
-      // _counter without calling setState(), then the build method would not be
-      // called again, and so nothing would appear to happen.
-      _counter++;
-    });
+  _MyHomePageState() {
+    pluginManager.register(ClipboardPlugin());
   }
 
   @override
@@ -94,11 +93,6 @@ class _MyHomePageState extends State<MyHomePage> {
           mainAxisAlignment: MainAxisAlignment.start,
           children: <Widget>[Expanded(child: MainView())],
         ),
-      ),
-      floatingActionButton: FloatingActionButton(
-        onPressed: _incrementCounter,
-        tooltip: 'Increment',
-        child: Icon(Icons.add),
       ), // This trailing comma makes auto-formatting nicer for build methods.
     );
   }
