@@ -13,6 +13,28 @@ class HotkeyShortcuts {
     return version;
   }
 
+  static void updateWindowSize({ int width, int height }) {
+    _channel.invokeMethod("updateWindowSize", {
+      'width': width,
+      'height': height
+    });
+  }
+
+  static void moveWindowPosition({ double dx, double dy }) {
+    _channel.invokeMethod("updateWindowPosition", {
+      "dx": dx.round(),
+      "dy": dy.round()
+    });
+  }
+
+  static void recordWindowPosition() {
+    _channel.invokeMethod("recordWindowPosition");
+  }
+
+  static void pasteToFrontestApp() {
+    _channel.invokeMethod("pasteToFrontestApp");
+  }
+
   static Future register(String hotkey, void Function() callback) {
     var list = hotkeyMap[hotkey];
     if (list == null) {

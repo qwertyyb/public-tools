@@ -1,4 +1,4 @@
-import 'package:ypaste_flutter/models/CommonListItem.dart';
+import 'PluginListItem.dart';
 
 abstract class Plugin {
   String label;
@@ -8,5 +8,7 @@ abstract class Plugin {
   void onCreated() {}
 
   void onInput(
-      String keyword, void Function(List<CommonListItem> list) setResult);
+      String keyword, void Function(List<PluginListItem> list) setResult);
+  
+  onTap(PluginListItem item);
 }

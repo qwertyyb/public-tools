@@ -1,11 +1,11 @@
 import 'dart:async';
+import 'package:hotkey_shortcuts/hotkey_shortcuts.dart';
 import 'package:intl/intl.dart';
 
 import 'package:flutter/services.dart';
 import 'package:sqflite/sqflite.dart';
 import 'package:oktoast/oktoast.dart';
-import 'package:ypaste_flutter/models/CommonListItem.dart';
-
+import 'package:ypaste_flutter/core/PluginListItem.dart';
 import '../core/Plugin.dart';
 import '../config.dart';
 
@@ -26,7 +26,7 @@ Future<Database> getDatabase() async {
   });
 }
 
-class _PasteItem {
+class _PasteItem extends PluginListItem {
   static String tableName = 'clipboardHistory';
   int id;
   String summary;
@@ -34,7 +34,15 @@ class _PasteItem {
   ContentType contentType;
   String text;
 
-  _PasteItem({this.summary, this.updatedAt, this.contentType, this.text});
+  _PasteItem({
+    this.summary,
+    this.updatedAt,
+    this.contentType,
+    this.text,
+    String title,
+    String subtitle,
+    String icon,
+  }): super(title: title, subtitle: subtitle, icon: icon);
 
   Map<String, dynamic> toMap() {
     var map = <String, dynamic>{
@@ -131,7 +139,7 @@ class ClipboardPlugin implements Plugin {
   var label = '剪切板';
 
   var icon =
-      "'https://vfiles.gtimg.cn/vupload/20210220/586e451613797978732.png'";
+      "https://vfiles.gtimg.cn/vupload/20210220/586e451613797978732.png";
 
   onCreated() {}
 
@@ -139,15 +147,19 @@ class ClipboardPlugin implements Plugin {
     var list = await PasteItemHelper.instance
         .query(where: 'text like ?', whereArgs: ['%' + keyword + '%']);
     setResult(list.map((e) {
-      return CommonListItem(
+      return _PasteItem(
           title: e.summary,
           subtitle: DateFormat('yyyy-MM-dd HH:mm:ss').format(e.updatedAt),
           icon: '',
-          onTap: (item, index, list) {
-            Clipboard.setData(ClipboardData(text: e.text));
-            showToast("已复制");
-          });
+          text: e.text
+      );
     }).toList());
+  }
+
+  onTap(item) {
+    Clipboard.setData(ClipboardData(text: (item as _PasteItem).text));
+    print(item);
+    HotkeyShortcuts.pasteToFrontestApp();
   }
 
   void Function(List<Map<String, String>>) onChange;

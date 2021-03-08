@@ -1,5 +1,6 @@
 import 'package:ypaste_flutter/core/Plugin.dart';
-import 'package:ypaste_flutter/models/CommonListItem.dart';
+
+import 'PluginListItem.dart';
 
 class PluginManager {
   // 工厂模式
@@ -25,10 +26,10 @@ class PluginManager {
 
   void handleInput(
     String keyword,
-    void Function(Plugin plugin, List<CommonListItem> list) setResult,
+    void Function(Plugin plugin, List<PluginListItem> list) setResult,
   ) {
     var setPluginResult = (Plugin plugin) {
-      return (List<CommonListItem> list) {
+      return (List<PluginListItem> list) {
         setResult(plugin, list);
       };
     };

@@ -27,6 +27,7 @@ dependencies:
   provider: ^4.3.3
   window_activator: ^0.2.0
   oktoast: ^2.3.2
+  intl: ^0.17.0
   hotkey_shortcuts:
     path: './lib/packages/hotkey_shortcuts'
   flutter:
