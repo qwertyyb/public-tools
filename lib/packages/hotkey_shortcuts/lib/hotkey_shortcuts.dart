@@ -35,6 +35,12 @@ class HotkeyShortcuts {
     _channel.invokeMethod("pasteToFrontestApp");
   }
 
+  static Future<List<dynamic>> getInstalledApps() async {
+    var res = await _channel.invokeListMethod("getInstalledApps");
+    print(res);
+    return res;
+  }
+
   static Future register(String hotkey, void Function() callback) {
     var list = hotkeyMap[hotkey];
     if (list == null) {

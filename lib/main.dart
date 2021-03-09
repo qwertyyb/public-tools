@@ -3,6 +3,7 @@ import 'package:flutter/material.dart';
 import 'package:oktoast/oktoast.dart';
 
 import 'package:ypaste_flutter/core/PluginManager.dart';
+import 'package:ypaste_flutter/plugins/application/application.dart';
 import 'package:ypaste_flutter/plugins/clipboard.dart';
 import './views/MainView.dart';
 // import './views/PasteItemListView.dart';
@@ -60,6 +61,7 @@ class _MyHomePageState extends State<MyHomePage> {
 
   _MyHomePageState() {
     pluginManager.register(ClipboardPlugin());
+    pluginManager.register(ApplicationPlugin());
   }
 
   @override

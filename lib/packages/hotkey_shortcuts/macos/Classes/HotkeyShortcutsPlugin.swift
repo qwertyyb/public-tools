@@ -2,6 +2,32 @@ import Cocoa
 import HotKey
 import FlutterMacOS
 
+
+var query: NSMetadataQuery?
+func getInstalledApps(callback: @escaping ([[String: String]]) -> ()) {
+    query = NSMetadataQuery()
+    query?.stop()
+    let predicate = NSPredicate(format: "kMDItemContentType == 'com.apple.application-bundle'")
+    query?.predicate = predicate
+    query?.searchScopes = ["/Applications"]
+    var observer: Any?
+    observer = NotificationCenter.default.addObserver(forName: NSNotification.Name.NSMetadataQueryDidFinishGathering, object: nil, queue: nil) { (notification) in
+        var list = [[String: String]]()
+        for i in 0 ..< query!.resultCount {
+            guard let item = query?.result(at: i) as? NSMetadataItem else { continue }
+            let name = item.value(forAttribute: kMDItemDisplayName as String)
+            let path = item.value(forAttribute: kMDItemPath as String)
+            list.append([
+                "name": name as! String,
+                "path": path as! String
+            ])
+        }
+        callback(list)
+        NotificationCenter.default.removeObserver(observer!)
+    }
+    query?.start()
+}
+
 @available(OSX 10.12, *)
 public class HotkeyShortcutsPlugin: NSObject, FlutterPlugin {
 
@@ -45,8 +71,6 @@ public class HotkeyShortcutsPlugin: NSObject, FlutterPlugin {
       keyCombo: keyCombo,
       keyDownHandler: {
         print("onHotkey: \(label)")
-        print("textInput")
-        print(NSTextInputContext.current)
         channel?.invokeMethod("onHotkey", arguments: [label])
       },
       keyUpHandler: nil
@@ -67,7 +91,6 @@ public class HotkeyShortcutsPlugin: NSObject, FlutterPlugin {
 
   fileprivate static func triggerPaste() {
     if !HotkeyShortcutsPlugin.checkAccess() {
-      print("cant")
       let _ = HotkeyShortcutsPlugin.checkAccess(prompt: true)
     }
     NSApp.hide(nil)
@@ -97,22 +120,18 @@ public class HotkeyShortcutsPlugin: NSObject, FlutterPlugin {
   }
 
   public func handle(_ call: FlutterMethodCall, result: @escaping FlutterResult) {
-    print("native call")
-    print(call)
+    print("native call", call.method, call.arguments as Any)
     switch call.method {
     case "getPlatformVersion":
       result("macOS " + ProcessInfo.processInfo.operatingSystemVersionString)
       break;
     case "registerHotkey":
-      print("native register")
       HotkeyShortcutsPlugin.registerHotkey(label: (call.arguments as! [String])[0])
       result(true)
       break;
     case "updateWindowSize":
-      print("updateWindowSize")
       let args = call.arguments as! [String:Double]
       let size = NSSize(width: args["width"]!, height: args["height"]!)
-      print(args)
       NSApp.keyWindow?.setContentSize(size)
       result(true)
       break;
@@ -129,12 +148,15 @@ public class HotkeyShortcutsPlugin: NSObject, FlutterPlugin {
       result(true)
       break;
     case "pasteToFrontestApp":
-      print("pasteToFrontestApp")
       HotkeyShortcutsPlugin.triggerPaste()
       result(true)
       break;
+    case "getInstalledApps":
+        getInstalledApps(callback: result)
+        break;
     default:
-      result(FlutterMethodNotImplemented)
+        print(FlutterMethodNotImplemented)
+//      result(FlutterMethodNotImplemented)
     }
   }
 }
