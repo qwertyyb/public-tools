@@ -28,7 +28,6 @@ Future<Database> getDatabase() async {
 
 class _PasteItem extends PluginListItem {
   static String tableName = 'clipboardHistory';
-  int id;
   String summary;
   DateTime updatedAt;
   ContentType contentType;
@@ -42,7 +41,7 @@ class _PasteItem extends PluginListItem {
     String title,
     String subtitle,
     String icon,
-  }): super(title: title, subtitle: subtitle, icon: icon);
+  }) : super(title: title, subtitle: subtitle, icon: icon);
 
   Map<String, dynamic> toMap() {
     var map = <String, dynamic>{
@@ -52,13 +51,13 @@ class _PasteItem extends PluginListItem {
       'text': text
     };
     if (id != null) {
-      map['id'] = id;
+      map['id'] = int.parse(id);
     }
     return map;
   }
 
   _PasteItem.fromMap(Map<String, dynamic> map) {
-    id = map['id'];
+    id = map['id'].toString();
     summary = map['summary'];
     text = map['text'].toString();
     contentType = ContentType.values[map['contentType']];
@@ -138,8 +137,7 @@ class ClipboardPlugin implements Plugin {
 
   var label = '剪切板';
 
-  var icon =
-      "https://vfiles.gtimg.cn/vupload/20210220/586e451613797978732.png";
+  var icon = "https://vfiles.gtimg.cn/vupload/20210220/586e451613797978732.png";
 
   onCreated() {}
 
@@ -150,15 +148,14 @@ class ClipboardPlugin implements Plugin {
       return _PasteItem(
           title: e.summary,
           subtitle: DateFormat('yyyy-MM-dd HH:mm:ss').format(e.updatedAt),
-          icon: '',
-          text: e.text
-      );
+          icon: 'https://img.icons8.com/officel/80/000000/paste-as-text.png',
+          text: e.text);
     }).toList());
   }
 
   onTap(item) {
     Clipboard.setData(ClipboardData(text: (item as _PasteItem).text));
-    print(item);
+    showToast("复制成功");
     HotkeyShortcuts.pasteToFrontestApp();
   }
 

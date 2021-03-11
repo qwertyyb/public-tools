@@ -13,18 +13,14 @@ class HotkeyShortcuts {
     return version;
   }
 
-  static void updateWindowSize({ int width, int height }) {
-    _channel.invokeMethod("updateWindowSize", {
-      'width': width,
-      'height': height
-    });
+  static void updateWindowSize({int width, int height}) {
+    _channel
+        .invokeMethod("updateWindowSize", {'width': width, 'height': height});
   }
 
-  static void moveWindowPosition({ double dx, double dy }) {
-    _channel.invokeMethod("updateWindowPosition", {
-      "dx": dx.round(),
-      "dy": dy.round()
-    });
+  static void moveWindowPosition({double dx, double dy}) {
+    _channel.invokeMethod(
+        "updateWindowPosition", {"dx": dx.round(), "dy": dy.round()});
   }
 
   static void recordWindowPosition() {
@@ -37,8 +33,15 @@ class HotkeyShortcuts {
 
   static Future<List<dynamic>> getInstalledApps() async {
     var res = await _channel.invokeListMethod("getInstalledApps");
-    print(res);
     return res;
+  }
+
+  static void launchApp(String path) {
+    _channel.invokeMethod("launchApp", path);
+  }
+
+  static void execCommand(String command) {
+    _channel.invokeMethod("execCommand", "lock");
   }
 
   static Future register(String hotkey, void Function() callback) {

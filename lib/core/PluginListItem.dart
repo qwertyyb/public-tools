@@ -3,5 +3,9 @@ class PluginListItem {
   String subtitle;
   String icon;
 
-  PluginListItem({this.title, this.subtitle, this.icon});
+  List<String> keywords;
+  String id;
+
+  PluginListItem(
+      {this.title, this.subtitle, this.icon, this.id, this.keywords});
 }

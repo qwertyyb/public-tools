@@ -28,7 +28,14 @@ func getInstalledApps(callback: @escaping ([[String: String]]) -> ()) {
     query?.start()
 }
 
-@available(OSX 10.12, *)
+func execCommand(command: String) {
+    var script = NSAppleScript.init(source: """
+        tell application "System Events" to keystroke "q" using {control down, command down}
+    """)
+    print(script?.executeAndReturnError(nil))
+}
+
+@available(OSX 10.15, *)
 public class HotkeyShortcutsPlugin: NSObject, FlutterPlugin {
 
   public static var channel: FlutterMethodChannel?
@@ -119,7 +126,7 @@ public class HotkeyShortcutsPlugin: NSObject, FlutterPlugin {
     HotkeyShortcutsPlugin.channel = channel
   }
 
-  public func handle(_ call: FlutterMethodCall, result: @escaping FlutterResult) {
+    public func handle(_ call: FlutterMethodCall, result: @escaping FlutterResult) {
     print("native call", call.method, call.arguments as Any)
     switch call.method {
     case "getPlatformVersion":
@@ -154,6 +161,14 @@ public class HotkeyShortcutsPlugin: NSObject, FlutterPlugin {
     case "getInstalledApps":
         getInstalledApps(callback: result)
         break;
+    case "launchApp":
+      let path = call.arguments as! String
+      NSWorkspace.shared.openApplication(at: URL(fileURLWithPath: path), configuration: NSWorkspace.OpenConfiguration())
+      result(true)
+      break;
+    case "execCommand":
+        execCommand(command: call.arguments as! String)
+        result(true)
     default:
         print(FlutterMethodNotImplemented)
 //      result(FlutterMethodNotImplemented)

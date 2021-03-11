@@ -28,6 +28,7 @@ dependencies:
   window_activator: ^0.2.0
   oktoast: ^2.3.2
   intl: ^0.17.0
+  cached_network_image: ^2.5.1
   hotkey_shortcuts:
     path: './lib/packages/hotkey_shortcuts'
   flutter:
