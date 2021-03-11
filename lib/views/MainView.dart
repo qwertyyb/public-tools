@@ -4,7 +4,7 @@ import 'package:ypaste_flutter/core/Plugin.dart';
 import 'package:ypaste_flutter/core/PluginListItem.dart';
 import 'package:ypaste_flutter/core/PluginManager.dart';
 import 'package:ypaste_flutter/views/InputBar.dart';
-import 'package:ypaste_flutter/views/PluginView.dart';
+import 'package:ypaste_flutter/views/PluginListView.dart';
 
 class MainView extends StatefulWidget {
   @override
@@ -38,23 +38,21 @@ class _MainViewState extends State<MainView> {
     });
   }
 
+  void _onEnter() {
+    final plugin = list.keys.first;
+    plugin.onTap(list[plugin].first);
+  }
+
   @override
   Widget build(BuildContext context) {
-    var listView = ListView.builder(
-      itemBuilder: (pluginContext, pluginIndex) {
-        var plugin = list.keys.elementAt(pluginIndex);
-        return PluginView(
-          plugin: plugin,
-          results: list[plugin],
-        );
-      },
-      itemCount: list.keys.length,
-    );
     return Column(
       children: [
-        InputBar(onKeywordChange: this._onKeywordChange,),
+        InputBar(
+          onKeywordChange: this._onKeywordChange,
+          onEnter: this._onEnter,
+        ),
         Expanded(
-          child: listView,
+          child: PluginListView(list: list,),
         )
       ],
     );

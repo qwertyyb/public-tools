@@ -9,13 +9,15 @@ class MainFlutterWindow: NSWindow {
 
   override func awakeFromNib() {
     let flutterViewController = FlutterViewController.init()
-    let windowFrame = self.frame
     self.contentViewController = flutterViewController
+    self.styleMask = [.borderless, .fullSizeContentView]
+    
+    let origin = NSPoint(x: self.frame.origin.x, y: 100)
+    let windowFrame = NSRect(origin: origin, size: CGSize(width: 720, height: 60))
     self.setFrame(windowFrame, display: true)
 
     RegisterGeneratedPlugins(registry: flutterViewController)
     
     super.awakeFromNib()
-    self.styleMask = [.borderless, .fullSizeContentView]
   }
 }

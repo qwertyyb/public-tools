@@ -1,10 +1,13 @@
 import 'package:flutter/material.dart';
+import 'package:flutter/services.dart';
 import 'package:hotkey_shortcuts/hotkey_shortcuts.dart';
 
 class InputBar extends StatelessWidget {
   final Function onKeywordChange;
+  final Function onEnter;
+  final FocusNode _focusNode = FocusNode(canRequestFocus: false);
 
-  InputBar({this.onKeywordChange});
+  InputBar({this.onKeywordChange, this.onEnter});
 
   void _onPointerMove(PointerMoveEvent event) {
     // 经过实践，此事件返回的位置信息乱七八糟，计算出来的位移信息会有瞬移的情况
@@ -18,24 +21,37 @@ class InputBar extends StatelessWidget {
 
   void _onPointerUp(PointerEvent event) {}
 
+  void _onKey(RawKeyEvent event) {
+    // 当按下向下键时，自动聚焦到下一个可聚焦的组件上，一般是候选列表第一个
+    if (event.isKeyPressed(LogicalKeyboardKey.arrowDown)) {
+      FocusManager.instance.primaryFocus.nextFocus();
+    } else if (event.isKeyPressed(LogicalKeyboardKey.enter)) {
+      this.onEnter();
+    }
+  }
+
   @override
   Widget build(BuildContext context) {
     return Container(
       height: 60,
       padding: EdgeInsets.symmetric(horizontal: 12),
-      child: Listener(
-        onPointerDown: _onPointerDown,
-        onPointerMove: _onPointerMove,
-        onPointerUp: _onPointerUp,
-        onPointerCancel: _onPointerUp,
-        child: TextField(
-          textAlignVertical: TextAlignVertical.center,
-          decoration: InputDecoration(
-            contentPadding: EdgeInsets.zero,
-            border: InputBorder.none,
+      child: RawKeyboardListener(
+        onKey: _onKey,
+        focusNode: _focusNode,
+        child: Listener(
+          onPointerDown: _onPointerDown,
+          onPointerMove: _onPointerMove,
+          onPointerUp: _onPointerUp,
+          onPointerCancel: _onPointerUp,
+          child: TextField(
+            textAlignVertical: TextAlignVertical.center,
+            decoration: InputDecoration(
+              contentPadding: EdgeInsets.zero,
+              border: InputBorder.none,
+            ),
+            style: TextStyle(fontSize: 32),
+            onChanged: this.onKeywordChange,
           ),
-          style: TextStyle(fontSize: 32),
-          onChanged: this.onKeywordChange,
         ),
       ),
     );

@@ -9,7 +9,7 @@ func getInstalledApps(callback: @escaping ([[String: String]]) -> ()) {
     query?.stop()
     let predicate = NSPredicate(format: "kMDItemContentType == 'com.apple.application-bundle'")
     query?.predicate = predicate
-    query?.searchScopes = ["/Applications"]
+    query?.searchScopes = ["/Applications", "/System/Applications"]
     var observer: Any?
     observer = NotificationCenter.default.addObserver(forName: NSNotification.Name.NSMetadataQueryDidFinishGathering, object: nil, queue: nil) { (notification) in
         var list = [[String: String]]()
