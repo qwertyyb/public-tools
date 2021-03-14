@@ -1,6 +1,6 @@
 // import 'package:flutter_redux/flutter_redux.dart';
 // import 'package:redux/redux.dart';
-// import 'package:ypaste_flutter/models/PasteItem.dart';
+// import 'package:public_tools/models/PasteItem.dart';
 
 // enum History { Add }
 

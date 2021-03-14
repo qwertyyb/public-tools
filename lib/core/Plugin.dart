@@ -5,8 +5,6 @@ abstract class Plugin {
 
   String icon;
 
-  void onCreated() {}
-
   void onInput(
       String keyword, void Function(List<PluginListItem> list) setResult);
   

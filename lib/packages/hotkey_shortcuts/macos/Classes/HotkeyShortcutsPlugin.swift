@@ -2,6 +2,28 @@ import Cocoa
 import HotKey
 import FlutterMacOS
 
+extension String {
+    func isIncludeChinese() -> Bool {
+        for ch in self.unicodeScalars {
+            // 中文字符范围：0x4e00 ~ 0x9fff
+            if (0x4e00 < ch.value  && ch.value < 0x9fff) {
+                return true
+            }
+        }
+        return false
+    }
+    
+    func transformToPinyin() -> String {
+        let stringRef = NSMutableString(string: self) as CFMutableString
+        // 转换为带音标的拼音
+        CFStringTransform(stringRef,nil, kCFStringTransformToLatin, false);
+        // 去掉音标
+        CFStringTransform(stringRef, nil, kCFStringTransformStripCombiningMarks, false);
+        let pinyin = stringRef as String;
+        return pinyin
+    }
+
+}
 
 var query: NSMetadataQuery?
 func getInstalledApps(callback: @escaping ([[String: String]]) -> ()) {
@@ -15,10 +37,12 @@ func getInstalledApps(callback: @escaping ([[String: String]]) -> ()) {
         var list = [[String: String]]()
         for i in 0 ..< query!.resultCount {
             guard let item = query?.result(at: i) as? NSMetadataItem else { continue }
-            let name = item.value(forAttribute: kMDItemDisplayName as String)
+            let name = (item.value(forAttribute: kMDItemDisplayName as String) as! String)
+                .replacingOccurrences(of: ".app", with: "")
             let path = item.value(forAttribute: kMDItemPath as String)
             list.append([
-                "name": name as! String,
+                "name": name,
+                "pinyin": name.transformToPinyin(),
                 "path": path as! String
             ])
         }
@@ -29,10 +53,30 @@ func getInstalledApps(callback: @escaping ([[String: String]]) -> ()) {
 }
 
 func execCommand(command: String) {
-    var script = NSAppleScript.init(source: """
+  let applescripts = [
+    "lock": """
         tell application "System Events" to keystroke "q" using {control down, command down}
-    """)
-    print(script?.executeAndReturnError(nil))
+    """,
+    "sleep": """
+        tell application "System Events"
+          start (sleep)
+        end tell
+    """,
+    "shutdown": """
+        tell application "System Events"
+          start (shut down)
+        end tell
+    """,
+    "restart": """
+        tell application "System Events"
+          start (restart)
+        end tell
+    """,
+  ]
+  guard let source = applescripts[command] else { return }
+  print(source)
+  let script = NSAppleScript.init(source: source)
+  print(script?.executeAndReturnError(nil))
 }
 
 @available(OSX 10.15, *)
@@ -73,11 +117,9 @@ public class HotkeyShortcutsPlugin: NSObject, FlutterPlugin {
       return;
     }
     let keyCombo = parse(label)
-    print("register hotkey: \(label)")
     let hotkey = HotKey(
       keyCombo: keyCombo,
       keyDownHandler: {
-        print("onHotkey: \(label)")
         channel?.invokeMethod("onHotkey", arguments: [label])
       },
       keyUpHandler: nil

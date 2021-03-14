@@ -1,6 +1,6 @@
 import 'package:hotkey_shortcuts/hotkey_shortcuts.dart';
-import 'package:ypaste_flutter/core/Plugin.dart';
-import 'package:ypaste_flutter/core/PluginListItem.dart';
+import 'package:public_tools/core/Plugin.dart';
+import 'package:public_tools/core/PluginListItem.dart';
 
 class CommandPlugin extends Plugin {
   List<PluginListItem> _commandList = [
@@ -10,6 +10,12 @@ class CommandPlugin extends Plugin {
         subtitle: "锁定你的电脑",
         keywords: ['lock', 'lockscreen', 'sp'],
         icon: 'https://img.icons8.com/fluent/96/000000/touch-id.png'),
+    PluginListItem(
+        id: 'sleep',
+        title: '睡眠',
+        subtitle: '让你的电脑睡眠',
+        keywords: ['sleep', 'sm'],
+        icon: 'https://img.icons8.com/fluent/96/000000/sleep-mode.png'),
     PluginListItem(
         id: 'shutdown',
         title: '关机',

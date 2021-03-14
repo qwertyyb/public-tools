@@ -8,7 +8,6 @@ class HotkeyShortcuts {
   static final Map<String, List<void Function()>> hotkeyMap = {};
 
   static Future<String> get platformVersion async {
-    _channel.setMethodCallHandler(_onHotkey);
     final String version = await _channel.invokeMethod('getPlatformVersion');
     return version;
   }
@@ -31,9 +30,8 @@ class HotkeyShortcuts {
     _channel.invokeMethod("pasteToFrontestApp");
   }
 
-  static Future<List<dynamic>> getInstalledApps() async {
-    var res = await _channel.invokeListMethod("getInstalledApps");
-    return res;
+  static Future<List<dynamic>> getInstalledApps() {
+    return _channel.invokeListMethod("getInstalledApps");
   }
 
   static void launchApp(String path) {
@@ -41,10 +39,11 @@ class HotkeyShortcuts {
   }
 
   static void execCommand(String command) {
-    _channel.invokeMethod("execCommand", "lock");
+    _channel.invokeMethod("execCommand", command);
   }
 
   static Future register(String hotkey, void Function() callback) {
+    _channel.setMethodCallHandler(_onHotkey);
     var list = hotkeyMap[hotkey];
     if (list == null) {
       list = [callback];

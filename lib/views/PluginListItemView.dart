@@ -1,6 +1,6 @@
 import 'package:cached_network_image/cached_network_image.dart';
 import 'package:flutter/material.dart';
-import 'package:ypaste_flutter/core/PluginListItem.dart';
+import 'package:public_tools/core/PluginListItem.dart';
 
 class PluginListItemView extends StatelessWidget {
   final PluginListItem item;
@@ -23,6 +23,7 @@ class PluginListItemView extends StatelessWidget {
                   item.icon != null
                       ? CachedNetworkImage(
                           imageUrl: item.icon,
+                          placeholder: (context, string) => CircularProgressIndicator(),
                           width: 30,
                           height: 30,
                         )

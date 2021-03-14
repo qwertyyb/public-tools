@@ -5,7 +5,7 @@ import 'package:intl/intl.dart';
 import 'package:flutter/services.dart';
 import 'package:sqflite/sqflite.dart';
 import 'package:oktoast/oktoast.dart';
-import 'package:ypaste_flutter/core/PluginListItem.dart';
+import 'package:public_tools/core/PluginListItem.dart';
 import '../core/Plugin.dart';
 import '../config.dart';
 
@@ -57,8 +57,9 @@ class _PasteItem extends PluginListItem {
   }
 
   _PasteItem.fromMap(Map<String, dynamic> map) {
+    final String str = map['summary'];
     id = map['id'].toString();
-    summary = map['summary'];
+    summary = str.replaceAll("\n", "").trim();
     text = map['text'].toString();
     contentType = ContentType.values[map['contentType']];
     updatedAt = DateTime.parse(map['updatedAt']);

@@ -1,6 +1,6 @@
 import 'package:hotkey_shortcuts/hotkey_shortcuts.dart';
-import 'package:ypaste_flutter/core/Plugin.dart';
-import 'package:ypaste_flutter/core/PluginListItem.dart';
+import 'package:public_tools/core/Plugin.dart';
+import 'package:public_tools/core/PluginListItem.dart';
 
 class ApplicationPlugin extends Plugin {
   ApplicationPlugin() {
@@ -9,10 +9,19 @@ class ApplicationPlugin extends Plugin {
   List<PluginListItem> apps;
   _getInstalledApps() async {
     final installedApps = await HotkeyShortcuts.getInstalledApps();
+    final transformPinyinToKeywords = (String pinyin) {
+      // 获取首字母
+      final cc = pinyin.split(" ").map((e) => e[0]).join("");
+      if (cc.length > 1) {
+        return [cc.toLowerCase(), pinyin.toLowerCase()];
+      }
+      return [pinyin.toLowerCase()];
+    };
     this.apps = installedApps
         .map((e) => PluginListItem(
               title: e['name'],
               subtitle: e['path'],
+              keywords: transformPinyinToKeywords(e['pinyin']),
               icon:
                   'https://img.icons8.com/cute-clipart/128/000000/apple-app-store.png',
             ))
@@ -20,10 +29,13 @@ class ApplicationPlugin extends Plugin {
   }
 
   onInput(query, setList) {
-    final keyword = query.toLowerCase();
+    query = query.toLowerCase();
     final list = this
         .apps
-        .where((element) => element.title.toLowerCase().contains(keyword))
+        .where((element) {
+          return element.keywords
+          .any((keyword) => keyword.contains(query));
+        })
         .toList();
     setList(list);
   }

@@ -1,6 +1,6 @@
 {
-    "name": "ypaste_flutter",
-    "short_name": "ypaste_flutter",
+    "name": "public_tools",
+    "short_name": "public_tools",
     "start_url": ".",
     "display": "standalone",
     "background_color": "#0175C2",

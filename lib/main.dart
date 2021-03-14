@@ -1,20 +1,21 @@
 import 'package:flutter/material.dart';
+import 'package:hotkey_shortcuts/hotkey_shortcuts.dart';
 
 import 'package:oktoast/oktoast.dart';
+import 'package:window_activator/window_activator.dart';
 
-import 'package:ypaste_flutter/core/PluginManager.dart';
-import 'package:ypaste_flutter/plugins/application/application.dart';
-import 'package:ypaste_flutter/plugins/clipboard.dart';
-import 'package:ypaste_flutter/plugins/command/command.dart';
+import 'package:public_tools/core/PluginManager.dart';
+import 'package:public_tools/plugins/application/application.dart';
+import 'package:public_tools/plugins/clipboard.dart';
+import 'package:public_tools/plugins/command/command.dart';
 import './views/MainView.dart';
-// import './views/PasteItemListView.dart';
-import './controllers/ShortcutsController.dart';
 
 void main() {
-  runApp(MyApp());
+  runApp(MainApp());
 }
 
-class MyApp extends StatelessWidget {
+class MainApp extends StatelessWidget {
+
   // This widget is the root of your application.
   @override
   Widget build(BuildContext context) {
@@ -33,13 +34,13 @@ class MyApp extends StatelessWidget {
         // is not restarted.
         primarySwatch: Colors.blue,
       ),
-      home: MyHomePage(title: 'Public'),
+      home: HomePage(title: 'Public'),
     ));
   }
 }
 
-class MyHomePage extends StatefulWidget {
-  MyHomePage({Key key, this.title}) : super(key: key);
+class HomePage extends StatefulWidget {
+  HomePage({Key key, this.title}) : super(key: key);
 
   // This widget is the home page of your application. It is stateful, meaning
   // that it has a State object (defined below) that contains fields that affect
@@ -53,17 +54,19 @@ class MyHomePage extends StatefulWidget {
   final String title;
 
   @override
-  _MyHomePageState createState() => _MyHomePageState();
+  _HomePageState createState() => _HomePageState();
 }
 
-class _MyHomePageState extends State<MyHomePage> {
-  ShortcutsController shortcutsController = ShortcutsController.instance;
+class _HomePageState extends State<HomePage> {
   PluginManager pluginManager = PluginManager.instance;
 
-  _MyHomePageState() {
-    pluginManager.register(ClipboardPlugin());
-    pluginManager.register(CommandPlugin());
-    pluginManager.register(ApplicationPlugin());
+  @override
+  void initState() {
+    // 注册快捷键
+    HotkeyShortcuts.register("command+space", () async {
+      await WindowActivator.activateWindow();
+    });
+    super.initState();
   }
 
   @override

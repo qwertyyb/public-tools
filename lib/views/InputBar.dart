@@ -3,11 +3,12 @@ import 'package:flutter/services.dart';
 import 'package:hotkey_shortcuts/hotkey_shortcuts.dart';
 
 class InputBar extends StatelessWidget {
-  final Function onKeywordChange;
   final Function onEnter;
   final FocusNode _focusNode = FocusNode(canRequestFocus: false);
 
-  InputBar({this.onKeywordChange, this.onEnter});
+  final TextEditingController controller;
+
+  InputBar({this.onEnter, this.controller});
 
   void _onPointerMove(PointerMoveEvent event) {
     // 经过实践，此事件返回的位置信息乱七八糟，计算出来的位移信息会有瞬移的情况
@@ -50,7 +51,7 @@ class InputBar extends StatelessWidget {
               border: InputBorder.none,
             ),
             style: TextStyle(fontSize: 32),
-            onChanged: this.onKeywordChange,
+            controller: controller,
           ),
         ),
       ),

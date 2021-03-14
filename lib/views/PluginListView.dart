@@ -1,14 +1,16 @@
 
 import 'package:flutter/material.dart';
-import 'package:ypaste_flutter/core/Plugin.dart';
-import 'package:ypaste_flutter/core/PluginListItem.dart';
-import 'package:ypaste_flutter/views/PluginView.dart';
+import 'package:public_tools/core/Plugin.dart';
+import 'package:public_tools/core/PluginListItem.dart';
+import 'package:public_tools/views/PluginView.dart';
 
 class PluginListView extends StatelessWidget {
 
   final Map<Plugin, List<PluginListItem>> list;
 
-  PluginListView({Key key, this.list}) : super(key: key);
+  final Function onTap;
+
+  PluginListView({Key key, this.list, this.onTap}) : super(key: key);
 
   @override
   Widget build(BuildContext context) {
@@ -18,6 +20,7 @@ class PluginListView extends StatelessWidget {
         return PluginView(
           plugin: plugin,
           results: list[plugin],
+          onTap: (PluginListItem item) => onTap(item, plugin),
         );
       },
       itemCount: list.keys.length,

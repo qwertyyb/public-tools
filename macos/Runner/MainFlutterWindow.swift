@@ -11,13 +11,19 @@ class MainFlutterWindow: NSWindow {
     let flutterViewController = FlutterViewController.init()
     self.contentViewController = flutterViewController
     self.styleMask = [.borderless, .fullSizeContentView]
-    
-    let origin = NSPoint(x: self.frame.origin.x, y: 100)
-    let windowFrame = NSRect(origin: origin, size: CGSize(width: 720, height: 60))
-    self.setFrame(windowFrame, display: true)
 
     RegisterGeneratedPlugins(registry: flutterViewController)
     
     super.awakeFromNib()
+    
+    let winW = CGFloat(720.0)
+    let winH = CGFloat(60.0)
+    let frame = NSScreen.main?.frame ?? NSRect.zero
+    let x = (frame.width - winW) / 2 + frame.minX
+    let y = frame.height * 3 / 4 + frame.minY
+
+    let origin = NSPoint(x: x, y: y)
+    let windowFrame = NSRect(origin: origin, size: CGSize(width: winW, height: winH))
+    self.setFrame(windowFrame, display: true)
   }
 }
