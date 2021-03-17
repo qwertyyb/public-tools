@@ -38,10 +38,10 @@ class _MainViewState extends State<MainView> {
   }
 
   void _updateWindowSize() {
-      var listLength = list.values.expand((element) => element).length;
-      var windowHeight = ((listLength > 9 ? 9 : listLength) * 54) + 60;
-      var windowWidth = 720;
-      HotkeyShortcuts.updateWindowSize(width: windowWidth, height: windowHeight);
+    var listLength = list.values.expand((element) => element).length;
+    var windowHeight = ((listLength > 9 ? 9 : listLength) * 54) + 60;
+    var windowWidth = 720;
+    HotkeyShortcuts.updateWindowSize(width: windowWidth, height: windowHeight);
   }
 
   void _clearResultList() {
@@ -77,10 +77,15 @@ class _MainViewState extends State<MainView> {
           controller: _textEditingController,
           onEnter: this._onEnter,
         ),
-        Divider(height: 0,),
+        Divider(
+          height: 0,
+        ),
         Expanded(
-          child: PluginListView(list: list, onTap: _onTap,),
-        )
+          child: PluginListView(
+            list: list,
+            onTap: _onTap,
+          ),
+        ),
       ],
     );
   }

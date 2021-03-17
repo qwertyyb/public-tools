@@ -1,4 +1,7 @@
 import 'dart:async';
+import 'package:flutter/material.dart';
+import 'package:flutter_highlight/flutter_highlight.dart';
+import 'package:flutter_highlight/themes/tomorrow-night.dart';
 import 'package:hotkey_shortcuts/hotkey_shortcuts.dart';
 import 'package:intl/intl.dart';
 
@@ -131,7 +134,7 @@ class PasteItemHelper {
   }
 }
 
-class ClipboardPlugin implements Plugin {
+class ClipboardPlugin extends Plugin {
   ClipboardPlugin({this.onChange}) {
     _startListenChange().listen(onNewItemReceived);
   }
@@ -142,9 +145,11 @@ class ClipboardPlugin implements Plugin {
 
   onCreated() {}
 
-  onInput(String keyword, setResult) async {
+  onQuery(String keyword, setResult) async {
+    if (!keyword.startsWith("cp ")) return;
+    var query = keyword.substring(3);
     var list = await PasteItemHelper.instance
-        .query(where: 'text like ?', whereArgs: ['%' + keyword + '%']);
+        .query(where: 'text like ?', whereArgs: ['%' + query + '%']);
     setResult(list.map((e) {
       return _PasteItem(
           title: e.summary,
@@ -152,6 +157,31 @@ class ClipboardPlugin implements Plugin {
           icon: 'https://img.icons8.com/officel/80/000000/paste-as-text.png',
           text: e.text);
     }).toList());
+  }
+
+  onSelect(item, index, list) {
+    final result = (item as _PasteItem);
+    return HighlightView(
+      // The original code to be highlighted
+      result.text,
+
+      // Specify language
+      // It is recommended to give it a value for performance
+      language: 'dart',
+
+      // Specify highlight theme
+      // All available themes are listed in `themes` folder
+      theme: tomorrowNightTheme,
+
+      // Specify padding
+      padding: EdgeInsets.all(12),
+
+      // Specify text style
+      // textStyle: TextStyle(
+      //   fontFamily: 'My awesome monospace font',
+      //   fontSize: 16,
+      // ),
+    );
   }
 
   onTap(item) {

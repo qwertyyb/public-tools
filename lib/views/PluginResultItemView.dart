@@ -2,19 +2,30 @@ import 'package:cached_network_image/cached_network_image.dart';
 import 'package:flutter/material.dart';
 import 'package:public_tools/core/PluginListItem.dart';
 
-class PluginListItemView extends StatelessWidget {
+class PluginResultItemView extends StatelessWidget {
   final PluginListItem item;
+
+  final int resultIndex;
 
   final Function onTap;
 
-  PluginListItemView({this.item, this.onTap});
+  final Function onSelect;
+
+  PluginResultItemView(
+      {this.item, this.onTap, this.resultIndex, this.onSelect});
 
   @override
   Widget build(BuildContext context) {
     return Container(
         height: 54,
+        color: resultIndex == 0 ? Colors.grey[300] : null,
         child: InkWell(
             onTap: onTap,
+            onFocusChange: (focused) {
+              if (focused) {
+                onSelect();
+              }
+            },
             child: Padding(
               padding: EdgeInsets.only(left: 10, right: 10),
               child: Row(
@@ -23,7 +34,8 @@ class PluginListItemView extends StatelessWidget {
                   item.icon != null
                       ? CachedNetworkImage(
                           imageUrl: item.icon,
-                          placeholder: (context, string) => CircularProgressIndicator(),
+                          placeholder: (context, string) =>
+                              CircularProgressIndicator(),
                           width: 30,
                           height: 30,
                         )

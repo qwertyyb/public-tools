@@ -1,15 +1,25 @@
 import 'package:flutter/material.dart';
 import 'package:public_tools/core/Plugin.dart';
 import 'package:public_tools/core/PluginListItem.dart';
-import 'package:public_tools/views/PluginListItemView.dart';
+import 'package:public_tools/views/PluginResultItemView.dart';
 
 class PluginView extends StatelessWidget {
   final Plugin plugin;
+  final int pluginIndex;
+  final int resultStartIndex;
   final List<PluginListItem> results;
 
   final Function onTap;
 
-  PluginView({this.plugin, this.results, this.onTap});
+  final Function onSelect;
+
+  PluginView(
+      {this.plugin,
+      this.results,
+      this.onTap,
+      this.pluginIndex,
+      this.resultStartIndex,
+      this.onSelect});
 
   @override
   Widget build(BuildContext context) {
@@ -17,13 +27,17 @@ class PluginView extends StatelessWidget {
       ListView.builder(
         shrinkWrap: true,
         itemBuilder: (context, i) {
-          return PluginListItemView(
-            item: results[i],
-            onTap: () {
-              plugin.onTap(results[i]);
-              onTap(results[i]);
-            },
-          );
+          return PluginResultItemView(
+              resultIndex: resultStartIndex + i,
+              item: results[i],
+              onTap: () {
+                plugin.onTap(results[i]);
+                onTap(results[i]);
+              },
+              onSelect: () {
+                // plugin.onSelect(results[i], i, results);
+                onSelect(results[i], i, results);
+              });
         },
         itemCount: results.length,
       ),

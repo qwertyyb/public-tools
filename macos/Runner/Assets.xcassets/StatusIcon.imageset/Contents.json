@@ -1,7 +1,7 @@
 {
   "images" : [
     {
-      "filename" : "public.png",
+      "filename" : "flutter (3)-1.png",
       "idiom" : "mac",
       "scale" : "1x"
     },
@@ -12,7 +12,7 @@
           "value" : "light"
         }
       ],
-      "filename" : "public-1.png",
+      "filename" : "flutter (3).png",
       "idiom" : "mac",
       "scale" : "1x"
     },
@@ -23,12 +23,12 @@
           "value" : "dark"
         }
       ],
-      "filename" : "public (3).png",
+      "filename" : "flutter (6).png",
       "idiom" : "mac",
       "scale" : "1x"
     },
     {
-      "filename" : "public (1).png",
+      "filename" : "flutter (4)-1.png",
       "idiom" : "mac",
       "scale" : "2x"
     },
@@ -39,7 +39,7 @@
           "value" : "light"
         }
       ],
-      "filename" : "public (1)-1.png",
+      "filename" : "flutter (4).png",
       "idiom" : "mac",
       "scale" : "2x"
     },
@@ -50,7 +50,7 @@
           "value" : "dark"
         }
       ],
-      "filename" : "public (4).png",
+      "filename" : "flutter (5).png",
       "idiom" : "mac",
       "scale" : "2x"
     }

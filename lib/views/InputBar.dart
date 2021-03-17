@@ -25,6 +25,8 @@ class InputBar extends StatelessWidget {
   void _onKey(RawKeyEvent event) {
     // 当按下向下键时，自动聚焦到下一个可聚焦的组件上，一般是候选列表第一个
     if (event.isKeyPressed(LogicalKeyboardKey.arrowDown)) {
+      // 第一个在输入时是选中状态，所以跳过第一个，直接跳去第二个
+      FocusManager.instance.primaryFocus.nextFocus();
       FocusManager.instance.primaryFocus.nextFocus();
     } else if (event.isKeyPressed(LogicalKeyboardKey.enter)) {
       this.onEnter();

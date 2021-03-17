@@ -49,7 +49,7 @@ class PluginManager {
       };
     };
     _pluginList.forEach((plugin) {
-      plugin.onInput(keyword, setPluginResult(plugin));
+      plugin.onQuery(keyword, setPluginResult(plugin));
     });
   }
 }

@@ -28,15 +28,11 @@ class ApplicationPlugin extends Plugin {
         .toList();
   }
 
-  onInput(query, setList) {
+  onQuery(query, setList) {
     query = query.toLowerCase();
-    final list = this
-        .apps
-        .where((element) {
-          return element.keywords
-          .any((keyword) => keyword.contains(query));
-        })
-        .toList();
+    final list = this.apps.where((element) {
+      return element.keywords.any((keyword) => keyword.contains(query));
+    }).toList();
     setList(list);
   }
 

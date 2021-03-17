@@ -76,7 +76,7 @@ func execCommand(command: String) {
   guard let source = applescripts[command] else { return }
   print(source)
   let script = NSAppleScript.init(source: source)
-  print(script?.executeAndReturnError(nil))
+  script?.executeAndReturnError(nil)
 }
 
 @available(OSX 10.15, *)
@@ -209,8 +209,9 @@ public class HotkeyShortcutsPlugin: NSObject, FlutterPlugin {
       result(true)
       break;
     case "execCommand":
-        execCommand(command: call.arguments as! String)
-        result(true)
+      execCommand(command: call.arguments as! String)
+      result(true)
+      break;
     default:
         print(FlutterMethodNotImplemented)
 //      result(FlutterMethodNotImplemented)

@@ -31,8 +31,7 @@ class CommandPlugin extends Plugin {
     )
   ];
 
-  onInput(query, setResult) {
-    print("query");
+  onQuery(query, setResult) {
     final list = _commandList
         .where((command) =>
             command.keywords.any((keyword) => keyword.startsWith(query)))

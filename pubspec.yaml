@@ -29,6 +29,7 @@ dependencies:
   oktoast: ^2.3.2
   intl: ^0.17.0
   cached_network_image: ^2.5.1
+  flutter_highlight: ^0.7.0
   hotkey_shortcuts:
     path: './lib/packages/hotkey_shortcuts'
   flutter:
