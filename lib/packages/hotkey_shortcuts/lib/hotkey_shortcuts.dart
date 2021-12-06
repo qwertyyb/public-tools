@@ -30,18 +30,6 @@ class HotkeyShortcuts {
     _channel.invokeMethod("pasteToFrontestApp");
   }
 
-  static Future<List<dynamic>> getInstalledApps() {
-    return _channel.invokeListMethod("getInstalledApps");
-  }
-
-  static void launchApp(String path) {
-    _channel.invokeMethod("launchApp", path);
-  }
-
-  static void execCommand(String command) {
-    _channel.invokeMethod("execCommand", command);
-  }
-
   static Future register(String hotkey, void Function() callback) {
     _channel.setMethodCallHandler(_onHotkey);
     var list = hotkeyMap[hotkey];

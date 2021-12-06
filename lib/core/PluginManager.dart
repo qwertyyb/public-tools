@@ -1,6 +1,8 @@
+import 'dart:io';
+import 'dart:convert';
 import 'package:public_tools/core/Plugin.dart';
 import 'package:public_tools/plugins/application/application.dart';
-import 'package:public_tools/plugins/clipboard.dart';
+import 'package:public_tools/plugins/clipboard/clipboard.dart';
 import 'package:public_tools/plugins/command/command.dart';
 
 import 'PluginListItem.dart';
@@ -35,7 +37,7 @@ class PluginManager {
 
   void handleInput(
     String keyword,
-    void Function(Plugin plugin, List<PluginListItem> list) setResult,
+    void Function(List<PluginListResultItem> list) setResult,
     void Function() clearResult,
   ) {
     print("query: $keyword");
@@ -45,7 +47,10 @@ class PluginManager {
     }
     var setPluginResult = (Plugin plugin) {
       return (List<PluginListItem> list) {
-        setResult(plugin, list);
+        var resultList = list.map((item) {
+          return PluginListResultItem(plugin: plugin, result: item);
+        }).toList();
+        setResult(resultList);
       };
     };
     _pluginList.forEach((plugin) {

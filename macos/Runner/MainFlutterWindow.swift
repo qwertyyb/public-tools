@@ -14,10 +14,12 @@ class MainFlutterWindow: NSWindow {
 
     RegisterGeneratedPlugins(registry: flutterViewController)
     
+    PBCServiceSetup(flutterViewController.engine.binaryMessenger, AppService())
+    
     super.awakeFromNib()
     
     let winW = CGFloat(720.0)
-    let winH = CGFloat(60.0)
+    let winH = CGFloat(480.0)
     let frame = NSScreen.main?.frame ?? NSRect.zero
     let x = (frame.width - winW) / 2 + frame.minX
     let y = frame.height * 3 / 4 + frame.minY

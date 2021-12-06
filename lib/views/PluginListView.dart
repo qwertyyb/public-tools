@@ -3,12 +3,17 @@ import 'package:public_tools/core/Plugin.dart';
 import 'package:public_tools/core/PluginListItem.dart';
 import 'package:public_tools/views/PluginView.dart';
 
+import 'PluginResultItemView.dart';
+
 class PluginListView extends StatefulWidget {
-  final Map<Plugin, List<PluginListItem>> list;
+  final List<PluginListResultItem> list;
+
+  final int selectedIndex;
 
   final Function onTap;
 
-  PluginListView({Key key, this.list, this.onTap}) : super(key: key);
+  PluginListView({Key key, this.list, this.onTap, this.selectedIndex})
+      : super(key: key);
 
   @override
   State<StatefulWidget> createState() => _PluginListViewState();
@@ -19,28 +24,24 @@ class _PluginListViewState extends State<PluginListView> {
 
   @override
   Widget build(BuildContext context) {
-    var startIndex = -1;
     return Row(crossAxisAlignment: CrossAxisAlignment.start, children: [
       Expanded(
         flex: 1,
         child: ListView.builder(
-          itemBuilder: (pluginContext, pluginIndex) {
-            var plugin = widget.list.keys.elementAt(pluginIndex);
-            var pluginView = PluginView(
-                plugin: plugin,
-                results: widget.list[plugin],
-                pluginIndex: pluginIndex,
-                resultStartIndex: startIndex + 1,
-                onTap: (PluginListItem item) => widget.onTap(item, plugin),
+          itemBuilder: (pluginContext, itemIndex) {
+            var resultItem = widget.list.elementAt(itemIndex);
+            var pluginView = PluginResultItemView(
+                item: resultItem.result,
+                selected: itemIndex == widget.selectedIndex,
+                onTap: resultItem.onTap,
                 onSelect: (PluginListItem item, int index, list) {
                   setState(() {
-                    detailView = plugin.onSelect(item, index, list);
+                    detailView = resultItem.onSelect();
                   });
                 });
-            startIndex += widget.list[plugin].length;
             return pluginView;
           },
-          itemCount: widget.list.keys.length,
+          itemCount: widget.list.length,
         ),
       ),
       if (detailView != null)

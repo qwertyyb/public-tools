@@ -9,8 +9,8 @@ import 'package:flutter/services.dart';
 import 'package:sqflite/sqflite.dart';
 import 'package:oktoast/oktoast.dart';
 import 'package:public_tools/core/PluginListItem.dart';
-import '../core/Plugin.dart';
-import '../config.dart';
+import '../../core/Plugin.dart';
+import '../../config.dart';
 
 enum ContentType { text, image }
 
@@ -159,7 +159,7 @@ class ClipboardPlugin extends Plugin {
     }).toList());
   }
 
-  onSelect(item, index, list) {
+  onSelect(item) {
     final result = (item as _PasteItem);
     return HighlightView(
       // The original code to be highlighted

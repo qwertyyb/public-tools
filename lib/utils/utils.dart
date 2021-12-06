@@ -4,7 +4,7 @@ import '../models/PasteItem.dart';
 
 class Utils {
   // 工厂模式
-  factory Utils() =>_getInstance();
+  factory Utils() => _getInstance();
   static Utils get instance => _getInstance();
   static Utils _instance;
   Utils._internal() {
@@ -16,7 +16,8 @@ class Utils {
     }
     return _instance;
   }
-  Future<Database> getDatabase() async{
+
+  Future<Database> getDatabase() async {
     var path = await Config.getDatabasePath();
     return openDatabase(path, version: 1,
         onCreate: (Database db, int version) async {

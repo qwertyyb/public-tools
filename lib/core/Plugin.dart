@@ -2,17 +2,19 @@ import 'package:flutter/material.dart';
 
 import 'PluginListItem.dart';
 
-abstract class Plugin {
+abstract class Plugin<T> {
   String label;
 
   String icon;
 
+  List<String> keywords = [];
+
   void onQuery(
-      String keyword, void Function(List<PluginListItem> list) setResult);
+      String keyword, void Function(List<PluginListItem<T>> list) setResult);
 
-  onTap(PluginListItem item);
+  onTap(PluginListItem<T> item);
 
-  Widget onSelect(PluginListItem item, int index, List<PluginListItem> list) {
+  Widget onSelect(PluginListItem<T> item) {
     return null;
   }
 }

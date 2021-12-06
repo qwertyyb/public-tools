@@ -1,5 +1,4 @@
 import 'package:flutter/material.dart';
-import 'package:hotkey_shortcuts/hotkey_shortcuts.dart';
 import 'package:public_tools/core/Plugin.dart';
 import 'package:public_tools/core/PluginListItem.dart';
 import 'package:public_tools/core/PluginManager.dart';
@@ -12,7 +11,9 @@ class MainView extends StatefulWidget {
 }
 
 class _MainViewState extends State<MainView> {
-  Map<Plugin, List<PluginListItem>> list = Map<Plugin, List<PluginListItem>>();
+  List<PluginListResultItem> list = [];
+
+  int selectedIndex = 0;
 
   final TextEditingController _textEditingController = TextEditingController();
 
@@ -29,6 +30,10 @@ class _MainViewState extends State<MainView> {
   }
 
   void _onKeywordChange() {
+    setState(() {
+      list.clear();
+      selectedIndex = 0;
+    });
     final keyword = _textEditingController.text;
     PluginManager.instance.handleInput(
       keyword,
@@ -38,31 +43,45 @@ class _MainViewState extends State<MainView> {
   }
 
   void _updateWindowSize() {
-    var listLength = list.values.expand((element) => element).length;
-    var windowHeight = ((listLength > 9 ? 9 : listLength) * 54) + 60;
+    var listLength = list.length;
+    var windowHeight = ((listLength > 9 ? 9 : listLength) * 48) + 48;
     var windowWidth = 720;
-    HotkeyShortcuts.updateWindowSize(width: windowWidth, height: windowHeight);
+    // HotkeyShortcuts.updateWindowSize(width: windowWidth, height: windowHeight);
   }
 
   void _clearResultList() {
     setState(() {
-      list = {};
+      list.clear();
       // 设置一个计时器，等组件渲染完成再调整窗口大小，否则会导致窗口闪烁
       Future.delayed(Duration(milliseconds: 100), () => _updateWindowSize());
     });
   }
 
-  void _setPluginResult(Plugin plugin, List<PluginListItem> result) {
+  void _setPluginResult(List<PluginListResultItem> result) {
     setState(() {
-      list[plugin] = result;
+      list.addAll(result);
       // 设置一个计时器，等组件渲染完成再调整窗口大小，否则会导致窗口闪烁
       Future.delayed(Duration(milliseconds: 100), () => _updateWindowSize());
     });
   }
 
   void _onEnter() {
-    final plugin = list.keys.first;
-    plugin.onTap(list[plugin].first);
+    if (list.length == 0) return;
+    final plugin = list.first.onTap();
+  }
+
+  void _selectNext() {
+    var nextIndex = (this.selectedIndex + 1) % list.length;
+    setState(() {
+      selectedIndex = nextIndex;
+    });
+  }
+
+  void _selectPrev() {
+    var prevIndex = (this.selectedIndex - 1 + list.length) % list.length;
+    setState(() {
+      selectedIndex = prevIndex;
+    });
   }
 
   void _onTap(PluginListItem item, Plugin plugin) {
@@ -76,15 +95,15 @@ class _MainViewState extends State<MainView> {
         InputBar(
           controller: _textEditingController,
           onEnter: this._onEnter,
+          selectNext: this._selectNext,
+          selectPrev: this._selectPrev,
         ),
         Divider(
           height: 0,
         ),
         Expanded(
           child: PluginListView(
-            list: list,
-            onTap: _onTap,
-          ),
+              list: list, onTap: _onTap, selectedIndex: selectedIndex),
         ),
       ],
     );

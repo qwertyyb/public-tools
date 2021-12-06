@@ -31,7 +31,7 @@ func getInstalledApps(callback: @escaping ([[String: String]]) -> ()) {
     query?.stop()
     let predicate = NSPredicate(format: "kMDItemContentType == 'com.apple.application-bundle'")
     query?.predicate = predicate
-    query?.searchScopes = ["/Applications", "/System/Applications"]
+    query?.searchScopes = ["/Applications", "/System/Applications", "/System/Library/CoreServices/Applications"]
     var observer: Any?
     observer = NotificationCenter.default.addObserver(forName: NSNotification.Name.NSMetadataQueryDidFinishGathering, object: nil, queue: nil) { (notification) in
         var list = [[String: String]]()
@@ -39,44 +39,30 @@ func getInstalledApps(callback: @escaping ([[String: String]]) -> ()) {
             guard let item = query?.result(at: i) as? NSMetadataItem else { continue }
             let name = (item.value(forAttribute: kMDItemDisplayName as String) as! String)
                 .replacingOccurrences(of: ".app", with: "")
-            let path = item.value(forAttribute: kMDItemPath as String)
+            let path = item.value(forAttribute: kMDItemPath as String) as! String;
+            let bundlePath = path + "/Contents/Info.plist"
+            let dict = NSDictionary(contentsOfFile: bundlePath)!
+            var iconPath = ""
+            if let iconName = dict["CFBundleIconFile"] {
+                iconPath = path + "/Contents/Resources/" + (iconName as! String) + ".icns"
+            }
+            if let iconName = dict["CFBundleIconName"] {
+                iconPath = path + "/Contents/Resources/" + (iconName as! String) + ".icns"
+            }
+            if !FileManager.default.fileExists(atPath: iconPath) {
+                iconPath = ""
+            }
             list.append([
                 "name": name,
                 "pinyin": name.transformToPinyin(),
-                "path": path as! String
+                "path": path,
+                "icon": iconPath
             ])
         }
         callback(list)
         NotificationCenter.default.removeObserver(observer!)
     }
     query?.start()
-}
-
-func execCommand(command: String) {
-  let applescripts = [
-    "lock": """
-        tell application "System Events" to keystroke "q" using {control down, command down}
-    """,
-    "sleep": """
-        tell application "System Events"
-          start (sleep)
-        end tell
-    """,
-    "shutdown": """
-        tell application "System Events"
-          start (shut down)
-        end tell
-    """,
-    "restart": """
-        tell application "System Events"
-          start (restart)
-        end tell
-    """,
-  ]
-  guard let source = applescripts[command] else { return }
-  print(source)
-  let script = NSAppleScript.init(source: source)
-  script?.executeAndReturnError(nil)
 }
 
 @available(OSX 10.15, *)
@@ -198,18 +184,6 @@ public class HotkeyShortcutsPlugin: NSObject, FlutterPlugin {
       break;
     case "pasteToFrontestApp":
       HotkeyShortcutsPlugin.triggerPaste()
-      result(true)
-      break;
-    case "getInstalledApps":
-        getInstalledApps(callback: result)
-        break;
-    case "launchApp":
-      let path = call.arguments as! String
-      NSWorkspace.shared.openApplication(at: URL(fileURLWithPath: path), configuration: NSWorkspace.OpenConfiguration())
-      result(true)
-      break;
-    case "execCommand":
-      execCommand(command: call.arguments as! String)
       result(true)
       break;
     default:

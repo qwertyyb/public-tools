@@ -1,76 +1,98 @@
+import 'dart:io';
+
 import 'package:cached_network_image/cached_network_image.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter/services.dart';
 import 'package:public_tools/core/PluginListItem.dart';
+
+class PluginResultItemIconView extends StatelessWidget {
+  final String icon;
+
+  final double size = 30;
+
+  PluginResultItemIconView(this.icon);
+
+  @override
+  Widget build(BuildContext context) {
+    return icon != null
+        ? icon.startsWith('http://') || icon.startsWith('https://')
+            ? CachedNetworkImage(
+                imageUrl: icon,
+                placeholder: (context, string) => CircularProgressIndicator(),
+                width: size,
+                height: size,
+              )
+            : Image.file(File(icon), width: size, height: size)
+        : Icon(
+            Icons.account_circle_rounded,
+            size: size,
+          );
+  }
+}
 
 class PluginResultItemView extends StatelessWidget {
   final PluginListItem item;
 
-  final int resultIndex;
+  final bool selected;
 
   final Function onTap;
 
   final Function onSelect;
 
-  PluginResultItemView(
-      {this.item, this.onTap, this.resultIndex, this.onSelect});
+  PluginResultItemView({this.item, this.onTap, this.selected, this.onSelect});
+
+  final FocusNode _focusNode = FocusNode(canRequestFocus: false);
+
+  onKey(RawKeyEvent event) {
+    if (event.isKeyPressed(LogicalKeyboardKey.enter)) {
+      onTap();
+    }
+  }
 
   @override
   Widget build(BuildContext context) {
-    return Container(
-        height: 54,
-        color: resultIndex == 0 ? Colors.grey[300] : null,
-        child: InkWell(
-            onTap: onTap,
-            onFocusChange: (focused) {
-              if (focused) {
-                onSelect();
-              }
-            },
-            child: Padding(
-              padding: EdgeInsets.only(left: 10, right: 10),
-              child: Row(
-                crossAxisAlignment: CrossAxisAlignment.center,
-                children: [
-                  item.icon != null
-                      ? CachedNetworkImage(
-                          imageUrl: item.icon,
-                          placeholder: (context, string) =>
-                              CircularProgressIndicator(),
-                          width: 30,
-                          height: 30,
-                        )
-                      : Icon(
-                          Icons.account_circle_rounded,
-                          size: 30,
-                        ),
-                  Expanded(
-                    child: Padding(
-                        padding: EdgeInsets.only(left: 12),
-                        child: Column(
-                          crossAxisAlignment: CrossAxisAlignment.start,
-                          mainAxisAlignment: MainAxisAlignment.center,
-                          children: [
-                            Padding(
-                              padding: EdgeInsets.only(bottom: 6),
-                              child: Text(item.title,
+    return RawKeyboardListener(
+        focusNode: _focusNode,
+        onKey: onKey,
+        child: Container(
+            height: 48,
+            color: selected ? Colors.grey[300] : null,
+            child: InkWell(
+                onTap: onTap,
+                child: Padding(
+                  padding: EdgeInsets.only(left: 10, right: 10),
+                  child: Row(
+                    crossAxisAlignment: CrossAxisAlignment.center,
+                    children: [
+                      PluginResultItemIconView(item.icon),
+                      Expanded(
+                        child: Padding(
+                            padding: EdgeInsets.only(left: 10),
+                            child: Column(
+                              crossAxisAlignment: CrossAxisAlignment.start,
+                              mainAxisAlignment: MainAxisAlignment.center,
+                              children: [
+                                Padding(
+                                  padding: EdgeInsets.only(bottom: 3),
+                                  child: Text(item.title,
+                                      maxLines: 1,
+                                      overflow: TextOverflow.ellipsis,
+                                      style: TextStyle(
+                                        fontWeight: FontWeight.w500,
+                                        fontSize: 14,
+                                      )),
+                                ),
+                                Text(
+                                  item.subtitle,
                                   maxLines: 1,
-                                  overflow: TextOverflow.ellipsis,
                                   style: TextStyle(
-                                    fontWeight: FontWeight.w500,
-                                    fontSize: 16,
-                                  )),
-                            ),
-                            Text(
-                              item.subtitle,
-                              maxLines: 1,
-                              style: TextStyle(
-                                  fontSize: 12, color: Colors.black38),
-                            )
-                          ],
-                        )),
+                                      fontSize: 10, color: Colors.black38),
+                                )
+                              ],
+                            )),
+                      ),
+                    ],
                   ),
-                ],
-              ),
-            )));
+                ))));
   }
 }

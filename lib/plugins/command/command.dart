@@ -1,29 +1,53 @@
-import 'package:hotkey_shortcuts/hotkey_shortcuts.dart';
+import 'dart:io';
+
 import 'package:public_tools/core/Plugin.dart';
 import 'package:public_tools/core/PluginListItem.dart';
 
-class CommandPlugin extends Plugin {
-  List<PluginListItem> _commandList = [
+enum Command { lock, sleep, shutdown, restart }
+
+class CommandPlugin extends Plugin<Command> {
+  Map<Command, String> _commands = {
+    Command.lock: """
+        tell application "System Events" to keystroke "q" using {control down, command down}
+    """,
+    Command.sleep: """
+        tell application "System Events"
+          start (sleep)
+        end tell
+    """,
+    Command.shutdown: """
+        tell application "System Events"
+          start (shut down)
+        end tell
+    """,
+    Command.restart: """
+        tell application "System Events"
+          start (restart)
+        end tell
+    """,
+  };
+
+  List<PluginListItem<Command>> _commandList = [
     PluginListItem(
-        id: 'lock',
+        id: Command.lock,
         title: "锁屏",
         subtitle: "锁定你的电脑",
         keywords: ['lock', 'lockscreen', 'sp'],
         icon: 'https://img.icons8.com/fluent/96/000000/touch-id.png'),
     PluginListItem(
-        id: 'sleep',
+        id: Command.sleep,
         title: '睡眠',
         subtitle: '让你的电脑睡眠',
         keywords: ['sleep', 'sm'],
         icon: 'https://img.icons8.com/fluent/96/000000/sleep-mode.png'),
     PluginListItem(
-        id: 'shutdown',
+        id: Command.shutdown,
         title: '关机',
         subtitle: '关闭你的电脑',
         keywords: ['shutdown', 'gj'],
         icon: 'https://img.icons8.com/fluent/96/000000/shutdown.png'),
     PluginListItem(
-      id: 'restart',
+      id: Command.restart,
       title: '重启',
       subtitle: '重新启动你的电脑',
       keywords: ['restart', 'cq'],
@@ -39,7 +63,7 @@ class CommandPlugin extends Plugin {
     setResult(list);
   }
 
-  onTap(item) {
-    HotkeyShortcuts.execCommand(item.id);
+  onTap(PluginListItem<Command> item) {
+    Process.run('osascript', ["-e", _commands[item.id]]);
   }
 }

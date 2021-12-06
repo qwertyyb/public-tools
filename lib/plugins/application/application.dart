@@ -1,6 +1,8 @@
-import 'package:hotkey_shortcuts/hotkey_shortcuts.dart';
+import 'dart:io';
+
 import 'package:public_tools/core/Plugin.dart';
 import 'package:public_tools/core/PluginListItem.dart';
+import 'package:public_tools/pigeon/app.dart';
 
 class ApplicationPlugin extends Plugin {
   ApplicationPlugin() {
@@ -8,7 +10,7 @@ class ApplicationPlugin extends Plugin {
   }
   List<PluginListItem> apps;
   _getInstalledApps() async {
-    final installedApps = await HotkeyShortcuts.getInstalledApps();
+    final installedApps = await Service().getInstalledApplicationList();
     final transformPinyinToKeywords = (String pinyin) {
       // 获取首字母
       final cc = pinyin.split(" ").map((e) => e[0]).join("");
@@ -18,12 +20,13 @@ class ApplicationPlugin extends Plugin {
       return [pinyin.toLowerCase()];
     };
     this.apps = installedApps
-        .map((e) => PluginListItem(
-              title: e['name'],
-              subtitle: e['path'],
-              keywords: transformPinyinToKeywords(e['pinyin']),
-              icon:
-                  'https://img.icons8.com/cute-clipart/128/000000/apple-app-store.png',
+        .map((app) => PluginListItem(
+              title: app.name,
+              subtitle: app.path,
+              keywords: transformPinyinToKeywords(app.pinyin),
+              icon: app.icon == ""
+                  ? 'https://img.icons8.com/cute-clipart/128/000000/apple-app-store.png'
+                  : app.icon,
             ))
         .toList();
   }
@@ -37,7 +40,6 @@ class ApplicationPlugin extends Plugin {
   }
 
   onTap(item) {
-    print("application on Tap");
-    HotkeyShortcuts.launchApp(item.subtitle);
+    Process.run("open", ["-a", item.subtitle]);
   }
 }

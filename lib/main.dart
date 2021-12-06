@@ -1,21 +1,22 @@
 import 'package:flutter/material.dart';
-import 'package:hotkey_shortcuts/hotkey_shortcuts.dart';
 
 import 'package:oktoast/oktoast.dart';
+import 'package:public_tools/server/server.dart';
 import 'package:window_activator/window_activator.dart';
-
+import 'package:hotkey_manager/hotkey_manager.dart';
 import 'package:public_tools/core/PluginManager.dart';
-import 'package:public_tools/plugins/application/application.dart';
-import 'package:public_tools/plugins/clipboard.dart';
-import 'package:public_tools/plugins/command/command.dart';
 import './views/MainView.dart';
+import 'pages/settings_page.dart';
 
 void main() {
+  WidgetsFlutterBinding.ensureInitialized();
+  hotKeyManager.unregisterAll();
+
+  runServer();
   runApp(MainApp());
 }
 
 class MainApp extends StatelessWidget {
-
   // This widget is the root of your application.
   @override
   Widget build(BuildContext context) {
@@ -60,12 +61,20 @@ class HomePage extends StatefulWidget {
 class _HomePageState extends State<HomePage> {
   PluginManager pluginManager = PluginManager.instance;
 
+  HotKey _hotKey = HotKey(
+    KeyCode.space,
+    modifiers: [KeyModifier.meta],
+    scope: HotKeyScope.system,
+  );
   @override
   void initState() {
     // 注册快捷键
-    HotkeyShortcuts.register("command+space", () async {
-      await WindowActivator.activateWindow();
-    });
+    hotKeyManager.register(
+      _hotKey,
+      keyDownHandler: (hotKey) async {
+        await WindowActivator.activateWindow();
+      },
+    );
     super.initState();
   }
 
@@ -77,30 +86,34 @@ class _HomePageState extends State<HomePage> {
     // The Flutter framework has been optimized to make rerunning build methods
     // fast, so that you can just rebuild anything that needs updating rather
     // than having to individually change instances of widgets.
-    return Scaffold(
-      body: Container(
-        // Center is a layout widget. It takes a single child and positions it
-        // in the middle of the parent.
-        padding: EdgeInsets.all(0),
-        child: Column(
-          // Column is also a layout widget. It takes a list of children and
-          // arranges them vertically. By default, it sizes itself to fit its
-          // children horizontally, and tries to be as tall as its parent.
-          //
-          // Invoke "debug painting" (press "p" in the console, choose the
-          // "Toggle Debug Paint" action from the Flutter Inspector in Android
-          // Studio, or the "Toggle Debug Paint" command in Visual Studio Code)
-          // to see the wireframe for each widget.
-          //
-          // Column has various properties to control how it sizes itself and
-          // how it positions its children. Here we use mainAxisAlignment to
-          // center the children vertically; the main axis here is the vertical
-          // axis because Columns are vertical (the cross axis would be
-          // horizontal).
-          mainAxisAlignment: MainAxisAlignment.start,
-          children: <Widget>[Expanded(child: MainView())],
-        ),
-      ), // This trailing comma makes auto-formatting nicer for build methods.
-    );
+    return MaterialApp(
+        title: "hello",
+        routes: {'/settings': (BuildContext context) => SettingsPage()},
+        home: Scaffold(
+          body: Container(
+            // Center is a layout widget. It takes a single child and positions it
+            // in the middle of the parent.
+            padding: EdgeInsets.all(0),
+            child: Column(
+              // Column is also a layout widget. It takes a list of children and
+              // arranges them vertically. By default, it sizes itself to fit its
+              // children horizontally, and tries to be as tall as its parent.
+              //
+              // Invoke "debug painting" (press "p" in the console, choose the
+              // "Toggle Debug Paint" action from the Flutter Inspector in Android
+              // Studio, or the "Toggle Debug Paint" command in Visual Studio Code)
+              // to see the wireframe for each widget.
+              //
+              // Column has various properties to control how it sizes itself and
+              // how it positions its children. Here we use mainAxisAlignment to
+              // center the children vertically; the main axis here is the vertical
+              // axis because Columns are vertical (the cross axis would be
+              // horizontal).
+              mainAxisAlignment: MainAxisAlignment.start,
+              children: <Widget>[Expanded(child: MainView())],
+            ),
+          ),
+        ) // This trailing comma makes auto-formatting nicer for build methods.
+        );
   }
 }

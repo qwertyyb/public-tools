@@ -7,6 +7,7 @@ class PluginView extends StatelessWidget {
   final Plugin plugin;
   final int pluginIndex;
   final int resultStartIndex;
+  final int selectedIndex;
   final List<PluginListItem> results;
 
   final Function onTap;
@@ -18,6 +19,7 @@ class PluginView extends StatelessWidget {
       this.results,
       this.onTap,
       this.pluginIndex,
+      this.selectedIndex,
       this.resultStartIndex,
       this.onSelect});
 
@@ -28,7 +30,7 @@ class PluginView extends StatelessWidget {
         shrinkWrap: true,
         itemBuilder: (context, i) {
           return PluginResultItemView(
-              resultIndex: resultStartIndex + i,
+              selected: resultStartIndex + i == selectedIndex,
               item: results[i],
               onTap: () {
                 plugin.onTap(results[i]);
