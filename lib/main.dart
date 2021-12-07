@@ -1,7 +1,6 @@
 import 'package:flutter/material.dart';
 
 import 'package:oktoast/oktoast.dart';
-import 'package:public_tools/server/server.dart';
 import 'package:window_activator/window_activator.dart';
 import 'package:hotkey_manager/hotkey_manager.dart';
 import 'package:public_tools/core/PluginManager.dart';
@@ -12,7 +11,6 @@ void main() {
   WidgetsFlutterBinding.ensureInitialized();
   hotKeyManager.unregisterAll();
 
-  runServer();
   runApp(MainApp());
 }
 

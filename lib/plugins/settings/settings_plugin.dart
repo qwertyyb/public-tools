@@ -13,7 +13,7 @@ class SettingsPlugin extends Plugin {
   ];
 
   onQuery(query, setResult) {
-    var match = keywords.where((element) => element.contains(query)).length > 0
+    var match = keywords.where((element) => element.contains(query)).length > 0;
     if (match) {
       setResult(commands);
     } else {

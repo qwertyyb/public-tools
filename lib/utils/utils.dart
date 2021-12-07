@@ -32,3 +32,26 @@ class Utils {
     });
   }
 }
+
+// 只调用一次的函数
+T Function(A a, B b) once<A, B, T>(T Function(A a, B b) func) {
+  var alreadyRun = false;
+  T t;
+  return (A a, B b) {
+    if (alreadyRun) return t;
+    return func(a, b);
+  };
+}
+
+// 可取消的函数
+T Function(A a, B b) cancelable<A, B, T>(T Function(A a, B b) func) {
+  bool canceled = false;
+  T t;
+  var canceledFn = (A a, B b) {
+    if (!canceled) {
+      return func(a, b);
+    }
+    return t;
+  };
+  return canceledFn;
+}

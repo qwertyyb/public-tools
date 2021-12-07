@@ -12,6 +12,13 @@ class PluginListItem<T> {
 
   PluginListItem(
       {this.title, this.subtitle, this.icon, this.id, this.keywords});
+
+  PluginListItem.fromJson(Map<String, dynamic> json) {
+    icon = json['icon'];
+    title = json['title'];
+    subtitle = json['subtitle'];
+    id = json['id'];
+  }
 }
 
 class PluginListResultItem {

@@ -1,9 +1,8 @@
-import 'dart:io';
-import 'dart:convert';
 import 'package:public_tools/core/Plugin.dart';
 import 'package:public_tools/plugins/application/application.dart';
 import 'package:public_tools/plugins/clipboard/clipboard.dart';
 import 'package:public_tools/plugins/command/command.dart';
+import 'package:public_tools/plugins/remote/remote.dart';
 
 import 'PluginListItem.dart';
 
@@ -19,10 +18,13 @@ class PluginManager {
     return _instance;
   }
 
+  String curKeyword = "";
+
   List<Plugin> _corePluginList = [
-    CommandPlugin(),
-    ClipboardPlugin(),
-    ApplicationPlugin(),
+    // CommandPlugin(),
+    // ClipboardPlugin(),
+    // ApplicationPlugin(),
+    RemotePlugin()
   ];
 
   PluginManager._internal() {
@@ -41,18 +43,27 @@ class PluginManager {
     void Function() clearResult,
   ) {
     print("query: $keyword");
+    curKeyword = keyword;
     if (keyword == "") {
       clearResult();
       return;
     }
-    var setPluginResult = (Plugin plugin) {
-      return (List<PluginListItem> list) {
-        var resultList = list.map((item) {
-          return PluginListResultItem(plugin: plugin, result: item);
-        }).toList();
-        setResult(resultList);
+    var setPluginResult = ((String keyword) {
+      return (Plugin plugin) {
+        bool called = false;
+        return (List<PluginListItem> list) {
+          print('curKeyword: $curKeyword, keyword: $keyword, called: $called');
+          if (keyword != curKeyword || called) {
+            return null;
+          }
+          called = true;
+          var resultList = list.map((item) {
+            return PluginListResultItem(plugin: plugin, result: item);
+          }).toList();
+          setResult(resultList);
+        };
       };
-    };
+    })(keyword);
     _pluginList.forEach((plugin) {
       plugin.onQuery(keyword, setPluginResult(plugin));
     });
