@@ -21,9 +21,9 @@ class PluginManager {
   String curKeyword = "";
 
   List<Plugin> _corePluginList = [
-    // CommandPlugin(),
-    // ClipboardPlugin(),
-    // ApplicationPlugin(),
+    CommandPlugin(),
+    ClipboardPlugin(),
+    ApplicationPlugin(),
     RemotePlugin()
   ];
 
@@ -52,7 +52,7 @@ class PluginManager {
       return (Plugin plugin) {
         bool called = false;
         return (List<PluginListItem> list) {
-          print('curKeyword: $curKeyword, keyword: $keyword, called: $called');
+          // 每个keyword, setResult最多只能调用一次
           if (keyword != curKeyword || called) {
             return null;
           }

@@ -59,6 +59,7 @@ class PluginResultItemView extends StatelessWidget {
             color: selected ? Colors.grey[300] : null,
             child: InkWell(
                 onTap: onTap,
+                focusNode: FocusNode(canRequestFocus: false),
                 child: Padding(
                   padding: EdgeInsets.only(left: 10, right: 10),
                   child: Row(

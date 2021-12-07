@@ -20,7 +20,17 @@ class _MainViewState extends State<MainView> {
   @override
   void initState() {
     super.initState();
-    _textEditingController.addListener(_onKeywordChange);
+    _textEditingController.addListener((() {
+      // 实践当知，这里要判断是否同值
+      String lastText = "";
+      return () {
+        if (lastText == _textEditingController.text) {
+          return;
+        }
+        lastText = _textEditingController.text;
+        _onKeywordChange();
+      };
+    })());
   }
 
   @override
@@ -67,7 +77,7 @@ class _MainViewState extends State<MainView> {
 
   void _onEnter() {
     if (list.length == 0) return;
-    final plugin = list.first.onTap();
+    list[selectedIndex].onTap();
   }
 
   void _selectNext() {

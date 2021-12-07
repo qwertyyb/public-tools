@@ -130,7 +130,7 @@ public class HotkeyShortcutsPlugin: NSObject, FlutterPlugin {
     }
     NSApp.hide(nil)
     
-    Timer.scheduledTimer(withTimeInterval: 0.2, repeats: false) { (timer) in
+    Timer.scheduledTimer(withTimeInterval: 0.01, repeats: false) { (timer) in
         // Based on https://github.com/Clipy/Clipy/blob/develop/Clipy/Sources/Services/PasteService.swift.
     
       let vCode = UInt16(0x09)

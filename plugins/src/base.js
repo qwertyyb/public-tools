@@ -34,7 +34,7 @@ const start = (list) => {
 module.exports = {
   updateList: async (keyword, list) => {
     // 不是正在处理的keyword, 丢弃
-    // if (keyword !== curKeyword) return;
+    if (keyword !== curKeyword) return;
     ws.send(JSON.stringify({ type: 'list', payload: { list } }))
   },
   onKeywordChange (callback) {
