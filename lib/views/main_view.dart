@@ -4,6 +4,7 @@ import 'package:public_tools/core/plugin_result_item.dart';
 import 'package:public_tools/core/plugin_manager.dart';
 import 'package:public_tools/views/input_bar.dart';
 import 'package:public_tools/views/list_preview.dart';
+import 'package:public_tools/views/plugin_label_view.dart';
 
 class MainView extends StatefulWidget {
   @override
@@ -102,18 +103,31 @@ class _MainViewState extends State<MainView> {
   Widget build(BuildContext context) {
     return Column(
       children: [
-        InputBar(
-          controller: _textEditingController,
-          onEnter: this._onEnter,
-          selectNext: this._selectNext,
-          selectPrev: this._selectPrev,
-        ),
+        PluginLabelView(),
         Divider(
-          height: 0,
+          height: 10,
         ),
         Expanded(
-          child: PluginListView(
-              list: list, onTap: _onTap, selectedIndex: selectedIndex),
+          child: Container(
+            color: Colors.white,
+            child: Column(
+              children: [
+                InputBar(
+                  controller: _textEditingController,
+                  onEnter: this._onEnter,
+                  selectNext: this._selectNext,
+                  selectPrev: this._selectPrev,
+                ),
+                Divider(
+                  height: 0,
+                ),
+                Expanded(
+                  child: PluginListView(
+                      list: list, onTap: _onTap, selectedIndex: selectedIndex),
+                )
+              ],
+            ),
+          ),
         ),
       ],
     );

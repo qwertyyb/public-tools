@@ -26,6 +26,8 @@ class MainFlutterWindow: NSWindow {
 
     let origin = NSPoint(x: x, y: y)
     let windowFrame = NSRect(origin: origin, size: CGSize(width: winW, height: winH))
+    isOpaque = false
+    backgroundColor = NSColor(red: 0, green: 0, blue: 0, alpha: 0)
     self.setFrame(windowFrame, display: true)
   }
 }

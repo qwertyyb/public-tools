@@ -85,9 +85,11 @@ class _HomePageState extends State<HomePage> {
     // fast, so that you can just rebuild anything that needs updating rather
     // than having to individually change instances of widgets.
     return MaterialApp(
+        color: Color.fromARGB(255, 0, 0, 0),
         title: "hello",
         routes: {'/settings': (BuildContext context) => SettingsPage()},
         home: Scaffold(
+          backgroundColor: Color.fromARGB(0, 0, 0, 0),
           body: Container(
             // Center is a layout widget. It takes a single child and positions it
             // in the middle of the parent.
