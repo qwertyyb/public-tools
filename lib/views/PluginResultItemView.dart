@@ -37,9 +37,8 @@ class PluginResultItemView extends StatelessWidget {
 
   final Function onTap;
 
-  final Function onSelect;
-
-  PluginResultItemView({this.item, this.onTap, this.selected, this.onSelect});
+  PluginResultItemView({Key key, this.item, this.onTap, this.selected})
+      : super(key: key);
 
   final FocusNode _focusNode = FocusNode(canRequestFocus: false);
 

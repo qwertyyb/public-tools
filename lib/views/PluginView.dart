@@ -35,10 +35,6 @@ class PluginView extends StatelessWidget {
               onTap: () {
                 plugin.onTap(results[i]);
                 onTap(results[i]);
-              },
-              onSelect: () {
-                // plugin.onSelect(results[i], i, results);
-                onSelect(results[i], i, results);
               });
         },
         itemCount: results.length,
