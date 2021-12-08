@@ -1,7 +1,7 @@
 import 'dart:io';
 
-import 'package:public_tools/core/Plugin.dart';
-import 'package:public_tools/core/PluginListItem.dart';
+import 'package:public_tools/core/plugin.dart';
+import 'package:public_tools/core/plugin_result_item.dart';
 
 enum Command { lock, sleep, shutdown, restart }
 

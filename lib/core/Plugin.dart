@@ -1,6 +1,6 @@
 import 'package:flutter/material.dart';
 
-import 'PluginListItem.dart';
+import 'plugin_result_item.dart';
 
 abstract class Plugin<T> {
   String label;

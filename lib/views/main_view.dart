@@ -1,9 +1,9 @@
 import 'package:flutter/material.dart';
-import 'package:public_tools/core/Plugin.dart';
-import 'package:public_tools/core/PluginListItem.dart';
-import 'package:public_tools/core/PluginManager.dart';
-import 'package:public_tools/views/InputBar.dart';
-import 'package:public_tools/views/PluginListView.dart';
+import 'package:public_tools/core/plugin.dart';
+import 'package:public_tools/core/plugin_result_item.dart';
+import 'package:public_tools/core/plugin_manager.dart';
+import 'package:public_tools/views/input_bar.dart';
+import 'package:public_tools/views/list_preview.dart';
 
 class MainView extends StatefulWidget {
   @override

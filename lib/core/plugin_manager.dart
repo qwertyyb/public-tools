@@ -1,10 +1,10 @@
-import 'package:public_tools/core/Plugin.dart';
+import 'package:public_tools/core/plugin.dart';
 import 'package:public_tools/plugins/application/application.dart';
 import 'package:public_tools/plugins/clipboard/clipboard.dart';
 import 'package:public_tools/plugins/command/command.dart';
 import 'package:public_tools/plugins/remote/remote.dart';
 
-import 'PluginListItem.dart';
+import 'plugin_result_item.dart';
 
 class PluginManager {
   // 工厂模式

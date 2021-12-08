@@ -1,9 +1,7 @@
 import 'package:flutter/material.dart';
-import 'package:public_tools/core/Plugin.dart';
-import 'package:public_tools/core/PluginListItem.dart';
-import 'package:public_tools/views/PluginView.dart';
+import 'package:public_tools/core/plugin_result_item.dart';
 
-import 'PluginResultItemView.dart';
+import 'result_item_view.dart';
 
 class PluginListView extends StatefulWidget {
   final List<PluginListResultItem> list;

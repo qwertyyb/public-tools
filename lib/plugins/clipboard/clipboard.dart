@@ -8,8 +8,8 @@ import 'package:intl/intl.dart';
 import 'package:flutter/services.dart';
 import 'package:sqflite/sqflite.dart';
 import 'package:oktoast/oktoast.dart';
-import 'package:public_tools/core/PluginListItem.dart';
-import '../../core/Plugin.dart';
+import 'package:public_tools/core/plugin_result_item.dart';
+import '../../core/plugin.dart';
 import '../../config.dart';
 
 enum ContentType { text, image }

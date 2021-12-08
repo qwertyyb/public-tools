@@ -3,8 +3,8 @@ import 'package:flutter/material.dart';
 import 'package:oktoast/oktoast.dart';
 import 'package:window_activator/window_activator.dart';
 import 'package:hotkey_manager/hotkey_manager.dart';
-import 'package:public_tools/core/PluginManager.dart';
-import './views/MainView.dart';
+import 'package:public_tools/core/plugin_manager.dart';
+import 'views/main_view.dart';
 import 'pages/settings_page.dart';
 
 void main() {

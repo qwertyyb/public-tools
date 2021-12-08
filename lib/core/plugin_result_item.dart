@@ -1,6 +1,6 @@
 import 'package:flutter/material.dart';
 
-import 'Plugin.dart';
+import 'plugin.dart';
 
 class PluginListItem<T> {
   String title;
