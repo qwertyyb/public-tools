@@ -1,6 +1,8 @@
 
 const axios = require('axios')
-const base = require('./base')
+const createPlugin = require('./plugin')
+
+const plugin = createPlugin('search_mdn')
 
 const queryResult = async (keyword = '') => {
   const params = new URLSearchParams({
@@ -20,18 +22,22 @@ const queryResult = async (keyword = '') => {
       subtitle: document.summary,
       icon: 'https://vfiles.gtimg.cn/vupload/20211129/2da75c1638159214694.png',
       url: 'https://developer.mozilla.org' + document.mdn_url,
-      detail: titles + bodys
+      // detail: titles + bodys,
+      id: document.mdn_url
     }
   })
 }
 
 let timeout = null;
-base.onKeywordChange((keyword) => {
+plugin.onKeywordChange((keyword) => {
   timeout && clearTimeout(timeout)
   timeout = setTimeout(async () => {
+    console.log('exec')
     const list = await queryResult(keyword)
-    console.log(list);
-    base.updateList(keyword, list)
-  }, 20)
+    plugin.updateList(keyword, list)
+  }, 200)
+})
+plugin.onTap(item => {
+  require('child_process').exec(`open https://developer.mozilla.org${item.id}`)
 })
 

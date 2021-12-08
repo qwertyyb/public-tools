@@ -1,7 +1,6 @@
 import 'dart:convert';
 import 'dart:io';
 
-import 'package:public_tools/core/plugin.dart';
 import 'package:public_tools/core/plugin_result_item.dart';
 
 class MessageData {
@@ -41,7 +40,7 @@ void Function(dynamic) _createHandler(WebSocket socket) {
         element(list);
       });
     }
-    socket.add(jsonEncode(data));
+    // socket.add(jsonEncode(data));
   };
 }
 

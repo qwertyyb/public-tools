@@ -1,5 +1,5 @@
 
-const base = require('./base')
+const base = require('./plugin')
 
 base.onKeywordChange((keyword) => {
   const list = [

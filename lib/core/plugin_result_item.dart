@@ -19,6 +19,15 @@ class PluginListItem<T> {
     subtitle = json['subtitle'];
     id = json['id'];
   }
+
+  Map<String, dynamic> toJson() {
+    final data = new Map<String, dynamic>();
+    data["title"] = title;
+    data["subtitle"] = subtitle;
+    data["icon"] = icon;
+    data["id"] = id;
+    return data;
+  }
 }
 
 class PluginListResultItem {

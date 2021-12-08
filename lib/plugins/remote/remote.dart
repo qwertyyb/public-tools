@@ -1,3 +1,5 @@
+import 'dart:convert';
+
 import 'package:public_tools/core/plugin.dart';
 import 'package:public_tools/core/plugin_result_item.dart';
 
@@ -19,6 +21,6 @@ class RemotePlugin extends Plugin<String> {
 
   @override
   onTap(PluginListItem<String> item) {
-    send("tap", {"id": item.id});
+    send("tap", {'item': item});
   }
 }
