@@ -1,5 +1,5 @@
 
-  var Module = typeof Module !== 'undefined' ? Module : {};
+  var Module = typeof global.Module !== 'undefined' ? global.Module : {};
   
   if (!Module.expectedDataFileDownloads) {
     Module.expectedDataFileDownloads = 0;
@@ -15,7 +15,7 @@
         // web worker
         PACKAGE_PATH = encodeURIComponent(location.pathname.toString().substring(0, location.pathname.toString().lastIndexOf('/')) + '/');
       }
-      var PACKAGE_NAME = 'build_wasm/bin/wechat_qrcode_files.data';
+      var PACKAGE_NAME = 'wechat_qrcode_files.data';
       var REMOTE_PACKAGE_BASE = 'wechat_qrcode_files.data';
       if (typeof Module['locateFilePackage'] === 'function' && !Module['locateFile']) {
         Module['locateFile'] = Module['locateFilePackage'];
@@ -28,7 +28,9 @@
     
       function fetchRemotePackage(packageName, packageSize, callback, errback) {
         if (typeof process === 'object') {
-          require('fs').readFile(packageName, function(err, contents) {
+          var filePath = require('path').join(__dirname, packageName)
+          require('fs').readFile(filePath, function(err, contents) {
+            console.log(contents.buffer)
             if (err) {
               errback(err);
             } else {
@@ -92,6 +94,7 @@
         var fetched = Module['getPreloadedPackage'] ? Module['getPreloadedPackage'](REMOTE_PACKAGE_NAME, REMOTE_PACKAGE_SIZE) : null;
 
         if (!fetched) fetchRemotePackage(REMOTE_PACKAGE_NAME, REMOTE_PACKAGE_SIZE, function(data) {
+          console.log(fetchedCallback)
           if (fetchedCallback) {
             fetchedCallback(data);
             fetchedCallback = null;
@@ -154,14 +157,15 @@
             for (var i = 0; i < files.length; ++i) {
               DataRequest.prototype.requests[files[i].filename].onload();
             }
-                Module['removeRunDependency']('datafile_build_wasm/bin/wechat_qrcode_files.data');
+                Module['removeRunDependency']('wechat_qrcode_files.data');
 
       };
-      Module['addRunDependency']('datafile_build_wasm/bin/wechat_qrcode_files.data');
+      Module['addRunDependency']('wechat_qrcode_files.data');
     
       if (!Module.preloadResults) Module.preloadResults = {};
     
         Module.preloadResults[PACKAGE_NAME] = {fromCache: false};
+        console.log('aaaaafetched', fetched)
         if (fetched) {
           processPackageData(fetched);
           fetched = null;
@@ -170,6 +174,7 @@
         }
       
     }
+    console.log('aaaa',Module)
     if (Module['calledRun']) {
       runWithFS();
     } else {

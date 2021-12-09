@@ -28,6 +28,7 @@ class MainFlutterWindow: NSWindow {
     let y = frame.height * 3 / 4 + frame.minY
 
     let origin = NSPoint(x: x, y: y)
+    print(NSPasteboard.PasteboardType.png.rawValue)
     let windowFrame = NSRect(origin: origin, size: CGSize(width: winW, height: winH))
     isOpaque = false
     backgroundColor = NSColor(red: 0, green: 0, blue: 0, alpha: 0)

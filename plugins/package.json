@@ -11,6 +11,9 @@
   "license": "ISC",
   "dependencies": {
     "axios": "^0.24.0",
+    "buffer-image-size": "^0.6.4",
+    "jimp": "^0.16.1",
+    "simple-mac-clipboard": "^1.0.1",
     "ws": "^8.3.0"
   }
 }

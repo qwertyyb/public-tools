@@ -2,16 +2,17 @@ const cv = require('./lib/ready_opencv')
 
 const detectWithOpencv = (() => {
   let wr = null
-  return (image) => {
-    const data = image.toBitmap();
-    const size = image.getSize();
+  return (imgdata) => {
+    // const data = image.toBitmap();
+    // const size = image.getSize();
     
-    const imgdata = {
-      ...size,
-      data
-    }
-
+    // const imgdata = {
+    //   ...size,
+    //   data
+    // }
+    // console.log()
     if (!wr) {
+      console.log(cv)
       wr = new cv.wechat_qrcode_WeChatQRCode("wechat_qrcode/detect.prototxt", "wechat_qrcode/detect.caffemodel", "wechat_qrcode/sr.prototxt", "wechat_qrcode/sr.caffemodel")
     }
 
@@ -30,4 +31,6 @@ const detectWithOpencv = (() => {
     return arr
   }
 })()
+
+module.exports = detectWithOpencv
 
