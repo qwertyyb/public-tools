@@ -36,8 +36,8 @@ class PluginListResultItem {
 
   PluginListResultItem({this.plugin, this.result});
 
-  onTap() {
-    plugin.onTap(result);
+  onTap({void Function() onEnterItem}) {
+    plugin.onTap(result, enterItem: onEnterItem);
   }
 
   Widget onSelect() {

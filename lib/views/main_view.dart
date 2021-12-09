@@ -1,10 +1,11 @@
 import 'package:flutter/material.dart';
+import 'package:hotkey_manager/hotkey_manager.dart';
 import 'package:public_tools/core/plugin.dart';
 import 'package:public_tools/core/plugin_result_item.dart';
 import 'package:public_tools/core/plugin_manager.dart';
 import 'package:public_tools/views/input_bar.dart';
 import 'package:public_tools/views/list_preview.dart';
-import 'package:public_tools/views/plugin_label_view.dart';
+import 'package:window_activator/window_activator.dart';
 
 class MainView extends StatefulWidget {
   @override
@@ -15,12 +16,39 @@ class _MainViewState extends State<MainView> {
   List<PluginListResultItem> list = [];
 
   int selectedIndex = 0;
+  PluginListResultItem _curResultItem;
+  bool _loading = false;
+  HotKey _hotKey = HotKey(
+    KeyCode.space,
+    modifiers: [KeyModifier.meta],
+    scope: HotKeyScope.system,
+  );
 
   final TextEditingController _textEditingController = TextEditingController();
 
   @override
   void initState() {
     super.initState();
+    // 注册快捷键
+    hotKeyManager.register(
+      _hotKey,
+      keyDownHandler: (hotKey) async {
+        _textEditingController.clear();
+        await WindowActivator.activateWindow();
+      },
+    );
+    PluginManager.instance.onEnterItem = (item) {
+      setState(() {
+        _curResultItem = item;
+        _textEditingController.clear();
+        selectedIndex = 0;
+      });
+    };
+    PluginManager.instance.onLoading = (isLoading) {
+      setState(() {
+        _loading = isLoading;
+      });
+    };
     _textEditingController.addListener((() {
       // 实践当知，这里要判断是否同值
       String lastText = "";
@@ -78,7 +106,7 @@ class _MainViewState extends State<MainView> {
 
   void _onEnter() {
     if (list.length == 0) return;
-    list[selectedIndex].onTap();
+    PluginManager.instance.handleTap(list[selectedIndex]);
   }
 
   void _selectNext() {
@@ -99,14 +127,14 @@ class _MainViewState extends State<MainView> {
     _textEditingController.clear();
   }
 
+  void _exitResultItem() {
+    PluginManager.instance.exitResultItem();
+  }
+
   @override
   Widget build(BuildContext context) {
     return Column(
       children: [
-        PluginLabelView(),
-        Divider(
-          height: 10,
-        ),
         Expanded(
           child: Container(
             color: Colors.white,
@@ -117,9 +145,14 @@ class _MainViewState extends State<MainView> {
                   onEnter: this._onEnter,
                   selectNext: this._selectNext,
                   selectPrev: this._selectPrev,
+                  curResultItem: this._curResultItem,
+                  onExitResultItem: this._exitResultItem,
                 ),
-                Divider(
-                  height: 0,
+                LinearProgressIndicator(
+                  backgroundColor: Colors.black12,
+                  color: Colors.black26,
+                  minHeight: 1,
+                  value: _loading ? null : 0,
                 ),
                 Expanded(
                   child: PluginListView(

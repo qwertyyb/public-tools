@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:public_tools/core/plugin_manager.dart';
 import 'package:public_tools/core/plugin_result_item.dart';
 
 import 'result_item_view.dart';
@@ -68,7 +69,7 @@ class _PluginListViewState extends State<PluginListView> {
                   : Key(widget.selectedIndex.toString()),
               item: resultItem.result,
               selected: itemIndex == widget.selectedIndex,
-              onTap: resultItem.onTap,
+              onTap: () => PluginManager.instance.handleTap(resultItem),
             );
             return pluginView;
           },

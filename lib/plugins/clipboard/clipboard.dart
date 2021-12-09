@@ -184,7 +184,7 @@ class ClipboardPlugin extends Plugin {
     );
   }
 
-  onTap(item) {
+  onTap(item, {enterItem}) {
     Clipboard.setData(ClipboardData(text: (item as _PasteItem).text));
     showToast("复制成功");
     HotkeyShortcuts.pasteToFrontestApp();

@@ -7,6 +7,9 @@ class MainFlutterWindow: NSWindow {
         get { return true }
     }
 
+  override func mouseDown(with event: NSEvent) {
+  }
+  
   override func awakeFromNib() {
     let flutterViewController = FlutterViewController.init()
     self.contentViewController = flutterViewController

@@ -59,23 +59,6 @@ class HomePage extends StatefulWidget {
 class _HomePageState extends State<HomePage> {
   PluginManager pluginManager = PluginManager.instance;
 
-  HotKey _hotKey = HotKey(
-    KeyCode.space,
-    modifiers: [KeyModifier.meta],
-    scope: HotKeyScope.system,
-  );
-  @override
-  void initState() {
-    // 注册快捷键
-    hotKeyManager.register(
-      _hotKey,
-      keyDownHandler: (hotKey) async {
-        await WindowActivator.activateWindow();
-      },
-    );
-    super.initState();
-  }
-
   @override
   Widget build(BuildContext context) {
     // This method is rerun every time setState is called, for instance as done

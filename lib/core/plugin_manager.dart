@@ -18,7 +18,10 @@ class PluginManager {
     return _instance;
   }
 
-  String curKeyword = "";
+  String _curKeyword = "";
+  PluginListResultItem _curResultItem;
+  void Function(PluginListResultItem) onEnterItem;
+  void Function(bool isLoading) onLoading;
 
   List<Plugin> _corePluginList = [
     CommandPlugin(),
@@ -43,7 +46,7 @@ class PluginManager {
     void Function() clearResult,
   ) {
     print("query: $keyword");
-    curKeyword = keyword;
+    _curKeyword = keyword;
     if (keyword == "") {
       clearResult();
       return;
@@ -53,7 +56,7 @@ class PluginManager {
         bool called = false;
         return (List<PluginListItem> list) {
           // 每个keyword, setResult最多只能调用一次
-          if (keyword != curKeyword || called) {
+          if (keyword != _curKeyword || called) {
             return null;
           }
           called = true;
@@ -64,8 +67,27 @@ class PluginManager {
         };
       };
     })(keyword);
-    _pluginList.forEach((plugin) {
-      plugin.onQuery(keyword, setPluginResult(plugin));
+    if (_curResultItem == null) {
+      _pluginList.forEach((plugin) {
+        plugin.onQuery(keyword, setPluginResult(plugin));
+      });
+    } else {
+      _curResultItem.plugin.setLoading = onLoading;
+      _curResultItem.plugin
+          .onQuery(keyword, setPluginResult(_curResultItem.plugin));
+    }
+  }
+
+  void handleTap(PluginListResultItem item) {
+    item.onTap(onEnterItem: () {
+      _curResultItem = item;
+      onEnterItem(item);
     });
+  }
+
+  void exitResultItem() {
+    _curResultItem.plugin.onExit(_curResultItem.result);
+    _curResultItem = null;
+    onEnterItem(null);
   }
 }

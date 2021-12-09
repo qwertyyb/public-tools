@@ -1,26 +1,77 @@
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:hotkey_shortcuts/hotkey_shortcuts.dart';
+import 'package:public_tools/core/plugin_result_item.dart';
+import 'package:public_tools/views/plugin_label_view.dart';
 
-class InputBar extends StatelessWidget {
-  final Function onEnter;
-  final Function selectNext;
-  final Function selectPrev;
+class _TextInput extends StatelessWidget {
+  final TextEditingController controller;
+
+  final void Function() onArrowDown;
+
+  final void Function() onArrowUp;
+
+  final void Function() onEnter;
+
+  _TextInput({this.controller, this.onArrowDown, this.onEnter, this.onArrowUp});
 
   final FocusNode _focusNode = FocusNode(
       canRequestFocus: false,
       onKey: (node, event) {
         // 防止按向上或向下箭头时，光标移动
         if (event.isKeyPressed(LogicalKeyboardKey.arrowDown) ||
-            event.isKeyPressed(LogicalKeyboardKey.arrowUp)) {
+            event.isKeyPressed(LogicalKeyboardKey.arrowUp) ||
+            event.isKeyPressed(LogicalKeyboardKey.enter)) {
           return KeyEventResult.handled;
         }
         return KeyEventResult.ignored;
       });
 
+  void _onKey(RawKeyEvent event) {
+    if (event.isKeyPressed(LogicalKeyboardKey.arrowDown)) {
+      this.onArrowDown();
+    } else if (event.isKeyPressed(LogicalKeyboardKey.enter)) {
+      this.onEnter();
+    } else if (event.isKeyPressed(LogicalKeyboardKey.arrowUp)) {
+      this.onArrowUp();
+    }
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    return RawKeyboardListener(
+      onKey: _onKey,
+      focusNode: _focusNode,
+      child: TextField(
+        autofocus: true,
+        // textAlignVertical: TextAlignVertical.center,
+        decoration: InputDecoration(
+          contentPadding: EdgeInsets.zero,
+          border: InputBorder.none,
+        ),
+        style: TextStyle(fontSize: 20),
+        controller: controller,
+      ),
+    );
+  }
+}
+
+class InputBar extends StatelessWidget {
+  final Function onEnter;
+  final Function selectNext;
+  final Function selectPrev;
+  final PluginListResultItem curResultItem;
+  final Function onExitResultItem;
+
   final TextEditingController controller;
 
-  InputBar({this.onEnter, this.controller, this.selectNext, this.selectPrev});
+  InputBar(
+      {this.onEnter,
+      this.controller,
+      this.selectNext,
+      this.selectPrev,
+      this.onExitResultItem,
+      this.curResultItem});
 
   void _onPointerMove(PointerMoveEvent event) {
     // 经过实践，此事件返回的位置信息乱七八糟，计算出来的位移信息会有瞬移的情况
@@ -34,39 +85,40 @@ class InputBar extends StatelessWidget {
 
   void _onPointerUp(PointerEvent event) {}
 
-  void _onKey(RawKeyEvent event) {
-    if (event.isKeyPressed(LogicalKeyboardKey.arrowDown)) {
-      this.selectNext();
-    } else if (event.isKeyPressed(LogicalKeyboardKey.enter)) {
-      this.onEnter();
-    } else if (event.isKeyPressed(LogicalKeyboardKey.arrowUp)) {
-      this.selectPrev();
-    }
-  }
-
   @override
   Widget build(BuildContext context) {
+    final List<Widget> widgets = [
+      Expanded(
+        child: _TextInput(
+          controller: controller,
+          onEnter: onEnter,
+          onArrowDown: selectNext,
+          onArrowUp: selectPrev,
+        ),
+      ),
+    ];
+    if (curResultItem != null) {
+      widgets.insert(
+        0,
+        IconButton(
+          padding: EdgeInsets.zero,
+          onPressed: onExitResultItem,
+          icon: Icon(Icons.arrow_back_ios),
+        ),
+      );
+      widgets.add(PluginLabelView(
+          icon: curResultItem.result.icon, title: curResultItem.result.title));
+    }
     return Container(
       height: 48,
       padding: EdgeInsets.symmetric(horizontal: 12),
-      alignment: Alignment.center,
-      child: RawKeyboardListener(
-        onKey: _onKey,
-        focusNode: _focusNode,
-        child: Listener(
-          onPointerDown: _onPointerDown,
-          onPointerMove: _onPointerMove,
-          onPointerUp: _onPointerUp,
-          onPointerCancel: _onPointerUp,
-          child: TextField(
-            // textAlignVertical: TextAlignVertical.center,
-            decoration: InputDecoration(
-              contentPadding: EdgeInsets.zero,
-              border: InputBorder.none,
-            ),
-            style: TextStyle(fontSize: 20),
-            controller: controller,
-          ),
+      child: Listener(
+        onPointerDown: _onPointerDown,
+        onPointerMove: _onPointerMove,
+        onPointerUp: _onPointerUp,
+        onPointerCancel: _onPointerUp,
+        child: Row(
+          children: widgets,
         ),
       ),
     );

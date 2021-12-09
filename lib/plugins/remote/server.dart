@@ -3,6 +3,13 @@ import 'dart:io';
 
 import 'package:public_tools/core/plugin_result_item.dart';
 
+typedef void ListReceiver(List<PluginListItem<String>> list);
+typedef void EnterItemReceiver();
+
+List<WebSocket> sockets = [];
+List<ListReceiver> receivers = [];
+List<EnterItemReceiver> enterItemReceivers = [];
+
 class MessageData {
   String type;
   Map<String, dynamic> payload;
@@ -25,9 +32,6 @@ String makeMessageData(String type, Map<String, dynamic> payload) {
   return jsonEncode(MessageData(type: type, payload: payload).toJson());
 }
 
-List<WebSocket> sockets = [];
-List<Receiver> receivers = [];
-
 void Function(dynamic) _createHandler(WebSocket socket) {
   return (dynamic data) {
     final message = MessageData.fromJson(data);
@@ -38,6 +42,11 @@ void Function(dynamic) _createHandler(WebSocket socket) {
           .toList();
       receivers.forEach((element) {
         element(list);
+      });
+    } else if (message.type == 'enter') {
+      // final item = PluginListItem<String>.fromJson(message.payload["item"]);
+      enterItemReceivers.forEach((element) {
+        element();
       });
     }
     // socket.add(jsonEncode(data));
@@ -67,8 +76,6 @@ void send(String type, Map<String, dynamic> payload) {
   });
 }
 
-typedef void Receiver(List<PluginListItem<String>> list);
-
-void onUpdateList(Receiver receiver) {
+void onUpdateList(ListReceiver receiver) {
   receivers.add(receiver);
 }

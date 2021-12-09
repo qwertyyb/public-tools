@@ -63,7 +63,7 @@ class CommandPlugin extends Plugin<Command> {
     setResult(list);
   }
 
-  onTap(PluginListItem<Command> item) {
+  onTap(PluginListItem<Command> item, {enterItem}) {
     Process.run('osascript', ["-e", _commands[item.id]]);
   }
 }

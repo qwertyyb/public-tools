@@ -2,14 +2,18 @@
 const axios = require('axios')
 const createPlugin = require('./plugin')
 
-const plugin = createPlugin('search_mdn')
+const plugin = createPlugin('mdn', {
+  title: '搜索MDN文档',
+  subtitle: '搜索MDN上的文档',
+  icon: 'https://vfiles.gtimg.cn/vupload/20211129/2da75c1638159214694.png'
+})
 
 const queryResult = async (keyword = '') => {
   const params = new URLSearchParams({
     q: keyword,
     sort: 'best',
   })
-  const url = 'https://developer.mozilla.org/api/v1/search/zh-CN?' + params.toString()
+  const url = 'https://developer.mozilla.org/api/v1/search/zh-CN?topic=js&' + params.toString()
   const response = await axios.get(url)
   const json = response.data
 
@@ -29,10 +33,9 @@ const queryResult = async (keyword = '') => {
 }
 
 let timeout = null;
-plugin.onKeywordChange((keyword) => {
+plugin.onKeywordChange(({ keyword }) => {
   timeout && clearTimeout(timeout)
   timeout = setTimeout(async () => {
-    console.log('exec')
     const list = await queryResult(keyword)
     plugin.updateList(keyword, list)
   }, 200)

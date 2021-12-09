@@ -39,7 +39,7 @@ class ApplicationPlugin extends Plugin {
     setList(list);
   }
 
-  onTap(item) {
+  onTap(item, {enterItem}) {
     Process.run("open", ["-a", item.subtitle]);
   }
 }

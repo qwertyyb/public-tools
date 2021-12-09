@@ -21,7 +21,7 @@ class SettingsPlugin extends Plugin {
     }
   }
 
-  onTap(item) {
+  onTap(item, {enterItem}) {
     // @todo 跳转到设置页面
   }
 }
