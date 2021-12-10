@@ -41,6 +41,6 @@ class PluginListResultItem {
   }
 
   Widget onSelect() {
-    return plugin.onSelect(result);
+    return plugin.onResultSelect(result);
   }
 }

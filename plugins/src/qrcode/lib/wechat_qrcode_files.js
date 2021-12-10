@@ -1,4 +1,3 @@
-
   var Module = typeof global.Module !== 'undefined' ? global.Module : {};
   
   if (!Module.expectedDataFileDownloads) {
@@ -30,7 +29,6 @@
         if (typeof process === 'object') {
           var filePath = require('path').join(__dirname, packageName)
           require('fs').readFile(filePath, function(err, contents) {
-            console.log(contents.buffer)
             if (err) {
               errback(err);
             } else {
@@ -94,7 +92,6 @@
         var fetched = Module['getPreloadedPackage'] ? Module['getPreloadedPackage'](REMOTE_PACKAGE_NAME, REMOTE_PACKAGE_SIZE) : null;
 
         if (!fetched) fetchRemotePackage(REMOTE_PACKAGE_NAME, REMOTE_PACKAGE_SIZE, function(data) {
-          console.log(fetchedCallback)
           if (fetchedCallback) {
             fetchedCallback(data);
             fetchedCallback = null;
@@ -165,7 +162,6 @@
       if (!Module.preloadResults) Module.preloadResults = {};
     
         Module.preloadResults[PACKAGE_NAME] = {fromCache: false};
-        console.log('aaaaafetched', fetched)
         if (fetched) {
           processPackageData(fetched);
           fetched = null;
@@ -174,7 +170,6 @@
         }
       
     }
-    console.log('aaaa',Module)
     if (Module['calledRun']) {
       runWithFS();
     } else {

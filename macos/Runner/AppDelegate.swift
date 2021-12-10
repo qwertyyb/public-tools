@@ -7,7 +7,7 @@ class AppDelegate: FlutterAppDelegate {
   private let statusItem = NSStatusBar.system.statusItem(withLength: NSStatusItem.squareLength)
   
   override func applicationShouldTerminateAfterLastWindowClosed(_ sender: NSApplication) -> Bool {
-    return true
+    return false
   }
   @IBAction func showAbout(_ sender: NSMenuItem) {
     NSApp.activate(ignoringOtherApps: true)

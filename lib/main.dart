@@ -1,14 +1,17 @@
 import 'package:flutter/material.dart';
+import 'package:hotkey_manager/hotkey_manager.dart';
 
 import 'package:oktoast/oktoast.dart';
-import 'package:window_activator/window_activator.dart';
-import 'package:hotkey_manager/hotkey_manager.dart';
 import 'package:public_tools/core/plugin_manager.dart';
+import 'package:window_manager/window_manager.dart';
 import 'views/main_view.dart';
 import 'pages/settings_page.dart';
 
-void main() {
+void main() async {
   WidgetsFlutterBinding.ensureInitialized();
+  // Must add this line.
+  await windowManager.ensureInitialized();
+  // For hot reload, `unregisterAll()` needs to be called.
   hotKeyManager.unregisterAll();
 
   runApp(MainApp());

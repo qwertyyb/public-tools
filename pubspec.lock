@@ -532,13 +532,13 @@ packages:
       url: "https://pub.flutter-io.cn"
     source: hosted
     version: "2.3.1"
-  window_activator:
+  window_manager:
     dependency: "direct main"
     description:
-      name: window_activator
+      name: window_manager
       url: "https://pub.flutter-io.cn"
     source: hosted
-    version: "0.2.0"
+    version: "0.1.1"
   xdg_directories:
     dependency: transitive
     description:

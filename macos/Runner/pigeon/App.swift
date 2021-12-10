@@ -70,4 +70,7 @@ public class AppService: NSObject, PBCService {
         }
         query.start()
     }
+    public func hideAppWithError(_ error: AutoreleasingUnsafeMutablePointer<FlutterError?>) {
+        NSApp.hide(nil)
+    }
 }

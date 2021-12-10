@@ -25,13 +25,13 @@ dependencies:
   sqflite: ^1.3.2+2
   path_provider: ^1.6.27
   provider: ^4.3.3
-  window_activator: ^0.2.0
   oktoast: ^3.1.5
   intl: ^0.17.0
   cached_network_image: ^2.5.1
   flutter_highlight: ^0.7.0
   hotkey_manager: ^0.1.5
   flutter_js: 0.5.0+5
+  window_manager: ^0.1.1
   hotkey_shortcuts:
     path: './lib/packages/hotkey_shortcuts'
   flutter:

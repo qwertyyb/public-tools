@@ -12,6 +12,23 @@ class RemotePlugin extends Plugin<String> {
   @override
   void onQuery(String keyword,
       void Function(List<PluginListItem<String>> list) setResult) {
+    print('keyword: $keyword');
+    receivers.clear();
+    enterItemReceivers.clear();
+    onUpdateList(setResult);
+    send("keyword", {"keyword": keyword});
+  }
+
+  @override
+  onTap(PluginListItem<String> item, {enterItem}) {
+    enterItemReceivers.clear();
+    enterItemReceivers.add(enterItem);
+    send("tap", {'item': item});
+  }
+
+  @override
+  void onSearch(String keyword,
+      void Function(List<PluginListItem<String>> list) setResult) {
     receivers.clear();
     enterItemReceivers.clear();
     setLoading(true);
@@ -23,9 +40,8 @@ class RemotePlugin extends Plugin<String> {
   }
 
   @override
-  onTap(PluginListItem<String> item, {enterItem}) {
+  void onResultTap(PluginListItem<String> item) {
     enterItemReceivers.clear();
-    enterItemReceivers.add(enterItem);
     send("tap", {'item': item});
   }
 

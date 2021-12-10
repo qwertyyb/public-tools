@@ -1,3 +1,4 @@
+import 'package:flutter/widgets.dart';
 import 'package:public_tools/core/plugin.dart';
 import 'package:public_tools/plugins/application/application.dart';
 import 'package:public_tools/plugins/clipboard/clipboard.dart';
@@ -42,12 +43,12 @@ class PluginManager {
 
   void handleInput(
     String keyword,
-    void Function(List<PluginListResultItem> list) setResult,
+    void Function(List<PluginListResultItem> list, Plugin plugin) setResult,
     void Function() clearResult,
   ) {
     print("query: $keyword");
     _curKeyword = keyword;
-    if (keyword == "") {
+    if (_curResultItem == null && keyword == "") {
       clearResult();
       return;
     }
@@ -56,14 +57,14 @@ class PluginManager {
         bool called = false;
         return (List<PluginListItem> list) {
           // 每个keyword, setResult最多只能调用一次
-          if (keyword != _curKeyword || called) {
-            return null;
-          }
+          // if (keyword != _curKeyword || called) {
+          //   return null;
+          // }
           called = true;
           var resultList = list.map((item) {
             return PluginListResultItem(plugin: plugin, result: item);
           }).toList();
-          setResult(resultList);
+          setResult(resultList, plugin);
         };
       };
     })(keyword);
@@ -74,15 +75,28 @@ class PluginManager {
     } else {
       _curResultItem.plugin.setLoading = onLoading;
       _curResultItem.plugin
-          .onQuery(keyword, setPluginResult(_curResultItem.plugin));
+          .onSearch(keyword, setPluginResult(_curResultItem.plugin));
     }
   }
 
   void handleTap(PluginListResultItem item) {
-    item.onTap(onEnterItem: () {
-      _curResultItem = item;
-      onEnterItem(item);
-    });
+    if (_curResultItem == null) {
+      item.onTap(onEnterItem: () {
+        _curResultItem = item;
+        item.plugin.onEnter(item.result);
+        onEnterItem(item);
+      });
+    } else {
+      item.plugin.onResultTap(item.result);
+    }
+  }
+
+  Widget handleResultSelected(PluginListResultItem item) {
+    if (_curResultItem == null) {
+      return null;
+    } else {
+      return item.plugin.onResultSelect(item.result);
+    }
   }
 
   void exitResultItem() {

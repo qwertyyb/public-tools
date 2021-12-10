@@ -146,20 +146,22 @@ class ClipboardPlugin extends Plugin {
   onCreated() {}
 
   onQuery(String keyword, setResult) async {
-    if (!keyword.startsWith("cp ")) return;
-    var query = keyword.substring(3);
-    var list = await PasteItemHelper.instance
-        .query(where: 'text like ?', whereArgs: ['%' + query + '%']);
-    setResult(list.map((e) {
-      return _PasteItem(
-          title: e.summary,
-          subtitle: DateFormat('yyyy-MM-dd HH:mm:ss').format(e.updatedAt),
-          icon: 'https://img.icons8.com/officel/80/000000/paste-as-text.png',
-          text: e.text);
-    }).toList());
+    if (["cp", "clipboard", "jqb"]
+        .any((element) => element.contains(keyword))) {
+      setResult([
+        PluginListItem<String>(
+            id: "clipboard",
+            title: "剪切板",
+            subtitle: "查看剪切板历史",
+            icon:
+                "https://vfiles.gtimg.cn/vupload/20210220/586e451613797978732.png")
+      ]);
+      return null;
+    }
+    setResult([]);
   }
 
-  onSelect(item) {
+  onResultSelect(item) {
     final result = (item as _PasteItem);
     return HighlightView(
       // The original code to be highlighted
@@ -185,6 +187,25 @@ class ClipboardPlugin extends Plugin {
   }
 
   onTap(item, {enterItem}) {
+    enterItem();
+  }
+
+  @override
+  void onSearch(String keyword,
+      void Function(List<PluginListItem> list) setResult) async {
+    var list = await PasteItemHelper.instance
+        .query(where: 'text like ?', whereArgs: ['%' + keyword + '%']);
+    setResult(list.map((e) {
+      return _PasteItem(
+          title: e.summary,
+          subtitle: DateFormat('yyyy-MM-dd HH:mm:ss').format(e.updatedAt),
+          icon: 'https://img.icons8.com/officel/80/000000/paste-as-text.png',
+          text: e.text);
+    }).toList());
+  }
+
+  @override
+  void onResultTap(PluginListItem item) {
     Clipboard.setData(ClipboardData(text: (item as _PasteItem).text));
     showToast("复制成功");
     HotkeyShortcuts.pasteToFrontestApp();

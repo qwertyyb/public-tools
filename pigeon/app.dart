@@ -13,4 +13,6 @@ class InstalledApplication {
 abstract class Service {
   @async
   List<InstalledApplication> getInstalledApplicationList();
+
+  void hideApp();
 }

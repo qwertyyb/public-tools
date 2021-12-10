@@ -5,7 +5,7 @@ import 'package:public_tools/core/plugin_result_item.dart';
 import 'package:public_tools/core/plugin_manager.dart';
 import 'package:public_tools/views/input_bar.dart';
 import 'package:public_tools/views/list_preview.dart';
-import 'package:window_activator/window_activator.dart';
+import 'package:window_manager/window_manager.dart';
 
 class MainView extends StatefulWidget {
   @override
@@ -34,13 +34,14 @@ class _MainViewState extends State<MainView> {
       _hotKey,
       keyDownHandler: (hotKey) async {
         _textEditingController.clear();
-        await WindowActivator.activateWindow();
+        await windowManager.show();
       },
     );
     PluginManager.instance.onEnterItem = (item) {
       setState(() {
         _curResultItem = item;
         _textEditingController.clear();
+        list.clear();
         selectedIndex = 0;
       });
     };
@@ -66,11 +67,11 @@ class _MainViewState extends State<MainView> {
   void dispose() {
     _textEditingController.dispose();
     super.dispose();
+    print("aaaa");
   }
 
   void _onKeywordChange() {
     setState(() {
-      list.clear();
       selectedIndex = 0;
     });
     final keyword = _textEditingController.text;
@@ -96,9 +97,18 @@ class _MainViewState extends State<MainView> {
     });
   }
 
-  void _setPluginResult(List<PluginListResultItem> result) {
+  void _setPluginResult(List<PluginListResultItem> result, Plugin plugin) {
     setState(() {
-      list.addAll(result);
+      // 用替换法，可以避免闪烁
+      final startIndex = list.indexWhere((element) => element.plugin == plugin);
+      final endIndex =
+          list.lastIndexWhere((element) => element.plugin == plugin);
+      if (startIndex != -1) {
+        list.removeRange(startIndex, endIndex + 1);
+        list.insertAll(startIndex, result);
+      } else {
+        list.addAll(result);
+      }
       // 设置一个计时器，等组件渲染完成再调整窗口大小，否则会导致窗口闪烁
       Future.delayed(Duration(milliseconds: 100), () => _updateWindowSize());
     });

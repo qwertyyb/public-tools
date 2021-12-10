@@ -125,4 +125,22 @@ void PBCServiceSetup(id<FlutterBinaryMessenger> binaryMessenger, NSObject<PBCSer
       [channel setMessageHandler:nil];
     }
   }
+  {
+    FlutterBasicMessageChannel *channel =
+      [FlutterBasicMessageChannel
+        messageChannelWithName:@"dev.flutter.pigeon.Service.hideApp"
+        binaryMessenger:binaryMessenger
+        codec:PBCServiceGetCodec()];
+    if (api) {
+      NSCAssert([api respondsToSelector:@selector(hideAppWithError:)], @"PBCService api (%@) doesn't respond to @selector(hideAppWithError:)", api);
+      [channel setMessageHandler:^(id _Nullable message, FlutterReply callback) {
+        FlutterError *error;
+        [api hideAppWithError:&error];
+        callback(wrapResult(nil, error));
+      }];
+    }
+    else {
+      [channel setMessageHandler:nil];
+    }
+  }
 }

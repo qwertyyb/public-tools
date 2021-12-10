@@ -1,6 +1,6 @@
 
 const axios = require('axios')
-const createPlugin = require('./plugin')
+const createPlugin = require('./core/plugin')
 
 const plugin = createPlugin('mdn', {
   title: '搜索MDN文档',
@@ -34,6 +34,7 @@ const queryResult = async (keyword = '') => {
 
 let timeout = null;
 plugin.onKeywordChange(({ keyword }) => {
+  if (!keyword) return plugin.updateList(keyword, [])
   timeout && clearTimeout(timeout)
   timeout = setTimeout(async () => {
     const list = await queryResult(keyword)
@@ -44,3 +45,4 @@ plugin.onTap(item => {
   require('child_process').exec(`open https://developer.mozilla.org${item.id}`)
 })
 
+module.exports = plugin

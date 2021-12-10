@@ -19,7 +19,7 @@ PODS:
   - sqflite (0.0.2):
     - FlutterMacOS
     - FMDB (>= 2.7.5)
-  - window_activator (0.1.0):
+  - window_manager (0.1.0):
     - FlutterMacOS
 
 DEPENDENCIES:
@@ -30,7 +30,7 @@ DEPENDENCIES:
   - path_provider_macos (from `Flutter/ephemeral/.symlinks/plugins/path_provider_macos/macos`)
   - shared_preferences_macos (from `Flutter/ephemeral/.symlinks/plugins/shared_preferences_macos/macos`)
   - sqflite (from `Flutter/ephemeral/.symlinks/plugins/sqflite/macos`)
-  - window_activator (from `Flutter/ephemeral/.symlinks/plugins/window_activator/macos`)
+  - window_manager (from `Flutter/ephemeral/.symlinks/plugins/window_manager/macos`)
 
 SPEC REPOS:
   trunk:
@@ -52,8 +52,8 @@ EXTERNAL SOURCES:
     :path: Flutter/ephemeral/.symlinks/plugins/shared_preferences_macos/macos
   sqflite:
     :path: Flutter/ephemeral/.symlinks/plugins/sqflite/macos
-  window_activator:
-    :path: Flutter/ephemeral/.symlinks/plugins/window_activator/macos
+  window_manager:
+    :path: Flutter/ephemeral/.symlinks/plugins/window_manager/macos
 
 SPEC CHECKSUMS:
   flutter_js: c664361655af1d8fc24e278c7d086e9cbe0d68bc
@@ -65,8 +65,8 @@ SPEC CHECKSUMS:
   path_provider_macos: a0a3fd666cb7cd0448e936fb4abad4052961002b
   shared_preferences_macos: 480ce071d0666e37cef23fe6c702293a3d21799e
   sqflite: a5789cceda41d54d23f31d6de539d65bb14100ea
-  window_activator: fa2c3da6a22c55810234cb5f5207dcf93fa1071c
+  window_manager: db713621c322d52e96064336a4ba2b7e4e30c94f
 
 PODFILE CHECKSUM: 6eac6b3292e5142cfc23bdeb71848a40ec51c14c
 
-COCOAPODS: 1.10.1
+COCOAPODS: 1.11.2

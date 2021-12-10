@@ -54,7 +54,7 @@ class _PluginListViewState extends State<PluginListView> {
         : null;
     Widget detailView;
     if (selectedItem != null) {
-      detailView = selectedItem.onSelect();
+      detailView = PluginManager.instance.handleResultSelected(selectedItem);
     }
     return Row(crossAxisAlignment: CrossAxisAlignment.start, children: [
       Expanded(

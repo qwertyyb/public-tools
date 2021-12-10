@@ -1,7 +1,10 @@
 import 'dart:convert';
 import 'dart:io';
 
+import 'package:oktoast/oktoast.dart';
 import 'package:public_tools/core/plugin_result_item.dart';
+import 'package:public_tools/pigeon/app.dart';
+import 'package:window_manager/window_manager.dart';
 
 typedef void ListReceiver(List<PluginListItem<String>> list);
 typedef void EnterItemReceiver();
@@ -33,8 +36,10 @@ String makeMessageData(String type, Map<String, dynamic> payload) {
 }
 
 void Function(dynamic) _createHandler(WebSocket socket) {
-  return (dynamic data) {
+  return (dynamic data) async {
     final message = MessageData.fromJson(data);
+    print(message.type);
+    print(message.payload);
     if (message.type == 'list') {
       List<PluginListItem<String>> list = message.payload["list"]
           .map<PluginListItem<String>>(
@@ -45,9 +50,16 @@ void Function(dynamic) _createHandler(WebSocket socket) {
       });
     } else if (message.type == 'enter') {
       // final item = PluginListItem<String>.fromJson(message.payload["item"]);
-      enterItemReceivers.forEach((element) {
-        element();
-      });
+      final enterItemReceiver = enterItemReceivers.first;
+      if (enterItemReceiver != null) {
+        enterItemReceiver();
+      }
+    } else if (message.type == 'toast') {
+      showToast(message.payload["content"]);
+    } else if (message.type == 'hideApp') {
+      await Service().hideApp();
+    } else if (message.type == 'showApp') {
+      await windowManager.show();
     }
     // socket.add(jsonEncode(data));
   };
@@ -70,8 +82,6 @@ void runServer() async {
 
 void send(String type, Map<String, dynamic> payload) {
   sockets.forEach((element) {
-    print("sendMessage");
-    print(makeMessageData(type, payload));
     element.add(makeMessageData(type, payload));
   });
 }

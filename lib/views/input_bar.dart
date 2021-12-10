@@ -13,24 +13,35 @@ class _TextInput extends StatelessWidget {
 
   final void Function() onEnter;
 
-  _TextInput({this.controller, this.onArrowDown, this.onEnter, this.onArrowUp});
+  final bool spaceOnEnter;
 
-  final FocusNode _focusNode = FocusNode(
-      canRequestFocus: false,
-      onKey: (node, event) {
-        // 防止按向上或向下箭头时，光标移动
-        if (event.isKeyPressed(LogicalKeyboardKey.arrowDown) ||
-            event.isKeyPressed(LogicalKeyboardKey.arrowUp) ||
-            event.isKeyPressed(LogicalKeyboardKey.enter)) {
-          return KeyEventResult.handled;
-        }
-        return KeyEventResult.ignored;
-      });
+  FocusNode _focusNode;
+
+  _TextInput(
+      {this.controller,
+      this.onArrowDown,
+      this.onEnter,
+      this.onArrowUp,
+      this.spaceOnEnter}) {
+    _focusNode = FocusNode(
+        canRequestFocus: false,
+        onKey: (node, event) {
+          // 防止按向上或向下箭头时，光标移动
+          if (event.isKeyPressed(LogicalKeyboardKey.arrowDown) ||
+              event.isKeyPressed(LogicalKeyboardKey.arrowUp) ||
+              (spaceOnEnter && event.isKeyPressed(LogicalKeyboardKey.space)) ||
+              event.isKeyPressed(LogicalKeyboardKey.enter)) {
+            return KeyEventResult.handled;
+          }
+          return KeyEventResult.ignored;
+        });
+  }
 
   void _onKey(RawKeyEvent event) {
     if (event.isKeyPressed(LogicalKeyboardKey.arrowDown)) {
       this.onArrowDown();
-    } else if (event.isKeyPressed(LogicalKeyboardKey.enter)) {
+    } else if (event.isKeyPressed(LogicalKeyboardKey.enter) ||
+        (spaceOnEnter && event.isKeyPressed(LogicalKeyboardKey.space))) {
       this.onEnter();
     } else if (event.isKeyPressed(LogicalKeyboardKey.arrowUp)) {
       this.onArrowUp();
@@ -94,6 +105,7 @@ class InputBar extends StatelessWidget {
           onEnter: onEnter,
           onArrowDown: selectNext,
           onArrowUp: selectPrev,
+          spaceOnEnter: curResultItem == null,
         ),
       ),
     ];
