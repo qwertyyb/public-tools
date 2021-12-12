@@ -14,19 +14,20 @@ class PluginResultItemIconView extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return icon != null
-        ? icon.startsWith('http://') || icon.startsWith('https://')
-            ? CachedNetworkImage(
-                imageUrl: icon,
-                placeholder: (context, string) => CircularProgressIndicator(),
-                width: size,
-                height: size,
-              )
-            : Image.file(File(icon), width: size, height: size)
-        : Icon(
-            Icons.account_circle_rounded,
-            size: size,
-          );
+    if (icon == null) {
+      return Icon(
+        Icons.account_circle_rounded,
+        size: size,
+      );
+    }
+    return icon.startsWith('http://') || icon.startsWith('https://')
+        ? CachedNetworkImage(
+            imageUrl: icon,
+            placeholder: (context, string) => CircularProgressIndicator(),
+            width: size,
+            height: size,
+          )
+        : Image.file(File(icon), width: size, height: size);
   }
 }
 

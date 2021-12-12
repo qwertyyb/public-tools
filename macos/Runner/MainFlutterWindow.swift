@@ -1,19 +1,41 @@
 import Cocoa
 import FlutterMacOS
 
-class MainFlutterWindow: NSWindow {
+class MainFlutterWindow: NSWindow, FlutterStreamHandler {
+    private var events: FlutterEventSink?;
+    func onListen(withArguments arguments: Any?, eventSink events: @escaping FlutterEventSink) -> FlutterError? {
+        self.events = events
+        return nil
+    }
+    
+    func onCancel(withArguments arguments: Any?) -> FlutterError? {
+        self.events = nil
+        return nil
+    }
+    
+    
+    private var eventChannel: FlutterEventChannel? = nil;
     
     override var canBecomeKey: Bool {
         get { return true }
     }
-
-  override func mouseDown(with event: NSEvent) {
-  }
   
   override func awakeFromNib() {
     let flutterViewController = FlutterViewController.init()
     self.contentViewController = flutterViewController
     self.styleMask = [.borderless, .fullSizeContentView]
+    self.eventChannel = FlutterEventChannel(name: "events-listener", binaryMessenger: flutterViewController.engine.binaryMessenger)
+    self.eventChannel?.setStreamHandler(self)
+    
+    NotificationCenter.default.addObserver(forName: NSApplication.didHideNotification, object: NSApp, queue: nil) { notification in
+        print("did hide")
+        self.events?("DID_HIDE")
+    }
+    
+    NotificationCenter.default.addObserver(forName: NSApplication.willUnhideNotification, object: NSApp, queue: nil) { notification in
+        self.events?("WILL_UNHIDE")
+        print("will unhide")
+    }
 
     RegisterGeneratedPlugins(registry: flutterViewController)
     

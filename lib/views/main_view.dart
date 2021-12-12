@@ -1,4 +1,7 @@
+import 'dart:async';
+
 import 'package:flutter/material.dart';
+import 'package:flutter/services.dart';
 import 'package:hotkey_manager/hotkey_manager.dart';
 import 'package:public_tools/core/plugin.dart';
 import 'package:public_tools/core/plugin_result_item.dart';
@@ -13,17 +16,18 @@ class MainView extends StatefulWidget {
 }
 
 class _MainViewState extends State<MainView> {
-  List<PluginListResultItem> list = [];
-
-  int selectedIndex = 0;
-  PluginListResultItem _curResultItem;
-  bool _loading = false;
   HotKey _hotKey = HotKey(
     KeyCode.space,
     modifiers: [KeyModifier.meta],
     scope: HotKeyScope.system,
   );
+  Timer _clearStateTimer;
+  EventChannel _eventChannel = EventChannel("events-listener");
 
+  List<PluginListResultItem> _list = [];
+  int _selectedIndex = 0;
+  PluginListResultItem _curResultItem;
+  bool _loading = false;
   final TextEditingController _textEditingController = TextEditingController();
 
   @override
@@ -33,16 +37,17 @@ class _MainViewState extends State<MainView> {
     hotKeyManager.register(
       _hotKey,
       keyDownHandler: (hotKey) async {
-        _textEditingController.clear();
         await windowManager.show();
       },
     );
     PluginManager.instance.onEnterItem = (item) {
+      print('onEnter before');
       setState(() {
         _curResultItem = item;
+        _list.clear();
+        _selectedIndex = 0;
+        // 会同步触发onChange，所以要放在最后，在onChange中能拿到最新的值
         _textEditingController.clear();
-        list.clear();
-        selectedIndex = 0;
       });
     };
     PluginManager.instance.onLoading = (isLoading) {
@@ -61,18 +66,34 @@ class _MainViewState extends State<MainView> {
         _onKeywordChange();
       };
     })());
+    _eventChannel.receiveBroadcastStream("state").listen((event) {
+      if (event == 'DID_HIDE') {
+        _clearStateTimer = Timer(Duration(minutes: 1), () {
+          PluginManager.instance.exitResultItem();
+          _clearResultList();
+          setState(() {
+            _textEditingController.clear();
+            _loading = false;
+          });
+        });
+      } else if (event == 'WILL_UNHIDE') {
+        if (_clearStateTimer != null) {
+          _clearStateTimer.cancel();
+        }
+      }
+    });
   }
 
   @override
   void dispose() {
     _textEditingController.dispose();
+    hotKeyManager.unregisterAll();
     super.dispose();
-    print("aaaa");
   }
 
   void _onKeywordChange() {
     setState(() {
-      selectedIndex = 0;
+      _selectedIndex = 0;
     });
     final keyword = _textEditingController.text;
     PluginManager.instance.handleInput(
@@ -83,7 +104,7 @@ class _MainViewState extends State<MainView> {
   }
 
   void _updateWindowSize() {
-    var listLength = list.length;
+    var listLength = _list.length;
     var windowHeight = ((listLength > 9 ? 9 : listLength) * 48) + 48;
     var windowWidth = 720;
     // HotkeyShortcuts.updateWindowSize(width: windowWidth, height: windowHeight);
@@ -91,7 +112,7 @@ class _MainViewState extends State<MainView> {
 
   void _clearResultList() {
     setState(() {
-      list.clear();
+      _list.clear();
       // 设置一个计时器，等组件渲染完成再调整窗口大小，否则会导致窗口闪烁
       Future.delayed(Duration(milliseconds: 100), () => _updateWindowSize());
     });
@@ -100,14 +121,15 @@ class _MainViewState extends State<MainView> {
   void _setPluginResult(List<PluginListResultItem> result, Plugin plugin) {
     setState(() {
       // 用替换法，可以避免闪烁
-      final startIndex = list.indexWhere((element) => element.plugin == plugin);
+      final startIndex =
+          _list.indexWhere((element) => element.plugin == plugin);
       final endIndex =
-          list.lastIndexWhere((element) => element.plugin == plugin);
+          _list.lastIndexWhere((element) => element.plugin == plugin);
       if (startIndex != -1) {
-        list.removeRange(startIndex, endIndex + 1);
-        list.insertAll(startIndex, result);
+        _list.removeRange(startIndex, endIndex + 1);
+        _list.insertAll(startIndex, result);
       } else {
-        list.addAll(result);
+        _list.addAll(result);
       }
       // 设置一个计时器，等组件渲染完成再调整窗口大小，否则会导致窗口闪烁
       Future.delayed(Duration(milliseconds: 100), () => _updateWindowSize());
@@ -115,21 +137,21 @@ class _MainViewState extends State<MainView> {
   }
 
   void _onEnter() {
-    if (list.length == 0) return;
-    PluginManager.instance.handleTap(list[selectedIndex]);
+    if (_list.length == 0) return;
+    PluginManager.instance.handleTap(_list[_selectedIndex]);
   }
 
   void _selectNext() {
-    var nextIndex = (this.selectedIndex + 1) % list.length;
+    var nextIndex = (this._selectedIndex + 1) % _list.length;
     setState(() {
-      selectedIndex = nextIndex;
+      _selectedIndex = nextIndex;
     });
   }
 
   void _selectPrev() {
-    var prevIndex = (this.selectedIndex - 1 + list.length) % list.length;
+    var prevIndex = this._selectedIndex <= 1 ? 0 : this._selectedIndex - 1;
     setState(() {
-      selectedIndex = prevIndex;
+      _selectedIndex = prevIndex;
     });
   }
 
@@ -166,7 +188,10 @@ class _MainViewState extends State<MainView> {
                 ),
                 Expanded(
                   child: PluginListView(
-                      list: list, onTap: _onTap, selectedIndex: selectedIndex),
+                    list: _list,
+                    onTap: _onTap,
+                    selectedIndex: _selectedIndex,
+                  ),
                 )
               ],
             ),

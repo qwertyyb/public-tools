@@ -58,7 +58,7 @@ class _PluginListViewState extends State<PluginListView> {
     }
     return Row(crossAxisAlignment: CrossAxisAlignment.start, children: [
       Expanded(
-        flex: 1,
+        flex: 2,
         child: ListView.builder(
           controller: scrollController,
           itemBuilder: (pluginContext, itemIndex) {
@@ -78,7 +78,7 @@ class _PluginListViewState extends State<PluginListView> {
       ),
       if (detailView != null)
         Expanded(
-          flex: 1,
+          flex: 3,
           child: Container(
               height: double.infinity,
               padding: EdgeInsets.all(8),

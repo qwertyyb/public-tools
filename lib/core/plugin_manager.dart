@@ -4,6 +4,7 @@ import 'package:public_tools/plugins/application/application.dart';
 import 'package:public_tools/plugins/clipboard/clipboard.dart';
 import 'package:public_tools/plugins/command/command.dart';
 import 'package:public_tools/plugins/remote/remote.dart';
+import 'package:public_tools/plugins/settings/settings_plugin.dart';
 
 import 'plugin_result_item.dart';
 
@@ -25,6 +26,7 @@ class PluginManager {
   void Function(bool isLoading) onLoading;
 
   List<Plugin> _corePluginList = [
+    SettingsPlugin(),
     CommandPlugin(),
     ClipboardPlugin(),
     ApplicationPlugin(),
@@ -100,6 +102,7 @@ class PluginManager {
   }
 
   void exitResultItem() {
+    if (_curResultItem == null) return;
     _curResultItem.plugin.onExit(_curResultItem.result);
     _curResultItem = null;
     onEnterItem(null);

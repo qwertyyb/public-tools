@@ -1,5 +1,5 @@
-import 'package:cached_network_image/cached_network_image.dart';
 import 'package:flutter/material.dart';
+import 'package:public_tools/views/result_item_view.dart';
 
 class PluginLabelView extends StatelessWidget {
   final String icon;
@@ -11,7 +11,7 @@ class PluginLabelView extends StatelessWidget {
   Widget build(BuildContext context) {
     return Row(
       children: [
-        CachedNetworkImage(imageUrl: icon, width: 32, height: 32),
+        PluginResultItemIconView(icon),
         Padding(padding: EdgeInsets.only(left: 6)),
         Text(title)
       ],
