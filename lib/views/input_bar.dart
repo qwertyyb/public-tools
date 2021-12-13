@@ -59,6 +59,7 @@ class _TextInput extends StatelessWidget {
         decoration: InputDecoration(
           contentPadding: EdgeInsets.zero,
           border: InputBorder.none,
+          hintText: "What Do You Want?",
         ),
         style: TextStyle(fontSize: 20),
         controller: controller,

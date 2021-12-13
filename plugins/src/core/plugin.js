@@ -71,6 +71,7 @@ const createPlugin = (name, { title, subtitle, icon }) => {
     updateList: async (keyword, list) => {
       console.log('curKeyword', curKeyword)
       // 不是正在处理的keyword, 丢弃
+      // @todo keyword不应该让插件传入
       if (keyword !== curKeyword) return;
       const handledList = list.map(item => {
         return {
