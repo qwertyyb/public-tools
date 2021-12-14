@@ -50,10 +50,16 @@ public class AppService: NSObject, PBCService {
                 let dict = NSDictionary(contentsOfFile: bundlePath)!
                 var iconPath = ""
                 if let iconName = dict["CFBundleIconFile"] {
-                    iconPath = path + "/Contents/Resources/" + (iconName as! String) + ".icns"
+                    iconPath = path + "/Contents/Resources/" + (iconName as! String)
+                  if (!iconPath.hasSuffix(".icns")) {
+                    iconPath += ".icns"
+                  }
                 }
                 if let iconName = dict["CFBundleIconName"] {
-                    iconPath = path + "/Contents/Resources/" + (iconName as! String) + ".icns"
+                    iconPath = path + "/Contents/Resources/" + (iconName as! String)
+                  if (!iconPath.hasSuffix(".icns")) {
+                    iconPath += ".icns"
+                  }
                 }
                 if !FileManager.default.fileExists(atPath: iconPath) {
                     iconPath = ""

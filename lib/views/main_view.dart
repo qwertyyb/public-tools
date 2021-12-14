@@ -40,11 +40,15 @@ class _MainViewState extends State<MainView> {
         await windowManager.show();
       },
     );
+    PluginManager.instance.onResultChange = (resultList) => {
+          setState(() {
+            _list = resultList;
+          })
+        };
     PluginManager.instance.onEnterItem = (item) {
       print('onEnter before');
       setState(() {
         _curResultItem = item;
-        _list.clear();
         _selectedIndex = 0;
         // 会同步触发onChange，所以要放在最后，在onChange中能拿到最新的值
         _textEditingController.clear();
@@ -70,7 +74,6 @@ class _MainViewState extends State<MainView> {
       if (event == 'DID_HIDE') {
         _clearStateTimer = Timer(Duration(minutes: 1), () {
           PluginManager.instance.exitResultItem();
-          _clearResultList();
           setState(() {
             _textEditingController.clear();
             _loading = false;
@@ -96,11 +99,7 @@ class _MainViewState extends State<MainView> {
       _selectedIndex = 0;
     });
     final keyword = _textEditingController.text;
-    PluginManager.instance.handleInput(
-      keyword,
-      this._setPluginResult,
-      this._clearResultList,
-    );
+    PluginManager.instance.handleInput(keyword);
   }
 
   void _updateWindowSize() {
@@ -108,32 +107,6 @@ class _MainViewState extends State<MainView> {
     var windowHeight = ((listLength > 9 ? 9 : listLength) * 48) + 48;
     var windowWidth = 720;
     // HotkeyShortcuts.updateWindowSize(width: windowWidth, height: windowHeight);
-  }
-
-  void _clearResultList() {
-    setState(() {
-      _list.clear();
-      // 设置一个计时器，等组件渲染完成再调整窗口大小，否则会导致窗口闪烁
-      Future.delayed(Duration(milliseconds: 100), () => _updateWindowSize());
-    });
-  }
-
-  void _setPluginResult(List<PluginListResultItem> result, Plugin plugin) {
-    setState(() {
-      // 用替换法，可以避免闪烁
-      final startIndex =
-          _list.indexWhere((element) => element.plugin == plugin);
-      final endIndex =
-          _list.lastIndexWhere((element) => element.plugin == plugin);
-      if (startIndex != -1) {
-        _list.removeRange(startIndex, endIndex + 1);
-        _list.insertAll(startIndex, result);
-      } else {
-        _list.addAll(result);
-      }
-      // 设置一个计时器，等组件渲染完成再调整窗口大小，否则会导致窗口闪烁
-      Future.delayed(Duration(milliseconds: 100), () => _updateWindowSize());
-    });
   }
 
   void _onEnter() {

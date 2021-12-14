@@ -13,16 +13,20 @@ class _TextInput extends StatelessWidget {
 
   final void Function() onEnter;
 
+  final void Function() onEmptyDelete;
+
   final bool spaceOnEnter;
 
   FocusNode _focusNode;
 
-  _TextInput(
-      {this.controller,
-      this.onArrowDown,
-      this.onEnter,
-      this.onArrowUp,
-      this.spaceOnEnter}) {
+  _TextInput({
+    this.controller,
+    this.onArrowDown,
+    this.onEnter,
+    this.onArrowUp,
+    this.spaceOnEnter,
+    this.onEmptyDelete,
+  }) {
     _focusNode = FocusNode(
         canRequestFocus: false,
         onKey: (node, event) {
@@ -38,6 +42,7 @@ class _TextInput extends StatelessWidget {
   }
 
   void _onKey(RawKeyEvent event) {
+    print(event.isKeyPressed(LogicalKeyboardKey.backspace));
     if (event.isKeyPressed(LogicalKeyboardKey.arrowDown)) {
       this.onArrowDown();
     } else if (event.isKeyPressed(LogicalKeyboardKey.enter) ||
@@ -45,6 +50,9 @@ class _TextInput extends StatelessWidget {
       this.onEnter();
     } else if (event.isKeyPressed(LogicalKeyboardKey.arrowUp)) {
       this.onArrowUp();
+    } else if (event.isKeyPressed(LogicalKeyboardKey.backspace) &&
+        controller.text.length <= 0) {
+      this.onEmptyDelete();
     }
   }
 
@@ -55,7 +63,6 @@ class _TextInput extends StatelessWidget {
       focusNode: _focusNode,
       child: TextField(
         autofocus: true,
-        // textAlignVertical: TextAlignVertical.center,
         decoration: InputDecoration(
           contentPadding: EdgeInsets.zero,
           border: InputBorder.none,
@@ -107,6 +114,7 @@ class InputBar extends StatelessWidget {
           onArrowDown: selectNext,
           onArrowUp: selectPrev,
           spaceOnEnter: curResultItem == null,
+          onEmptyDelete: onExitResultItem,
         ),
       ),
     ];

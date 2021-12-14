@@ -20,10 +20,17 @@ class PluginManager {
     return _instance;
   }
 
-  String _curKeyword = "";
+  Map<Plugin, List<PluginListResultItem>> _resultList = {};
   PluginListResultItem _curResultItem;
   void Function(PluginListResultItem) onEnterItem;
+  void Function(List<PluginListResultItem> resultList) onResultChange =
+      (List<PluginListResultItem> resultList) {};
   void Function(bool isLoading) onLoading;
+
+  void _updateResultList(void Function() updater) {
+    updater();
+    onResultChange(_resultList.values.expand((element) => element).toList());
+  }
 
   List<Plugin> _corePluginList = [
     SettingsPlugin(),
@@ -43,33 +50,20 @@ class PluginManager {
     _pluginList.add(plugin);
   }
 
-  void handleInput(
-    String keyword,
-    void Function(List<PluginListResultItem> list, Plugin plugin) setResult,
-    void Function() clearResult,
-  ) {
+  void handleInput(String keyword) {
     print("query: $keyword");
-    _curKeyword = keyword;
     if (_curResultItem == null && keyword == "") {
-      clearResult();
+      _updateResultList(() => _resultList.clear());
       return;
     }
-    var setPluginResult = ((String keyword) {
-      return (Plugin plugin) {
-        bool called = false;
-        return (List<PluginListItem> list) {
-          // 每个keyword, setResult最多只能调用一次
-          // if (keyword != _curKeyword || called) {
-          //   return null;
-          // }
-          called = true;
-          var resultList = list.map((item) {
-            return PluginListResultItem(plugin: plugin, result: item);
-          }).toList();
-          setResult(resultList, plugin);
-        };
+    var setPluginResult = (Plugin plugin) {
+      return (List<PluginListItem> list) {
+        var resultList = list.map((item) {
+          return PluginListResultItem(plugin: plugin, result: item);
+        }).toList();
+        _updateResultList(() => _resultList[plugin] = resultList);
       };
-    })(keyword);
+    };
     if (_curResultItem == null) {
       _pluginList.forEach((plugin) {
         plugin.onQuery(keyword, setPluginResult(plugin));
@@ -85,6 +79,7 @@ class PluginManager {
     if (_curResultItem == null) {
       item.onTap(onEnterItem: () {
         _curResultItem = item;
+        _updateResultList(() => _resultList.clear());
         item.plugin.onEnter(item.result);
         onEnterItem(item);
       });
@@ -105,6 +100,7 @@ class PluginManager {
     if (_curResultItem == null) return;
     _curResultItem.plugin.onExit(_curResultItem.result);
     _curResultItem = null;
+    _updateResultList(() => _resultList.clear());
     onEnterItem(null);
   }
 }
