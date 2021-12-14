@@ -25,6 +25,7 @@ class PluginManager {
   void Function(PluginListResultItem) onEnterItem;
   void Function(List<PluginListResultItem> resultList) onResultChange =
       (List<PluginListResultItem> resultList) {};
+  void Function(Widget preview) onPreviewChange = (preview) {};
   void Function(bool isLoading) onLoading;
 
   void _updateResultList(void Function() updater) {
@@ -77,7 +78,7 @@ class PluginManager {
 
   void handleTap(PluginListResultItem item) {
     if (_curResultItem == null) {
-      item.onTap(onEnterItem: () {
+      item.plugin.onTap(item.result, enterItem: () {
         _curResultItem = item;
         _updateResultList(() => _resultList.clear());
         item.plugin.onEnter(item.result);
@@ -88,11 +89,12 @@ class PluginManager {
     }
   }
 
-  Widget handleResultSelected(PluginListResultItem item) {
+  void handleResultSelected(PluginListResultItem item) {
     if (_curResultItem == null) {
       return null;
     } else {
-      return item.plugin.onResultSelect(item.result);
+      return item.plugin
+          .onResultSelect(item.result, setPreview: onPreviewChange);
     }
   }
 

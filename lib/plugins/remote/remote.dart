@@ -1,3 +1,4 @@
+import 'package:flutter_html/flutter_html.dart';
 import 'package:public_tools/core/plugin.dart';
 import 'package:public_tools/core/plugin_result_item.dart';
 
@@ -15,6 +16,7 @@ class RemotePlugin extends Plugin<String> {
     print('keyword: $keyword');
     receivers.clear();
     enterItemReceivers.clear();
+    setResultItemPreview = (content) {};
     onUpdateList(setResult);
     send("keyword", {"keyword": keyword});
   }
@@ -23,6 +25,7 @@ class RemotePlugin extends Plugin<String> {
   onTap(PluginListItem<String> item, {enterItem}) {
     enterItemReceivers.clear();
     enterItemReceivers.add(enterItem);
+    setResultItemPreview = (content) {};
     send("tap", {'item': item});
   }
 
@@ -31,6 +34,7 @@ class RemotePlugin extends Plugin<String> {
       void Function(List<PluginListItem<String>> list) setResult) {
     receivers.clear();
     enterItemReceivers.clear();
+    setResultItemPreview = (content) {};
     setLoading(true);
     onUpdateList(setResult);
     onUpdateList((list) {
@@ -43,6 +47,15 @@ class RemotePlugin extends Plugin<String> {
   void onResultTap(PluginListItem<String> item) {
     enterItemReceivers.clear();
     send("tap", {'item': item});
+  }
+
+  @override
+  void onResultSelect(PluginListItem<String> item, {setPreview}) {
+    setResultItemPreview = (content) {
+      print(content);
+      setPreview(Html(data: content));
+    };
+    send('select', {'item': item});
   }
 
   @override

@@ -9,10 +9,17 @@ class PluginListView extends StatefulWidget {
 
   final int selectedIndex;
 
+  final Widget preview;
+
   final Function onTap;
 
-  PluginListView({Key key, this.list, this.onTap, this.selectedIndex})
-      : super(key: key);
+  PluginListView({
+    Key key,
+    this.list,
+    this.onTap,
+    this.selectedIndex,
+    this.preview,
+  }) : super(key: key);
 
   @override
   State<StatefulWidget> createState() => _PluginListViewState();
@@ -49,13 +56,12 @@ class _PluginListViewState extends State<PluginListView> {
 
   @override
   Widget build(BuildContext context) {
-    final selectedItem = widget.list.length > widget.selectedIndex
-        ? widget.list.elementAt(widget.selectedIndex)
-        : null;
-    Widget detailView;
-    if (selectedItem != null) {
-      detailView = PluginManager.instance.handleResultSelected(selectedItem);
-    }
+    // final selectedItem = widget.list.length > widget.selectedIndex
+    //     ? widget.list.elementAt(widget.selectedIndex)
+    //     : null;
+    // if (selectedItem != null) {
+    //   PluginManager.instance.handleResultSelected(selectedItem);
+    // }
     return Row(crossAxisAlignment: CrossAxisAlignment.start, children: [
       Expanded(
         flex: 2,
@@ -76,7 +82,7 @@ class _PluginListViewState extends State<PluginListView> {
           itemCount: widget.list.length,
         ),
       ),
-      if (detailView != null)
+      if (widget.preview != null)
         Expanded(
           flex: 3,
           child: Container(
@@ -84,7 +90,7 @@ class _PluginListViewState extends State<PluginListView> {
               padding: EdgeInsets.all(8),
               color: Colors.grey[300],
               child: Container(
-                child: detailView,
+                child: widget.preview,
               )),
         )
     ]);

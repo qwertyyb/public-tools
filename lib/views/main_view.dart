@@ -23,6 +23,7 @@ class _MainViewState extends State<MainView> {
   );
   Timer _clearStateTimer;
   EventChannel _eventChannel = EventChannel("events-listener");
+  Widget preview;
 
   List<PluginListResultItem> _list = [];
   int _selectedIndex = 0;
@@ -40,18 +41,24 @@ class _MainViewState extends State<MainView> {
         await windowManager.show();
       },
     );
-    PluginManager.instance.onResultChange = (resultList) => {
-          setState(() {
-            _list = resultList;
-          })
-        };
+    PluginManager.instance.onResultChange = (resultList) {
+      print('onResultChange: ${resultList.length}');
+      _list = resultList;
+      _updatePreview();
+    };
     PluginManager.instance.onEnterItem = (item) {
       print('onEnter before');
+      _selectedIndex = 0;
+      _updatePreview();
       setState(() {
         _curResultItem = item;
-        _selectedIndex = 0;
         // 会同步触发onChange，所以要放在最后，在onChange中能拿到最新的值
         _textEditingController.clear();
+      });
+    };
+    PluginManager.instance.onPreviewChange = (previewWidget) {
+      setState(() {
+        preview = previewWidget;
       });
     };
     PluginManager.instance.onLoading = (isLoading) {
@@ -94,10 +101,20 @@ class _MainViewState extends State<MainView> {
     super.dispose();
   }
 
-  void _onKeywordChange() {
+  void _updatePreview() {
     setState(() {
-      _selectedIndex = 0;
+      preview = null;
     });
+    print('$_selectedIndex, ${_list.length}');
+    if (_selectedIndex < _list.length) {
+      final selected = _list.elementAt(_selectedIndex);
+      PluginManager.instance.handleResultSelected(selected);
+    }
+  }
+
+  void _onKeywordChange() {
+    _selectedIndex = 0;
+    _updatePreview();
     final keyword = _textEditingController.text;
     PluginManager.instance.handleInput(keyword);
   }
@@ -116,16 +133,14 @@ class _MainViewState extends State<MainView> {
 
   void _selectNext() {
     var nextIndex = (this._selectedIndex + 1) % _list.length;
-    setState(() {
-      _selectedIndex = nextIndex;
-    });
+    _selectedIndex = nextIndex;
+    _updatePreview();
   }
 
   void _selectPrev() {
     var prevIndex = this._selectedIndex <= 1 ? 0 : this._selectedIndex - 1;
-    setState(() {
-      _selectedIndex = prevIndex;
-    });
+    _selectedIndex = prevIndex;
+    _updatePreview();
   }
 
   void _onTap(PluginListItem item, Plugin plugin) {
@@ -164,6 +179,7 @@ class _MainViewState extends State<MainView> {
                     list: _list,
                     onTap: _onTap,
                     selectedIndex: _selectedIndex,
+                    preview: preview,
                   ),
                 )
               ],

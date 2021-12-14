@@ -161,9 +161,9 @@ class ClipboardPlugin extends Plugin {
     setResult([]);
   }
 
-  onResultSelect(item) {
+  void onResultSelect(item, {setPreview}) {
     final result = (item as _PasteItem);
-    return HighlightView(
+    setPreview(HighlightView(
       // The original code to be highlighted
       result.text,
 
@@ -183,7 +183,7 @@ class ClipboardPlugin extends Plugin {
       //   fontFamily: 'My awesome monospace font',
       //   fontSize: 16,
       // ),
-    );
+    ));
   }
 
   onTap(item, {enterItem}) {

@@ -1,6 +1,7 @@
 const clip = require('simple-mac-clipboard')
 const robot = require('robotjs')
 const jimp = require('jimp')
+const QRCode = require('qrcode')
 const detectWithOpencv = require('./qrcode/index')
 const createPlugin = require('./core/plugin')
 
@@ -28,6 +29,14 @@ const plugin = createPlugin('qrcode', {
 })
 
 plugin.onKeywordChange(async ({ keyword }) => {
+  if (keyword) {
+    return plugin.updateList(keyword, [{
+      id: 'qrcode-generator',
+      title: keyword,
+      subtitle: '生成二维码',
+      icon: 'https://img.icons8.com/pastel-glyph/64/4a90e2/qr-code--v1.png'
+    }])
+  }
   const results = await readQrcodeFromClipboard();
   const list = results.map(result => {
     return {
@@ -81,6 +90,17 @@ plugin.onTap(async (item) => {
   setTimeout(() => {
     plugin.hideApp()
   }, 500)
+})
+
+plugin.onSelect(item => {
+  console.log('qrcode', item.id)
+  if (item.id === 'qrcode-qrcode-generator') {
+    QRCode.toDataURL(item.title, {}, (err, url) => {
+      plugin.updatePreview({
+        html: `<img src="${url}" />`
+      })
+    })
+  }
 })
 
 module.exports = plugin

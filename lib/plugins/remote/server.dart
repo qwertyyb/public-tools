@@ -12,6 +12,7 @@ typedef void EnterItemReceiver();
 List<WebSocket> sockets = [];
 List<ListReceiver> receivers = [];
 List<EnterItemReceiver> enterItemReceivers = [];
+void Function(String content) setResultItemPreview = (content) => null;
 
 class MessageData {
   String type;
@@ -60,6 +61,8 @@ void Function(dynamic) _createHandler(WebSocket socket) {
       await Service().hideApp();
     } else if (message.type == 'showApp') {
       await windowManager.show();
+    } else if (message.type == 'preview') {
+      setResultItemPreview(message.payload['html']);
     }
     // socket.add(jsonEncode(data));
   };

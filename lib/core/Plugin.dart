@@ -27,7 +27,8 @@ abstract class Plugin<T> {
 
   void onExit(PluginListItem item) {}
 
-  Widget onResultSelect(PluginListItem<T> item) {
-    return null;
+  void onResultSelect(PluginListItem<T> item,
+      {void Function(Widget preview) setPreview}) {
+    return setPreview(null);
   }
 }

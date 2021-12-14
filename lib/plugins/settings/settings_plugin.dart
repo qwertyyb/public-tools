@@ -193,9 +193,9 @@ class SettingsPlugin extends Plugin {
   }
 
   @override
-  Widget onResultSelect(PluginListItem item) {
+  void onResultSelect(PluginListItem item, {setPreview}) {
     if (item.id == 'basic') {
-      return Padding(
+      setPreview(Padding(
         padding: EdgeInsets.all(10),
         child: Align(
           alignment: Alignment.topCenter,
@@ -209,7 +209,7 @@ class SettingsPlugin extends Plugin {
             ],
           ),
         ),
-      );
+      ));
     }
     return null;
   }

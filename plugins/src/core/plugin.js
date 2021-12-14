@@ -43,6 +43,11 @@ event.on('keyword', ({ keyword }) => {
   send('list', { list })
 })
 
+event.on('select', ({ item }) => {
+  if (!curPlugin) return;
+  event.emit(`${curPlugin.name}-onSelect`, item)
+})
+
 event.on('exit', () => {
   curPlugin = null
 })
@@ -57,6 +62,8 @@ ws.on('message', (message) => {
     event.emit('tap', payload)
   } else if (type === 'exit') {
     event.emit('exit', payload)
+  } else if (type === 'select') {
+    event.emit('select', payload)
   }
 })
 
@@ -68,6 +75,9 @@ const createPlugin = (name, { title, subtitle, icon }) => {
   const plugin = {
     name,
     config: { title, subtitle, icon },
+    updatePreview: ({ html }) => {
+      send('preview', { html })
+    },
     updateList: async (keyword, list) => {
       console.log('curKeyword', curKeyword)
       // 不是正在处理的keyword, 丢弃
@@ -100,6 +110,9 @@ const createPlugin = (name, { title, subtitle, icon }) => {
     },
     onEnter(cb) {
       event.on(`${name}-onEnter`, cb)
+    },
+    onSelect(cb) {
+      event.on(`${name}-onSelect`, cb)
     }
   }
   plugins.set(name, plugin)
