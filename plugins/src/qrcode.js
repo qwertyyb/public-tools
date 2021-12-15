@@ -93,7 +93,6 @@ plugin.onTap(async (item) => {
 })
 
 plugin.onSelect(item => {
-  console.log('qrcode', item.id)
   if (item.id === 'qrcode-qrcode-generator') {
     return QRCode.toDataURL(item.title, {}, (err, url) => {
       plugin.updatePreview({

@@ -2,10 +2,11 @@ import 'dart:async';
 import 'package:flutter/material.dart';
 import 'package:flutter_highlight/flutter_highlight.dart';
 import 'package:flutter_highlight/themes/tomorrow-night.dart';
-import 'package:hotkey_shortcuts/hotkey_shortcuts.dart';
 import 'package:intl/intl.dart';
 
 import 'package:flutter/services.dart';
+import 'package:public_tools/pigeon/app.dart';
+import 'package:public_tools/utils/logger.dart';
 import 'package:sqflite/sqflite.dart';
 import 'package:oktoast/oktoast.dart';
 import 'package:public_tools/core/plugin_result_item.dart';
@@ -136,7 +137,7 @@ class PasteItemHelper {
 
 class ClipboardPlugin extends Plugin {
   ClipboardPlugin({this.onChange}) {
-    _startListenChange().listen(onNewItemReceived);
+    _startListenChange();
   }
 
   var label = '剪切板';
@@ -208,48 +209,44 @@ class ClipboardPlugin extends Plugin {
   void onResultTap(PluginListItem item) {
     Clipboard.setData(ClipboardData(text: (item as _PasteItem).text));
     showToast("复制成功");
-    HotkeyShortcuts.pasteToFrontestApp();
+    Service().pasteToFrontestApp();
   }
 
   void Function(List<Map<String, String>>) onChange;
 
-  final _streamController = StreamController<String>();
-  Stream<String> _startListenChange() {
+  void _startListenChange() {
     String lastText;
     var callback = (Timer timer) {
       Clipboard.getData(Clipboard.kTextPlain).then((data) {
         if (data == null) return;
         if (lastText == data.text) {
-          return print('数据一致');
+          return;
         }
         lastText = data.text;
-        print(this._streamController);
-        this._streamController.add(data.text);
-        print('数据不一致');
+        _onNewItemReceived(data.text);
       });
     };
     Timer.periodic(Duration(seconds: 2), callback);
-    return _streamController.stream.asBroadcastStream();
   }
 
-  Future<_PasteItem> existsItem(text) {
+  Future<_PasteItem> _existsItem(text) {
     return PasteItemHelper.instance
         .query(where: 'text = ?', whereArgs: [text]).then((results) {
       return results.length > 0 ? results[0] : null;
     });
   }
 
-  void onNewItemReceived(event) async {
-    print("新的粘贴板内容: $event");
+  void _onNewItemReceived(String text) async {
+    logger.i('[clipboard] 新的粘贴板内容: $text');
     var item = _PasteItem(
       contentType: ContentType.text,
-      text: event,
+      text: text,
       updatedAt: DateTime.now(),
-      summary: event,
+      summary: text,
     );
-    var alreadyExistsItem = await existsItem(event);
+    var alreadyExistsItem = await _existsItem(text);
     if (alreadyExistsItem != null) {
-      print("数据库已存在，仅更新时间");
+      logger.i('数据库已存在，仅更新时间');
       item.id = alreadyExistsItem.id;
     }
     await PasteItemHelper.instance.save(item);

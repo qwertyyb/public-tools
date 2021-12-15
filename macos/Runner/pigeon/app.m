@@ -143,4 +143,22 @@ void PBCServiceSetup(id<FlutterBinaryMessenger> binaryMessenger, NSObject<PBCSer
       [channel setMessageHandler:nil];
     }
   }
+  {
+    FlutterBasicMessageChannel *channel =
+      [FlutterBasicMessageChannel
+        messageChannelWithName:@"dev.flutter.pigeon.Service.pasteToFrontestApp"
+        binaryMessenger:binaryMessenger
+        codec:PBCServiceGetCodec()];
+    if (api) {
+      NSCAssert([api respondsToSelector:@selector(pasteToFrontestAppWithError:)], @"PBCService api (%@) doesn't respond to @selector(pasteToFrontestAppWithError:)", api);
+      [channel setMessageHandler:^(id _Nullable message, FlutterReply callback) {
+        FlutterError *error;
+        [api pasteToFrontestAppWithError:&error];
+        callback(wrapResult(nil, error));
+      }];
+    }
+    else {
+      [channel setMessageHandler:nil];
+    }
+  }
 }

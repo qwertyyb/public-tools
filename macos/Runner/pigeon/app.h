@@ -23,6 +23,7 @@ NSObject<FlutterMessageCodec> *PBCServiceGetCodec(void);
 @protocol PBCService
 - (void)getInstalledApplicationListWithCompletion:(void(^)(NSArray<PBCInstalledApplication *> *_Nullable, FlutterError *_Nullable))completion;
 - (void)hideAppWithError:(FlutterError *_Nullable *_Nonnull)error;
+- (void)pasteToFrontestAppWithError:(FlutterError *_Nullable *_Nonnull)error;
 @end
 
 extern void PBCServiceSetup(id<FlutterBinaryMessenger> binaryMessenger, NSObject<PBCService> *_Nullable api);

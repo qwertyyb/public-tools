@@ -6,6 +6,7 @@ import 'package:flutter/widgets.dart';
 import 'package:hotkey_manager/hotkey_manager.dart';
 import 'package:public_tools/core/plugin.dart';
 import 'package:public_tools/core/plugin_result_item.dart';
+import 'package:public_tools/utils/logger.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 
 const Map<KeyModifier, List<LogicalKeyboardKey>> _knownLogicalKeys =
@@ -63,9 +64,6 @@ class _HotkeyRecordState extends State<_HotkeyRecordButton> {
 
   @override
   void initState() {
-    FocusManager.instance.addListener(() {
-      print(FocusManager.instance.primaryFocus);
-    });
     _focusNode = FocusNode(
       canRequestFocus: false,
       descendantsAreFocusable: false,
@@ -90,7 +88,7 @@ class _HotkeyRecordState extends State<_HotkeyRecordButton> {
     final savedKeyCode = json["keyCode"];
     final modifiers = savedModifiers.map((e) => KeyModifierParser.parse(e));
     final keyCode = KeyCodeParser.parse(savedKeyCode);
-    print('$modifiers, $keyCode');
+    logger.i('$modifiers, $keyCode');
     setState(() {
       this.modifiers = [KeyModifier.meta];
       this.keyCode = KeyCode.space;
@@ -112,13 +110,11 @@ class _HotkeyRecordState extends State<_HotkeyRecordButton> {
         .toList();
     // @todo mac上按下shift键时，keyCode获取不到
 
-    print("onKey: $modifiers, ${event.logicalKey}");
     if (_knownLogicalKeys.values
         .any((element) => element.contains(event.logicalKey))) {
       return;
     }
     final keyCode = KeyCodeParser.fromLogicalKey(event.logicalKey);
-    print('$modifiers, $keyCode');
     if (modifiers.length > 0 && keyCode != null) {
       setState(() {
         this.modifiers = modifiers;

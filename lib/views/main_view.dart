@@ -6,6 +6,7 @@ import 'package:hotkey_manager/hotkey_manager.dart';
 import 'package:public_tools/core/plugin.dart';
 import 'package:public_tools/core/plugin_result_item.dart';
 import 'package:public_tools/core/plugin_manager.dart';
+import 'package:public_tools/utils/logger.dart';
 import 'package:public_tools/views/input_bar.dart';
 import 'package:public_tools/views/list_preview.dart';
 import 'package:window_manager/window_manager.dart';
@@ -42,12 +43,12 @@ class _MainViewState extends State<MainView> {
       },
     );
     PluginManager.instance.onResultChange = (resultList) {
-      print('onResultChange: ${resultList.length}');
+      logger.i('[main_view] onResultChange: ${resultList.length}');
       _list = resultList;
       _updatePreview();
     };
     PluginManager.instance.onEnterItem = (item) {
-      print('onEnter before');
+      logger.i('[main_view] onEnter: $item');
       _selectedIndex = 0;
       _updatePreview();
       setState(() {
@@ -102,7 +103,6 @@ class _MainViewState extends State<MainView> {
   }
 
   void _updatePreview() {
-    print('$_selectedIndex, ${_list.length}');
     if (_selectedIndex < _list.length) {
       final selected = _list.elementAt(_selectedIndex);
       PluginManager.instance.handleResultSelected(selected);
@@ -117,13 +117,6 @@ class _MainViewState extends State<MainView> {
     _updatePreview();
     final keyword = _textEditingController.text;
     PluginManager.instance.handleInput(keyword);
-  }
-
-  void _updateWindowSize() {
-    var listLength = _list.length;
-    var windowHeight = ((listLength > 9 ? 9 : listLength) * 48) + 48;
-    var windowWidth = 720;
-    // HotkeyShortcuts.updateWindowSize(width: windowWidth, height: windowHeight);
   }
 
   void _onEnter() {

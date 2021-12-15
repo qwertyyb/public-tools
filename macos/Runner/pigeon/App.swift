@@ -32,6 +32,35 @@ public extension String {
 }
 
 public class AppService: NSObject, PBCService {
+    private func checkAccess(prompt: Bool = false) -> Bool {
+      let checkOptionPromptKey = kAXTrustedCheckOptionPrompt.takeUnretainedValue() as String
+      let opts = [checkOptionPromptKey: prompt] as CFDictionary
+      return AXIsProcessTrustedWithOptions(opts)
+    }
+
+    public func pasteToFrontestAppWithError(_ error: AutoreleasingUnsafeMutablePointer<FlutterError?>) {
+        if !checkAccess() {
+          let _ = checkAccess(prompt: true)
+        }
+        NSApp.hide(nil)
+        
+        Timer.scheduledTimer(withTimeInterval: 0.01, repeats: false) { (timer) in
+            // Based on https://github.com/Clipy/Clipy/blob/develop/Clipy/Sources/Services/PasteService.swift.
+        
+          let vCode = UInt16(0x09)
+          let source = CGEventSource(stateID: .combinedSessionState)
+          // Disable local keyboard events while pasting
+          source?.setLocalEventsFilterDuringSuppressionState([.permitLocalMouseEvents, .permitSystemDefinedEvents], state: .eventSuppressionStateSuppressionInterval)
+          
+          let keyVDown = CGEvent(keyboardEventSource: source, virtualKey: vCode, keyDown: true)
+          let keyVUp = CGEvent(keyboardEventSource: source, virtualKey: vCode, keyDown: false)
+          keyVDown?.flags = .maskCommand
+          keyVUp?.flags = .maskCommand
+          keyVDown?.post(tap: .cgAnnotatedSessionEventTap)
+          keyVUp?.post(tap: .cgAnnotatedSessionEventTap)
+        }
+    }
+    
     public func getInstalledApplicationList(completion: @escaping ([PBCInstalledApplication]?, FlutterError?) -> Void) {
         let query = NSMetadataQuery()
         query.stop()

@@ -1,8 +1,8 @@
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
-import 'package:hotkey_shortcuts/hotkey_shortcuts.dart';
 import 'package:public_tools/core/plugin_result_item.dart';
 import 'package:public_tools/views/plugin_label_view.dart';
+import 'package:window_manager/window_manager.dart';
 
 class _TextInput extends StatelessWidget {
   final TextEditingController controller;
@@ -42,7 +42,6 @@ class _TextInput extends StatelessWidget {
   }
 
   void _onKey(RawKeyEvent event) {
-    print(event.isKeyPressed(LogicalKeyboardKey.backspace));
     if (event.isKeyPressed(LogicalKeyboardKey.arrowDown)) {
       this.onArrowDown();
     } else if (event.isKeyPressed(LogicalKeyboardKey.enter) ||
@@ -84,25 +83,18 @@ class InputBar extends StatelessWidget {
 
   final TextEditingController controller;
 
-  InputBar(
-      {this.onEnter,
-      this.controller,
-      this.selectNext,
-      this.selectPrev,
-      this.onExitResultItem,
-      this.curResultItem});
-
-  void _onPointerMove(PointerMoveEvent event) {
-    // 经过实践，此事件返回的位置信息乱七八糟，计算出来的位移信息会有瞬移的情况
-    // 所以此接口获取到的位移信息dx, dy不作为窗口移动的依据。
-    HotkeyShortcuts.moveWindowPosition(dx: event.delta.dx, dy: event.delta.dy);
-  }
+  InputBar({
+    this.onEnter,
+    this.controller,
+    this.selectNext,
+    this.selectPrev,
+    this.onExitResultItem,
+    this.curResultItem,
+  });
 
   void _onPointerDown(PointerDownEvent event) {
-    HotkeyShortcuts.recordWindowPosition();
+    windowManager.startDragging();
   }
-
-  void _onPointerUp(PointerEvent event) {}
 
   @override
   Widget build(BuildContext context) {
@@ -135,9 +127,6 @@ class InputBar extends StatelessWidget {
       padding: EdgeInsets.symmetric(horizontal: 12),
       child: Listener(
         onPointerDown: _onPointerDown,
-        onPointerMove: _onPointerMove,
-        onPointerUp: _onPointerUp,
-        onPointerCancel: _onPointerUp,
         child: Row(
           children: widgets,
         ),

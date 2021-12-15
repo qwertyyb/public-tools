@@ -4,19 +4,19 @@ import 'package:flutter/material.dart';
 import 'package:flutter_html/flutter_html.dart';
 import 'package:public_tools/core/plugin.dart';
 import 'package:public_tools/core/plugin_result_item.dart';
+import 'package:public_tools/utils/logger.dart';
 
 import 'server.dart';
 
 class RemotePlugin extends Plugin<String> {
   RemotePlugin() {
     runServer();
-    print("server is running");
+    logger.i('server is running');
   }
 
   @override
   void onQuery(String keyword,
       void Function(List<PluginListItem<String>> list) setResult) {
-    print('keyword: $keyword');
     receivers.clear();
     enterItemReceivers.clear();
     setResultItemPreview = (content) {};

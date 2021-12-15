@@ -4,6 +4,7 @@ import 'dart:io';
 import 'package:oktoast/oktoast.dart';
 import 'package:public_tools/core/plugin_result_item.dart';
 import 'package:public_tools/pigeon/app.dart';
+import 'package:public_tools/utils/logger.dart';
 import 'package:window_manager/window_manager.dart';
 
 typedef void ListReceiver(List<PluginListItem<String>> list);
@@ -39,8 +40,7 @@ String makeMessageData(String type, Map<String, dynamic> payload) {
 void Function(dynamic) _createHandler(WebSocket socket) {
   return (dynamic data) async {
     final message = MessageData.fromJson(data);
-    print(message.type);
-    print(message.payload);
+    logger.i(message.toJson());
     if (message.type == 'list') {
       List<PluginListItem<String>> list = message.payload["list"]
           .map<PluginListItem<String>>(

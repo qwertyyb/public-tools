@@ -5,6 +5,7 @@ import 'package:public_tools/plugins/clipboard/clipboard.dart';
 import 'package:public_tools/plugins/command/command.dart';
 import 'package:public_tools/plugins/remote/remote.dart';
 import 'package:public_tools/plugins/settings/settings_plugin.dart';
+import 'package:public_tools/utils/logger.dart';
 
 import 'plugin_result_item.dart';
 
@@ -52,7 +53,7 @@ class PluginManager {
   }
 
   void handleInput(String keyword) {
-    print("query: $keyword");
+    logger.i('[handleInput] keyword: $keyword');
     if (_curResultItem == null && keyword == "") {
       _updateResultList(() => _resultList.clear());
       return;

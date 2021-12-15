@@ -15,4 +15,6 @@ abstract class Service {
   List<InstalledApplication> getInstalledApplicationList();
 
   void hideApp();
+
+  void pasteToFrontestApp();
 }

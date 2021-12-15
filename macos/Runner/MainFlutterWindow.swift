@@ -28,13 +28,11 @@ class MainFlutterWindow: NSWindow, FlutterStreamHandler {
     self.eventChannel?.setStreamHandler(self)
     
     NotificationCenter.default.addObserver(forName: NSApplication.didHideNotification, object: NSApp, queue: nil) { notification in
-        print("did hide")
         self.events?("DID_HIDE")
     }
     
     NotificationCenter.default.addObserver(forName: NSApplication.willUnhideNotification, object: NSApp, queue: nil) { notification in
         self.events?("WILL_UNHIDE")
-        print("will unhide")
     }
 
     RegisterGeneratedPlugins(registry: flutterViewController)
@@ -50,7 +48,6 @@ class MainFlutterWindow: NSWindow, FlutterStreamHandler {
     let y = frame.height * 3 / 4 + frame.minY
 
     let origin = NSPoint(x: x, y: y)
-    print(NSPasteboard.PasteboardType.png.rawValue)
     let windowFrame = NSRect(origin: origin, size: CGSize(width: winW, height: winH))
     isOpaque = false
     backgroundColor = NSColor(red: 0, green: 0, blue: 0, alpha: 0)
