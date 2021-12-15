@@ -102,14 +102,14 @@ class _MainViewState extends State<MainView> {
   }
 
   void _updatePreview() {
-    setState(() {
-      preview = null;
-    });
     print('$_selectedIndex, ${_list.length}');
     if (_selectedIndex < _list.length) {
       final selected = _list.elementAt(_selectedIndex);
       PluginManager.instance.handleResultSelected(selected);
+    } else {
+      preview = null;
     }
+    setState(() {});
   }
 
   void _onKeywordChange() {

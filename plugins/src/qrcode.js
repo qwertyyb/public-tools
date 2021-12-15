@@ -95,12 +95,13 @@ plugin.onTap(async (item) => {
 plugin.onSelect(item => {
   console.log('qrcode', item.id)
   if (item.id === 'qrcode-qrcode-generator') {
-    QRCode.toDataURL(item.title, {}, (err, url) => {
+    return QRCode.toDataURL(item.title, {}, (err, url) => {
       plugin.updatePreview({
-        html: `<img src="${url}" />`
+        html: `<div style="margin-left:100px"><img src="${url}" width="200" height="200"/></div>`
       })
     })
   }
+  plugin.updatePreview({ html: '' })
 })
 
 module.exports = plugin

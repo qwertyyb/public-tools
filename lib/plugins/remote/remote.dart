@@ -1,3 +1,6 @@
+import 'dart:convert';
+
+import 'package:flutter/material.dart';
 import 'package:flutter_html/flutter_html.dart';
 import 'package:public_tools/core/plugin.dart';
 import 'package:public_tools/core/plugin_result_item.dart';
@@ -52,8 +55,46 @@ class RemotePlugin extends Plugin<String> {
   @override
   void onResultSelect(PluginListItem<String> item, {setPreview}) {
     setResultItemPreview = (content) {
-      print(content);
-      setPreview(Html(data: content));
+      if (content == '' || content == null) {
+        return setPreview(null);
+      }
+      double attrDouble(Map<String, String> attributes, String attr) {
+        final widthString = attributes[attr];
+        return widthString == null
+            ? widthString as double
+            : double.tryParse(widthString);
+      }
+
+      ImageRender customBase64ImageRender() => (context, attributes, element) {
+            final decodedImage =
+                base64.decode(attributes['src'].split("base64,")[1].trim());
+            precacheImage(
+              MemoryImage(decodedImage),
+              context.buildContext,
+              onError: (exception, StackTrace stackTrace) {
+                context.parser.onImageError.call(exception, stackTrace);
+              },
+            );
+            return Image.memory(
+              decodedImage,
+              fit: BoxFit.fitWidth,
+              width: attrDouble(attributes, 'width'),
+              height: attrDouble(attributes, 'height'),
+              frameBuilder: (ctx, child, frame, _) {
+                if (frame == null) {
+                  return Text(attributes['alt'] ?? "",
+                      style: context.style.generateTextStyle());
+                }
+                return child;
+              },
+            );
+          };
+      setPreview(Html(
+        data: content,
+        customImageRenders: {
+          dataUriMatcher(): customBase64ImageRender(),
+        },
+      ));
     };
     send('select', {'item': item});
   }
