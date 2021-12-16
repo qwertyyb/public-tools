@@ -31,6 +31,39 @@ public extension String {
 
 }
 
+extension NSBitmapImageRep {
+    func png() -> Data? {
+        representation(using: .png, properties: [:])
+    }
+}
+
+extension Data {
+    var bitmap: NSBitmapImageRep? { NSBitmapImageRep(data: self) }
+}
+
+extension NSImage {
+    func png() -> Data? { tiffRepresentation?.bitmap?.png() }
+
+    func resizedForFile(to size: Int) -> NSImage {
+        let newSizeInt = size / Int(NSScreen.main?.backingScaleFactor ?? 1)
+        let newSize = CGSize(width: newSizeInt, height: newSizeInt)
+
+        let image = NSImage(size: newSize)
+        image.lockFocus()
+        NSGraphicsContext.current?.imageInterpolation = .high
+
+        draw(
+            in: CGRect(origin: .zero, size: newSize),
+            from: .zero,
+            operation: .copy,
+            fraction: 1
+        )
+
+        image.unlockFocus()
+        return image
+    }
+}
+
 public class AppService: NSObject, PBCService {
     private func checkAccess(prompt: Bool = false) -> Bool {
       let checkOptionPromptKey = kAXTrustedCheckOptionPrompt.takeUnretainedValue() as String
@@ -75,28 +108,34 @@ public class AppService: NSObject, PBCService {
                 let name = (item.value(forAttribute: kMDItemDisplayName as String) as! String)
                     .replacingOccurrences(of: ".app", with: "")
                 let path = item.value(forAttribute: kMDItemPath as String) as! String;
-                let bundlePath = path + "/Contents/Info.plist"
-                let dict = NSDictionary(contentsOfFile: bundlePath)!
-                var iconPath = ""
-                if let iconName = dict["CFBundleIconFile"] {
-                    iconPath = path + "/Contents/Resources/" + (iconName as! String)
-                  if (!iconPath.hasSuffix(".icns")) {
-                    iconPath += ".icns"
-                  }
+                var icon = NSWorkspace.shared.icon(forFile: path).resizedForFile(to: 64).png()?.base64EncodedString()
+                if (icon != nil) {
+                    icon = "base64:" + icon!
+                } else {
+                    icon = ""
                 }
-                if let iconName = dict["CFBundleIconName"] {
-                    iconPath = path + "/Contents/Resources/" + (iconName as! String)
-                  if (!iconPath.hasSuffix(".icns")) {
-                    iconPath += ".icns"
-                  }
-                }
-                if !FileManager.default.fileExists(atPath: iconPath) {
-                    iconPath = ""
-                }
+//                let bundlePath = path + "/Contents/Info.plist"
+//                let dict = NSDictionary(contentsOfFile: bundlePath)!
+//                var iconPath = ""
+//                if let iconName = dict["CFBundleIconFile"] {
+//                    iconPath = path + "/Contents/Resources/" + (iconName as! String)
+//                  if (!iconPath.hasSuffix(".icns")) {
+//                    iconPath += ".icns"
+//                  }
+//                }
+//                if let iconName = dict["CFBundleIconName"] {
+//                    iconPath = path + "/Contents/Resources/" + (iconName as! String)
+//                  if (!iconPath.hasSuffix(".icns")) {
+//                    iconPath += ".icns"
+//                  }
+//                }
+//                if !FileManager.default.fileExists(atPath: iconPath) {
+//                    iconPath = ""
+//                }
                 let app = PBCInstalledApplication()
                 app.name = name
                 app.path = path
-                app.icon = iconPath
+                app.icon = icon
                 app.pinyin = name.transformToPinyin()
                 list.append(app)
             }

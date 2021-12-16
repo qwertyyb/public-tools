@@ -1,3 +1,4 @@
+import 'dart:convert';
 import 'dart:io';
 
 import 'package:cached_network_image/cached_network_image.dart';
@@ -27,7 +28,13 @@ class PluginResultItemIconView extends StatelessWidget {
             width: size,
             height: size,
           )
-        : Image.file(File(icon), width: size, height: size);
+        : icon.startsWith('base64:')
+            ? Image.memory(
+                base64Decode(icon.substring('base64:'.length)),
+                width: size,
+                height: size,
+              )
+            : Image.file(File(icon), width: size, height: size);
   }
 }
 
