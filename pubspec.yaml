@@ -42,7 +42,7 @@ dependencies:
   flutter_html: ^2.2.1
 
 dev_dependencies:
-  pigeon: ^1.0.10
+  pigeon: ^1.0.12
   flutter_test:
     sdk: flutter
 

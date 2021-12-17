@@ -17,4 +17,7 @@ abstract class Service {
   void hideApp();
 
   void pasteToFrontestApp();
+
+  @async
+  Map<String, String> startListenHotkey();
 }

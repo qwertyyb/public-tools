@@ -1,4 +1,4 @@
-#!bash
+#!/bin/bash
 
 flutter pub run pigeon \
   --input pigeon/app.dart \

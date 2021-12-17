@@ -14,9 +14,7 @@ const readQrcodeFromClipboard = () => {
     return jimp.read(pngBuffer)
     .then(image => {
       const { width, height, data } = image.bitmap
-      console.log({ width, height })
       const result = detectWithOpencv({ width, height, data: data })
-      console.log(result)
       return result
     })
   }

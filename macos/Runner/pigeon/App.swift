@@ -7,6 +7,8 @@
 
 import Foundation
 import FlutterMacOS
+import hotkey_manager
+import HotKey
 
 public extension String {
     func isIncludeChinese() -> Bool {
@@ -65,6 +67,24 @@ extension NSImage {
 }
 
 public class AppService: NSObject, PBCService {
+  private var listener: Any?;
+  
+  public func startListenHotkey(completion: @escaping ([String : String]?, FlutterError?) -> Void) {
+    listener = NSEvent.addLocalMonitorForEvents(matching: .keyDown) { (event) -> NSEvent? in
+      let modifiers = event.pluginModifiers().joined(separator: ";");
+      let keyCode = event.characters ?? ""
+      let args: [String: String] = ["modifiers": modifiers, "keyCode": keyCode];
+      completion(args, nil);
+      return event
+    };
+  }
+  
+  public func endListenHotkey() {
+    if listener != nil {
+      return NSEvent.removeMonitor(listener)
+    }
+  }
+  
     private func checkAccess(prompt: Bool = false) -> Bool {
       let checkOptionPromptKey = kAXTrustedCheckOptionPrompt.takeUnretainedValue() as String
       let opts = [checkOptionPromptKey: prompt] as CFDictionary
