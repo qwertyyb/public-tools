@@ -17,11 +17,6 @@ class MainView extends StatefulWidget {
 }
 
 class _MainViewState extends State<MainView> {
-  HotKey _hotKey = HotKey(
-    KeyCode.space,
-    modifiers: [KeyModifier.meta],
-    scope: HotKeyScope.system,
-  );
   Timer _clearStateTimer;
   EventChannel _eventChannel = EventChannel("events-listener");
   Widget preview;
@@ -35,13 +30,6 @@ class _MainViewState extends State<MainView> {
   @override
   void initState() {
     super.initState();
-    // 注册快捷键
-    hotKeyManager.register(
-      _hotKey,
-      keyDownHandler: (hotKey) async {
-        await windowManager.show();
-      },
-    );
     PluginManager.instance.onResultChange = (resultList) {
       logger.i('[main_view] onResultChange: ${resultList.length}');
       _list = resultList;

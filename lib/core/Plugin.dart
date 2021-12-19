@@ -12,14 +12,18 @@ abstract class Plugin<T> {
   void Function(bool) setLoading = (isLoading) {};
 
   void onQuery(
-      String keyword, void Function(List<PluginListItem<T>> list) setResult);
+    String keyword,
+    void Function(List<PluginListItem<T>> list) setResult,
+  );
 
-  onTap(PluginListItem<T> item, {void Function() enterItem});
+  void onTap(PluginListItem<T> item, {void Function() enterItem});
 
   void onEnter(PluginListItem item) {}
 
   void onSearch(
-      String keyword, void Function(List<PluginListItem<T>> list) setResult) {
+    String keyword,
+    void Function(List<PluginListItem<T>> list) setResult,
+  ) {
     setResult([]);
   }
 

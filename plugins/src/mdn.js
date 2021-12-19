@@ -33,16 +33,23 @@ const queryResult = async (keyword = '') => {
 }
 
 let timeout = null;
+let latestList = []
 plugin.onKeywordChange(({ keyword }) => {
   if (!keyword) return plugin.updateList(keyword, [])
   timeout && clearTimeout(timeout)
   timeout = setTimeout(async () => {
     const list = await queryResult(keyword)
+    latestList = list
     plugin.updateList(keyword, list)
   }, 200)
 })
 plugin.onTap(item => {
   require('child_process').exec(`open https://developer.mozilla.org${item.id}`)
 })
+plugin.onSelect(item => {
+  const target = latestList.find(i => i.id === item.id.replace('mdn-', ''))
+  if (!target) return plugin.updatePreview({ html: '' });
+  plugin.updatePreview({ html: `<h1>${target.title}</h1><div>${target.subtitle } </div>` })
+});
 
 module.exports = plugin
