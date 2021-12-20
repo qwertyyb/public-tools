@@ -78,9 +78,19 @@ void runServer() async {
           onDone: () {
         socket.close();
         sockets = sockets.where((element) => element != socket).toList();
+        if (sockets.length <= 0) {
+          _runClient();
+        }
       });
     }
   });
+  _runClient();
+}
+
+void _runClient() async {
+  // @todo command need to be filled here
+  final clientProcess = await Process.start('', ['']);
+  clientProcess.stdout.transform(utf8.decoder).forEach(print);
 }
 
 void send(String type, Map<String, dynamic> payload) {
