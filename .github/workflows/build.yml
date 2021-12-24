@@ -1,0 +1,38 @@
+on:
+  workflow_dispatch:
+    inputs: 
+      release:
+        description: 'release version'
+        required: true
+        default: 'v1.0.2'
+  push:
+    tags:
+      - 'v*.*.*'
+
+jobs:
+  build:
+    runs-on: macOS-latest
+
+    steps:
+      - uses: actions/checkout@v2
+
+      - uses: subosito/flutter-action@v1
+        with:
+          channel: 'stable' # or: 'beta', 'dev' or 'master'
+
+      #todo 运行测试
+
+      - name: import application certificate
+        id: keychain
+        uses: apple-actions/import-codesign-certs@v1
+        with: 
+          p12-file-base64: ${{ secrets.CERTIFICATES_P12 }}
+          p12-password: ${{ secrets.CERTIFICATES_P12_PASSWORD }}
+
+      # flutter build macos 会自动运行 flutter pub get
+      - run: flutter build macos
+
+      - uses: actions/upload-artifact@v2
+        with:
+          name: build-app
+          path: "build/macos/Build/Products/Release/public tools.app"
