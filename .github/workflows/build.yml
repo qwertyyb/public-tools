@@ -34,7 +34,10 @@ jobs:
       # flutter build macos 会自动运行 flutter pub get
       - run: flutter build macos
 
+      - name: zip *.app
+        run: ditto -c -k --sequesterRsrc --keepParent "build/macos/Build/Products/Release/public tools.app" "build/macos/Build/Products/Release/public tools.zip"
+
       - uses: actions/upload-artifact@v2
         with:
           name: build-app
-          path: "build/macos/Build/Products/Release/public tools.app"
+          path: "build/macos/Build/Products/Release/public tools.zip"
