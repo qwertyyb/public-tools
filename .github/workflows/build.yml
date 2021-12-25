@@ -1,3 +1,6 @@
+name: build app
+
+
 on:
   workflow_dispatch:
     inputs: 
@@ -41,3 +44,9 @@ jobs:
         with:
           name: build-app
           path: "build/macos/Build/Products/Release/public tools.zip"
+
+      - uses: ncipollo/release-action@v1
+        with:
+          artifacts: "build/macos/Build/Products/Release/public tools.zip"
+          generateReleaseNotes: true
+          token: ${{ secrets.GITHUB_TOKEN }}
