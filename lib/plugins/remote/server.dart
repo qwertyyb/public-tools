@@ -14,6 +14,7 @@ List<WebSocket> sockets = [];
 List<ListReceiver> receivers = [];
 List<EnterItemReceiver> enterItemReceivers = [];
 void Function(String content) setResultItemPreview = (content) => null;
+String _binPath = '';
 
 class MessageData {
   String type;
@@ -79,17 +80,29 @@ void runServer() async {
         socket.close();
         sockets = sockets.where((element) => element != socket).toList();
         if (sockets.length <= 0) {
-          _runClient();
+          runClient();
         }
       });
     }
   });
-  _runClient();
 }
 
-void _runClient() async {
-  // @todo command need to be filled here
-  final clientProcess = await Process.start('', ['']);
+void setBinPath(String binPath) {
+  _binPath = binPath;
+}
+
+void runClient() async {
+  var pluginDir = '';
+  if (Platform.environment["REMOTE_PLUGIN_MODE"] == 'local') {
+    pluginDir = Directory.current.path + '/plugins';
+  }
+  // @todo 生产环境下载并执行
+  if (pluginDir == '') return null;
+  final clientProcess = await Process.start(
+    '$_binPath/npm',
+    ['run', 'start'],
+    workingDirectory: pluginDir,
+  );
   clientProcess.stdout.transform(utf8.decoder).forEach(print);
 }
 

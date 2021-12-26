@@ -1,15 +1,39 @@
 import 'dart:convert';
+import 'dart:io';
 
 import 'package:flutter/material.dart';
 import 'package:flutter_html/flutter_html.dart';
+import 'package:path_provider/path_provider.dart';
 import 'package:public_tools/core/plugin.dart';
 import 'package:public_tools/core/plugin_result_item.dart';
 import 'package:public_tools/utils/logger.dart';
 
 import 'server.dart';
 
+Future<String> _downloadNodeJs() async {
+  const downloadUrl =
+      'https://nodejs.org/dist/v16.13.1/node-v16.13.1-darwin-x64.tar.gz';
+  final dir = await getApplicationSupportDirectory();
+  final filePath = '${dir.path}/node-v16.13.1-darwin-x64.tar.gz';
+  final nodeDir = '${dir.path}/node-v16.13.1-darwin-x64';
+  if (File(filePath).existsSync()) return '$nodeDir/bin';
+  final request = await HttpClient().getUrl(Uri.parse(downloadUrl));
+  final response = await request.close();
+  final file = File(filePath);
+  await response.pipe(file.openWrite()).catchError((error) {
+    file.deleteSync();
+  }, test: (error) => false);
+  Process.run("tar", ['-zxf', 'node-v16.13.1-darwin-x64.tar.gz'],
+      workingDirectory: dir.path);
+  return '$nodeDir/bin';
+}
+
 class RemotePlugin extends Plugin<String> {
   RemotePlugin() {
+    _downloadNodeJs().then((binPath) {
+      setBinPath(binPath);
+      runClient();
+    });
     runServer();
     logger.i('server is running');
   }

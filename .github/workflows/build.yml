@@ -35,7 +35,19 @@ jobs:
       - run: flutter config --enable-macos-desktop
 
       # flutter build macos 会自动运行 flutter pub get
-      - run: flutter build macos
+      - name: build macos
+        run: |
+          tag=${{ github.ref_name }}
+          version=${tag:1}
+          number=`date +%Y%m%d%H%M%S`
+          flutter build macos --build-name=$version --build-number=$number
+
+      - name: "Notarize Release Build"
+        uses: devbotsxyz/xcode-notarize@v1
+        with:
+          product-path: "build/macos/Build/Products/Release/public tools.app"
+          appstore-connect-username: ${{ secrets.NOTARIZATION_USERNAME }}
+          appstore-connect-password: ${{ secrets.NOTARIZATION_PASSWORD }}
 
       - name: zip *.app
         run: ditto -c -k --sequesterRsrc --keepParent "build/macos/Build/Products/Release/public tools.app" "build/macos/Build/Products/Release/public tools.zip"

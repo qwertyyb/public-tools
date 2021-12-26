@@ -8,7 +8,10 @@
       "name": "YPaste-flutter",
       "request": "launch",
       "program": "lib/main.dart",
-      "type": "dart"
+      "type": "dart",
+      "env": {
+        "REMOTE_PLUGIN_MODE": "local"
+      }
     }
   ]
 }
