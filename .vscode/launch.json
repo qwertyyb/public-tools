@@ -10,7 +10,7 @@
       "program": "lib/main.dart",
       "type": "dart",
       "env": {
-        "REMOTE_PLUGIN_MODE": "local"
+        "REMOTE_PLUGIN_MODE": "manual"
       }
     }
   ]

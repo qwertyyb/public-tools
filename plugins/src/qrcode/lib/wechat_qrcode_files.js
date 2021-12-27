@@ -1,4 +1,5 @@
-  var Module = typeof global.Module !== 'undefined' ? global.Module : {};
+const initFiles = (Module) => {  
+  var Module = Module || {};
   
   if (!Module.expectedDataFileDownloads) {
     Module.expectedDataFileDownloads = 0;
@@ -182,3 +183,7 @@
   
   })();
   
+  return Module
+}
+
+module.exports = initFiles
