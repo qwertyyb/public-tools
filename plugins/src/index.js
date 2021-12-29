@@ -1,5 +1,5 @@
 const mdnPlugin = require('./mdn')
-const qrcodePlugin = require('./qrcode.js')
+const qrcodePlugin = require('./qrcode/index.js')
 const magicPlugin = require('./magic')
 const translatePlugin = require('./translate')
 

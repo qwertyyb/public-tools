@@ -1,0 +1,36 @@
+name: build json
+
+on:
+  workflow_dispatch:
+    inputs: 
+      release:
+        description: 'release version'
+        required: true
+        default: 'v1.0.2'
+  push:
+    branch:
+      - main
+
+jobs:
+  build-json-file:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v2
+      
+      - uses: actions/setup-node@v2
+        with:
+          node-version: '16'
+
+      - name: bulild json file
+        run: cd plugins && npm run buld-json
+
+      - name: update json file
+        run: |
+          mv plugins.json ../docs
+          cd ..
+          git config --local user.email "action@github.com"
+          git config --local user.name "GitHub Action"
+          git add docs/plugins.json
+          git commit -m "docs: 更新插件"
+          git push
+

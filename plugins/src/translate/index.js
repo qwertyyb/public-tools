@@ -1,5 +1,5 @@
 const axios = require("axios");
-const createPlugin = require("./core/plugin");
+const createPlugin = require("../core/plugin");
 const clip = require('simple-mac-clipboard')
 
 const TRIGGERS = ['fy', 'ts', 'trans', 'translate', '翻译']

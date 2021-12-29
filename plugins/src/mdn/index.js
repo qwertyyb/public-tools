@@ -1,6 +1,6 @@
 
 const axios = require('axios')
-const createPlugin = require('./core/plugin')
+const createPlugin = require('../core/plugin')
 
 const plugin = createPlugin('mdn', {
   title: '搜索MDN文档',
