@@ -22,12 +22,12 @@ jobs:
           node-version: '16'
 
       - name: bulild json file
-        run: cd plugins && npm run buld-json
+        run: cd plugins && npm run build-json
 
       - name: update json file
         run: |
-          mv plugins.json ../docs
-          cd ..
+          pwd
+          mv plugins/plugins.json ./docs/
           git config --local user.email "action@github.com"
           git config --local user.name "GitHub Action"
           git add docs/plugins.json
