@@ -19,7 +19,6 @@ magicPlugin.onKeywordChange(({ keyword }) => {
     icon: 'https://vfiles.gtimg.cn/vupload/20211210/13075e1639102744067.png',
     id: 'magic:mod:prod',
   }
-  console.log('aaaa')
   magicPlugin.updateList(keyword, [editorPage, modPage])
 })
 

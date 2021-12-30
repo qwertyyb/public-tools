@@ -1,6 +1,6 @@
 {
-  "name": "translate",
-  "title": "翻译",
-  "description": "翻译内容",
-  "icon": "https://via.placeholder.com/40"
+  "name": "mdn",
+  "title": "MDN",
+  "description": "搜索MDN",
+  "icon": "https://vfiles.gtimg.cn/vupload/20211129/2da75c1638159214694.png"
 }

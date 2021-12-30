@@ -1,8 +1,9 @@
 {
   "name": "translate",
-  "tilte": "翻译",
+  "title": "翻译",
   "version": "1.0.0",
   "description": "翻译文本",
+  "icon": "https://img.icons8.com/color/144/000000/google-translate.png",
   "main": "index.js",
   "scripts": {
     "test": "echo \"Error: no test specified\" && exit 1"
