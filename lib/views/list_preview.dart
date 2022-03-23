@@ -1,11 +1,11 @@
 import 'package:flutter/material.dart';
+import 'package:public_tools/core/plugin.dart';
 import 'package:public_tools/core/plugin_manager.dart';
-import 'package:public_tools/core/plugin_result_item.dart';
 
 import 'result_item_view.dart';
 
 class PluginListView extends StatefulWidget {
-  final List<PluginListResultItem> list;
+  final List list;
 
   final int selectedIndex;
 
@@ -27,12 +27,6 @@ class PluginListView extends StatefulWidget {
 
 class _PluginListViewState extends State<PluginListView> {
   final scrollController = new ScrollController();
-  final selectedKey = GlobalKey();
-
-  @override
-  void initState() {
-    super.initState();
-  }
 
   @override
   void didUpdateWidget(covariant PluginListView oldWidget) {
@@ -56,12 +50,6 @@ class _PluginListViewState extends State<PluginListView> {
 
   @override
   Widget build(BuildContext context) {
-    // final selectedItem = widget.list.length > widget.selectedIndex
-    //     ? widget.list.elementAt(widget.selectedIndex)
-    //     : null;
-    // if (selectedItem != null) {
-    //   PluginManager.instance.handleResultSelected(selectedItem);
-    // }
     return Row(crossAxisAlignment: CrossAxisAlignment.start, children: [
       Expanded(
         flex: 2,
@@ -70,12 +58,9 @@ class _PluginListViewState extends State<PluginListView> {
           itemBuilder: (pluginContext, itemIndex) {
             var resultItem = widget.list.elementAt(itemIndex);
             var pluginView = PluginResultItemView(
-              key: itemIndex == widget.selectedIndex
-                  ? selectedKey
-                  : Key(widget.selectedIndex.toString()),
-              item: resultItem.result,
+              item: resultItem.value,
               selected: itemIndex == widget.selectedIndex,
-              onTap: () => PluginManager.instance.handleTap(resultItem),
+              onTap: () => Navigator.pushNamed(context, '/command'),
             );
             return pluginView;
           },

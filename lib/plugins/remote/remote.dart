@@ -5,7 +5,6 @@ import 'package:flutter/material.dart';
 import 'package:flutter_html/flutter_html.dart';
 import 'package:path_provider/path_provider.dart';
 import 'package:public_tools/core/plugin.dart';
-import 'package:public_tools/core/plugin_result_item.dart';
 import 'package:public_tools/utils/logger.dart';
 
 import 'server.dart';
@@ -28,104 +27,98 @@ Future<String> _downloadNodeJs() async {
   return '$nodeDir/bin';
 }
 
-class RemotePlugin extends Plugin<String> {
+class RemotePlugin extends Plugin {
+  RemotePluginServer _server;
+  List<PluginCommand> commands = [];
   RemotePlugin() {
     _downloadNodeJs().then((binPath) {
       setBinPath(binPath);
       runClient();
     });
-    runServer();
+    this._server = RemotePluginServer(onReady: () async {
+      final data = await this._server.invoke("getCommands", {});
+      logger.i('getCommands: $data');
+      this.commands = data["commands"]
+          .map<PluginCommand>((element) => PluginCommand.fromJson(element))
+          .toList();
+    });
     logger.i('server is running');
   }
 
   @override
-  void onQuery(String keyword,
-      void Function(List<PluginListItem<String>> list) setResult) {
-    receivers.clear();
-    enterItemReceivers.clear();
-    setResultItemPreview = (content) {};
-    onUpdateList(setResult);
-    send("keyword", {"keyword": keyword});
-  }
-
-  @override
-  onTap(PluginListItem<String> item, {enterItem}) {
-    enterItemReceivers.clear();
-    enterItemReceivers.add(enterItem);
-    setResultItemPreview = (content) {};
-    send("tap", {'item': item});
-  }
-
-  @override
-  void onSearch(String keyword,
-      void Function(List<PluginListItem<String>> list) setResult) {
-    receivers.clear();
-    enterItemReceivers.clear();
-    setResultItemPreview = (content) {};
-    setLoading(true);
-    onUpdateList(setResult);
-    onUpdateList((list) {
-      setLoading(false);
+  void onEnter(PluginCommand command) {
+    this._server.invoke("onEnter", {
+      "command": command.toJson(),
     });
-    send("keyword", {"keyword": keyword});
   }
 
   @override
-  void onResultTap(PluginListItem<String> item) {
-    enterItemReceivers.clear();
-    send("tap", {'item': item});
+  Future<List<SearchResult>> onSearch(
+      String keyword, PluginCommand command) async {
+    final data = await this
+        ._server
+        .invoke('onSearch', {"keyword": keyword, "command": command.toJson()});
+    return data["results"]
+        .map<SearchResult>((element) => SearchResult.fromJson(element))
+        .toList();
   }
 
   @override
-  void onResultSelect(PluginListItem<String> item, {setPreview}) {
-    setResultItemPreview = (content) {
-      if (content == '' || content == null) {
-        return setPreview(null);
-      }
-      double attrDouble(Map<String, String> attributes, String attr) {
-        final widthString = attributes[attr];
-        return widthString == null
-            ? widthString as double
-            : double.tryParse(widthString);
-      }
-
-      ImageRender customBase64ImageRender() => (context, attributes, element) {
-            final decodedImage =
-                base64.decode(attributes['src'].split("base64,")[1].trim());
-            precacheImage(
-              MemoryImage(decodedImage),
-              context.buildContext,
-              onError: (exception, StackTrace stackTrace) {
-                context.parser.onImageError.call(exception, stackTrace);
-              },
-            );
-            return Image.memory(
-              decodedImage,
-              fit: BoxFit.fitWidth,
-              width: attrDouble(attributes, 'width'),
-              height: attrDouble(attributes, 'height'),
-              frameBuilder: (ctx, child, frame, _) {
-                if (frame == null) {
-                  return Text(attributes['alt'] ?? "",
-                      style: context.style.generateTextStyle());
-                }
-                return child;
-              },
-            );
-          };
-      setPreview(Html(
-        data: content,
-        customImageRenders: {
-          dataUriMatcher(): customBase64ImageRender(),
-        },
-      ));
-    };
-    send('select', {'item': item});
+  void onResultTap(SearchResult result) {
+    this._server.invoke('onResultTap', {
+      "result": result.toJson(),
+    });
   }
 
   @override
-  void onExit(PluginListItem item) {
-    send("exit", {});
-    super.onExit(item);
+  Future<Widget> onResultSelected(SearchResult result) async {
+    final data = await this._server.invoke('onResultSelected', {
+      "result": result.toJson(),
+    });
+    if (data["html"] == null) return null;
+    double attrDouble(Map<String, String> attributes, String attr) {
+      final widthString = attributes[attr];
+      return widthString == null
+          ? widthString as double
+          : double.tryParse(widthString);
+    }
+
+    ImageRender customBase64ImageRender() => (context, attributes, element) {
+          final decodedImage =
+              base64.decode(attributes['src'].split("base64,")[1].trim());
+          precacheImage(
+            MemoryImage(decodedImage),
+            context.buildContext,
+            onError: (exception, StackTrace stackTrace) {
+              context.parser.onImageError.call(exception, stackTrace);
+            },
+          );
+          return Image.memory(
+            decodedImage,
+            fit: BoxFit.fitWidth,
+            width: attrDouble(attributes, 'width'),
+            height: attrDouble(attributes, 'height'),
+            frameBuilder: (ctx, child, frame, _) {
+              if (frame == null) {
+                return Text(attributes['alt'] ?? "",
+                    style: context.style.generateTextStyle());
+              }
+              return child;
+            },
+          );
+        };
+    return Html(
+      data: data["html"],
+      customImageRenders: {
+        dataUriMatcher(): customBase64ImageRender(),
+      },
+    );
+  }
+
+  @override
+  void onExit(PluginCommand command) {
+    this._server.invoke("onExit", {
+      "command": command.toJson(),
+    });
   }
 }

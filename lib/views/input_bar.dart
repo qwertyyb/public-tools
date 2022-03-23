@@ -1,6 +1,8 @@
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
-import 'package:public_tools/core/plugin_result_item.dart';
+import 'package:provider/provider.dart';
+import 'package:public_tools/core/plugin.dart';
+import 'package:public_tools/core/plugin_manager.dart';
 import 'package:public_tools/views/plugin_label_view.dart';
 import 'package:window_manager/window_manager.dart';
 
@@ -15,8 +17,6 @@ class _TextInput extends StatelessWidget {
 
   final void Function() onEmptyDelete;
 
-  final bool spaceOnEnter;
-
   FocusNode _focusNode;
 
   _TextInput({
@@ -24,7 +24,6 @@ class _TextInput extends StatelessWidget {
     this.onArrowDown,
     this.onEnter,
     this.onArrowUp,
-    this.spaceOnEnter,
     this.onEmptyDelete,
   }) {
     _focusNode = FocusNode(
@@ -33,7 +32,6 @@ class _TextInput extends StatelessWidget {
           // 防止按向上或向下箭头时，光标移动
           if (event.isKeyPressed(LogicalKeyboardKey.arrowDown) ||
               event.isKeyPressed(LogicalKeyboardKey.arrowUp) ||
-              (spaceOnEnter && event.isKeyPressed(LogicalKeyboardKey.space)) ||
               event.isKeyPressed(LogicalKeyboardKey.enter)) {
             return KeyEventResult.handled;
           }
@@ -44,14 +42,18 @@ class _TextInput extends StatelessWidget {
   void _onKey(RawKeyEvent event) {
     if (event.isKeyPressed(LogicalKeyboardKey.arrowDown)) {
       this.onArrowDown();
-    } else if (event.isKeyPressed(LogicalKeyboardKey.enter) ||
-        (spaceOnEnter && event.isKeyPressed(LogicalKeyboardKey.space))) {
+    } else if (event.isKeyPressed(LogicalKeyboardKey.enter)) {
       this.onEnter();
     } else if (event.isKeyPressed(LogicalKeyboardKey.arrowUp)) {
       this.onArrowUp();
     } else if (event.isKeyPressed(LogicalKeyboardKey.backspace) &&
         controller.text.length <= 0) {
-      this.onEmptyDelete();
+      // onKey事件在textfield value change之前，所以这里需要延迟一下
+      // 否则会导致在onEmptyDelete中设置controller.text之后，textfield处理删除键时，删掉新设置的text
+      if (this.onEmptyDelete == null) return;
+      Future.delayed(Duration.zero, () {
+        this.onEmptyDelete();
+      });
     }
   }
 
@@ -78,8 +80,9 @@ class InputBar extends StatelessWidget {
   final Function onEnter;
   final Function selectNext;
   final Function selectPrev;
-  final PluginListResultItem curResultItem;
-  final Function onExitResultItem;
+  final Widget inputPrefix;
+  final Widget inputSuffix;
+  final Function onEmptyDelete;
 
   final TextEditingController controller;
 
@@ -88,8 +91,9 @@ class InputBar extends StatelessWidget {
     this.controller,
     this.selectNext,
     this.selectPrev,
-    this.onExitResultItem,
-    this.curResultItem,
+    this.inputPrefix,
+    this.inputSuffix,
+    this.onEmptyDelete,
   });
 
   void _onPointerDown(PointerDownEvent event) {
@@ -105,22 +109,18 @@ class InputBar extends StatelessWidget {
           onEnter: onEnter,
           onArrowDown: selectNext,
           onArrowUp: selectPrev,
-          spaceOnEnter: curResultItem == null,
-          onEmptyDelete: onExitResultItem,
+          onEmptyDelete: onEmptyDelete,
         ),
       ),
     ];
-    if (curResultItem != null) {
+    if (inputPrefix != null) {
       widgets.insert(
         0,
-        IconButton(
-          padding: EdgeInsets.zero,
-          onPressed: onExitResultItem,
-          icon: Icon(Icons.arrow_back_ios),
-        ),
+        inputPrefix,
       );
-      widgets.add(PluginLabelView(
-          icon: curResultItem.result.icon, title: curResultItem.result.title));
+    }
+    if (inputSuffix != null) {
+      widgets.add(inputSuffix);
     }
     return Container(
       height: 48,

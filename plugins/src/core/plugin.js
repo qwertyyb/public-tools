@@ -1,121 +1,96 @@
-const { EventEmitter } = require('events')
 const ws = require('./ws')
 
-const event = new EventEmitter()
-let curKeyword;
 let curPlugin = null;
 const plugins = new Map();
 
-const send = (type, payload) => ws.send(JSON.stringify({ type, payload }))
+const send = (type, replyId, payload) => {
+  console.log('send', type, replyId, payload)
+  return ws.send(JSON.stringify({ type, id: replyId, payload }))
+}
 
-event.on('tap', ({ item }) => {
-  if (curPlugin) {
-    const { id: idWithName, ...restAttrs } = item;
-    const [name, ...rest] = idWithName.split('-')
-    const id = rest.join('-')
-    const plugin = plugins.get(name)
+ws.on('message',async  (message) => {
+  const { type, payload, replyId } = JSON.parse(message)
+  console.log('receive Message', JSON.parse(message))
+
+  if (type === 'getCommands') {
+    const commands = Array.from(plugins.values()).map(plugin => {
+      const { title, subtitle, description, id, icon, mode, keywords } = plugin;
+      return {
+        id,
+        title,
+        subtitle,
+        description,
+        icon,
+        mode,
+        keywords
+      }
+    })
+    send('callback', replyId, { commands })
+  }
+
+  if (type === 'onEnter') {
+    const plugin = plugins.get(payload.command.id)
     if (!plugin) {
-      throw new Error(`插件${name}不存在`)
+      throw new Error(`插件${payload.command.id}不存在`)
     }
-    return event.emit(`${name}-onTap`, { ...restAttrs, id })
+    curPlugin = plugin;
+    plugin.onEnter(payload.command);
   }
-  const plugin = plugins.get(item.id)
-  if (!plugin) {
-    throw new Error(`插件${item.id}不存在`)
-  }
-  curPlugin = plugin;
-  event.emit(`${plugin.name}-onEnter`)
-  curKeyword = ''
-  send('enter', { item: item })
-})
 
-event.on('keyword', ({ keyword }) => {
-  if (curPlugin) {
-    return event.emit(`${curPlugin.name}-keyword`, { keyword })
-  }
-  const list = Array.from(plugins.keys()).filter(name => name.includes(keyword)).map(name => {
-    const plugin = plugins.get(name)
-    return {
-      id: name,
-      ...plugin.config
+  if (type === 'onSearch') {
+    const plugin = plugins.get(payload.command.id)
+    if (!plugin) {
+      throw new Error(`插件${payload.command.id}不存在`)
     }
-  })
-  send('list', { list })
-})
+    const results = await plugin.onSearch(payload.keyword)
+    send('callback', replyId, { results })
+  }
 
-event.on('select', ({ item }) => {
-  if (!curPlugin) return;
-  event.emit(`${curPlugin.name}-onSelect`, item)
-})
+  if (type === 'onResultSelected') {
+    if (!curPlugin) {
+      throw new Error(`插件不存在`)
+    }
+    const html = await curPlugin.onResultSelected(payload.result)
+    send('callback', replyId, { html })
+  }
 
-event.on('exit', () => {
-  curPlugin = null
-})
+  if (type === 'onResultTap') {
+    if (!curPlugin) {
+      throw new Error(`插件不存在`)
+    }
+    curPlugin.onResultTap(payload.result)
+  }
 
-ws.on('message', (message) => {
-  const { type, payload } = JSON.parse(message)
-  console.log(type, payload)
-  if (type === 'keyword') {
-    curKeyword = payload.keyword
-    event.emit('keyword', payload)
-  } else if (type === 'tap') {
-    event.emit('tap', payload)
-  } else if (type === 'exit') {
-    event.emit('exit', payload)
-  } else if (type === 'select') {
-    event.emit('select', payload)
+  if (type === 'onExit') {
+    if (!curPlugin) {
+      throw new Error(`插件不存在`)
+    }
+    let plugin = curPlugin;
+    curPlugin = null;
+    plugin.onExit(payload.command)
   }
 })
 
+const createUtils = () => ({
+  toast(content) {
+    send('toast', '', { content })
+  },
+  hideApp() {
+    send('hideApp', '', {})
+  },
+  showApp() {
+    send('showApp', '', {})
+  },
+})
 
-const createPlugin = (name, { title, subtitle, icon }) => {
-  if (plugins.get(name)) {
+
+const createPlugin = (pluginCreator) => {
+  const plugin = pluginCreator(createUtils())
+  const { id } = plugin;
+  if (plugins.get(id)) {
     throw new Error('当前插件已存在')
   }
-  const plugin = {
-    name,
-    config: { title, subtitle, icon },
-    updatePreview: ({ html }) => {
-      send('preview', { html })
-    },
-    updateList: async (keyword, list) => {
-      console.log('curKeyword', curKeyword)
-      // 不是正在处理的keyword, 丢弃
-      // @todo keyword不应该让插件传入
-      if (keyword !== curKeyword) return;
-      const handledList = list.map(item => {
-        return {
-          ...item,
-          id: `${name}-${item.id}`
-        }
-      })
-      console.log(handledList)
-      send('list', { list: handledList })
-    },
-    toast({ content }) {
-      send('toast', { content })
-    },
-    hideApp() {
-      send('hideApp', {})
-    },
-    showApp() {
-      send('showApp', {})
-    },
-    // @todo 添加是否防抖选项
-    onKeywordChange (callback) {
-      event.on(`${name}-keyword`, callback)
-    },
-    onTap(cb) {
-      event.on(`${name}-onTap`, cb)
-    },
-    onEnter(cb) {
-      event.on(`${name}-onEnter`, cb)
-    },
-    onSelect(cb) {
-      event.on(`${name}-onSelect`, cb)
-    }
-  }
-  plugins.set(name, plugin)
+  plugins.set(id, plugin)
   return plugin
 }
 

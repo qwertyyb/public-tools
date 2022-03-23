@@ -1,26 +1,42 @@
 import 'dart:async';
 
 import 'package:flutter/material.dart';
-import 'package:flutter/services.dart';
 import 'package:hotkey_manager/hotkey_manager.dart';
-import 'package:provider/provider.dart';
-import 'package:public_tools/core/plugin.dart';
-import 'package:public_tools/core/plugin_manager.dart';
 import 'package:public_tools/utils/logger.dart';
 import 'package:public_tools/views/input_bar.dart';
 import 'package:public_tools/views/list_preview.dart';
 
-class MainView extends StatefulWidget {
+class SearchList<T> extends StatefulWidget {
+  final Future<List> Function(String keyword) onSearch;
+
+  final Future<Widget> Function(T item) onSelect;
+
+  final void Function(T item) onEnter;
+
+  final void Function() onEmptyDelete;
+
+  final Widget inputPrefix;
+
+  final Widget inputSuffix;
+
+  SearchList({
+    this.onSearch,
+    this.onEnter,
+    this.onSelect,
+    this.inputPrefix,
+    this.inputSuffix,
+    this.onEmptyDelete,
+  });
+
   @override
-  State<StatefulWidget> createState() => _MainViewState();
+  State<StatefulWidget> createState() => _SearchListState<T>();
 }
 
-class _MainViewState extends State<MainView> {
-  Timer _clearStateTimer;
-  EventChannel _eventChannel = EventChannel("events-listener");
-
+class _SearchListState<T> extends State<SearchList<T>> {
   bool _loading = false;
   final TextEditingController _textEditingController = TextEditingController();
+  List<T> _list = [];
+  int _selectedIndex = 0;
 
   @override
   void initState() {
@@ -37,21 +53,6 @@ class _MainViewState extends State<MainView> {
         _onKeywordChange();
       };
     })());
-    _eventChannel.receiveBroadcastStream("state").listen((event) {
-      if (event == 'DID_HIDE') {
-        _clearStateTimer = Timer(Duration(minutes: 1), () {
-          PluginManager.instance.onExit();
-          setState(() {
-            _textEditingController.clear();
-            _loading = false;
-          });
-        });
-      } else if (event == 'WILL_UNHIDE') {
-        if (_clearStateTimer != null) {
-          _clearStateTimer.cancel();
-        }
-      }
-    });
   }
 
   @override
@@ -61,29 +62,32 @@ class _MainViewState extends State<MainView> {
     super.dispose();
   }
 
-  void _onKeywordChange() {
+  void _onKeywordChange() async {
     final keyword = _textEditingController.text;
-    PluginManager.instance.onSearch(keyword);
-  }
-
-  void _onEnter() {
-    PluginManager.instance.onTap();
+    final list = await widget.onSearch(keyword);
+    setState(() {
+      _list = list;
+      _selectedIndex = 0;
+    });
   }
 
   void _selectNext() {
-    PluginManager.instance.selectNext();
+    final nextIndex = (_selectedIndex + 1) % _list.length;
+    setState(() {
+      _selectedIndex = nextIndex;
+    });
   }
 
-  void _selectPrev() {
-    PluginManager.instance.selectPrevious();
+  void _selectPrevious() {
+    final nextIndex = (_selectedIndex - 1 + _list.length) % _list.length;
+    setState(() {
+      _selectedIndex = nextIndex;
+    });
   }
 
-  void _onTap(item, Plugin plugin) {
-    _textEditingController.clear();
-  }
-
-  void _exitResultItem() {
-    PluginManager.instance.onExit();
+  void _onEnter() {
+    final selected = _list[_selectedIndex];
+    widget.onEnter(selected);
   }
 
   @override
@@ -98,8 +102,11 @@ class _MainViewState extends State<MainView> {
                 InputBar(
                   controller: _textEditingController,
                   onEnter: this._onEnter,
+                  onEmptyDelete: this.widget.onEmptyDelete,
                   selectNext: this._selectNext,
-                  selectPrev: this._selectPrev,
+                  selectPrev: this._selectPrevious,
+                  inputPrefix: widget.inputPrefix,
+                  inputSuffix: widget.inputSuffix,
                 ),
                 LinearProgressIndicator(
                   backgroundColor: Colors.black12,
@@ -109,12 +116,9 @@ class _MainViewState extends State<MainView> {
                 ),
                 Expanded(
                   child: PluginListView(
-                    list: context.select((MainState state) => state.list),
-                    onTap: _onTap,
-                    selectedIndex: context
-                        .select((MainState state) => state.selectedIndex),
-                    preview: context
-                        .select((MainState state) => state.resultPreview),
+                    list: _list,
+                    onTap: _onEnter,
+                    selectedIndex: _selectedIndex,
                   ),
                 )
               ],

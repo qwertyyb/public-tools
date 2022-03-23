@@ -1,14 +1,12 @@
 import 'dart:io';
 
 import 'package:public_tools/core/plugin.dart';
-import 'package:public_tools/core/plugin_result_item.dart';
 import 'package:public_tools/pigeon/app.dart';
 
 class ApplicationPlugin extends Plugin {
   ApplicationPlugin() {
     _getInstalledApps();
   }
-  List<PluginListItem> apps;
   _getInstalledApps() async {
     final installedApps = await Service().getInstalledApplicationList();
     final transformPinyinToKeywords = (String pinyin) {
@@ -19,8 +17,8 @@ class ApplicationPlugin extends Plugin {
       }
       return [pinyin.toLowerCase()];
     };
-    this.apps = installedApps
-        .map((app) => PluginListItem(
+    this.commands = installedApps
+        .map((app) => PluginCommand(
               title: app.name,
               subtitle: app.path,
               keywords: transformPinyinToKeywords(app.pinyin),
@@ -31,15 +29,9 @@ class ApplicationPlugin extends Plugin {
         .toList();
   }
 
-  onQuery(query, setList) {
-    query = query.toLowerCase();
-    final list = this.apps.where((element) {
-      return element.keywords.any((keyword) => keyword.contains(query));
-    }).toList();
-    setList(list);
-  }
-
-  onTap(item, {enterItem}) {
-    Process.run("open", ["-a", item.subtitle]);
+  @override
+  void onEnter(PluginCommand command) {
+    Service().hideApp();
+    Process.run("open", ["-a", command.subtitle]);
   }
 }

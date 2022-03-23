@@ -2,7 +2,10 @@ import 'package:flutter/material.dart';
 import 'package:hotkey_manager/hotkey_manager.dart';
 
 import 'package:oktoast/oktoast.dart';
+import 'package:provider/provider.dart';
 import 'package:public_tools/core/plugin_manager.dart';
+import 'package:public_tools/pages/command_page.dart';
+import 'package:public_tools/pages/main_page.dart';
 import 'package:window_manager/window_manager.dart';
 import 'views/main_view.dart';
 import 'pages/settings_page.dart';
@@ -70,35 +73,28 @@ class _HomePageState extends State<HomePage> {
     // The Flutter framework has been optimized to make rerunning build methods
     // fast, so that you can just rebuild anything that needs updating rather
     // than having to individually change instances of widgets.
-    return MaterialApp(
-        color: Color.fromARGB(255, 0, 0, 0),
-        title: "hello",
-        routes: {'/settings': (BuildContext context) => SettingsPage()},
-        home: Scaffold(
-          backgroundColor: Color.fromARGB(0, 0, 0, 0),
-          body: Container(
-            // Center is a layout widget. It takes a single child and positions it
-            // in the middle of the parent.
-            padding: EdgeInsets.all(0),
-            child: Column(
-              // Column is also a layout widget. It takes a list of children and
-              // arranges them vertically. By default, it sizes itself to fit its
-              // children horizontally, and tries to be as tall as its parent.
-              //
-              // Invoke "debug painting" (press "p" in the console, choose the
-              // "Toggle Debug Paint" action from the Flutter Inspector in Android
-              // Studio, or the "Toggle Debug Paint" command in Visual Studio Code)
-              // to see the wireframe for each widget.
-              //
-              // Column has various properties to control how it sizes itself and
-              // how it positions its children. Here we use mainAxisAlignment to
-              // center the children vertically; the main axis here is the vertical
-              // axis because Columns are vertical (the cross axis would be
-              // horizontal).
-              mainAxisAlignment: MainAxisAlignment.start,
-              children: <Widget>[Expanded(child: MainView())],
-            ),
-          ),
+    return ChangeNotifierProvider.value(
+        value: PluginManager.instance.state,
+        child: MaterialApp(
+          color: Color.fromARGB(255, 0, 0, 0),
+          title: "hello",
+          routes: {
+            '/settings': (BuildContext context) => SettingsPage(),
+            // '/command': (BuildContext context) => Scaffold(body: MainView()),
+          },
+          onGenerateRoute: (settings) {
+            if (settings.name == 'command') {
+              final args = settings.arguments as CommandPageParams;
+              return MaterialPageRoute(
+                builder: (context) => CommandPage(
+                  plugin: args.plugin,
+                  command: args.command,
+                ),
+              );
+            }
+            return null;
+          },
+          home: MainPage(),
         ) // This trailing comma makes auto-formatting nicer for build methods.
         );
   }

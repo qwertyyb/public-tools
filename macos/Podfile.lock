@@ -18,7 +18,7 @@ PODS:
     - FMDB (>= 2.7.5)
   - wakelock_macos (0.0.1):
     - FlutterMacOS
-  - window_manager (0.1.0):
+  - window_manager (0.1.4):
     - FlutterMacOS
 
 DEPENDENCIES:
@@ -61,11 +61,11 @@ SPEC CHECKSUMS:
   HotKey: ad59450195936c10992438c4210f673de5aee43e
   hotkey_manager: ad673457691f4d39e481be04a61da2ae07d81c62
   path_provider_macos: 160cab0d5461f0c0e02995469a98f24bdb9a3f1f
-  shared_preferences_macos: 480ce071d0666e37cef23fe6c702293a3d21799e
+  shared_preferences_macos: a64dc611287ed6cbe28fd1297898db1336975727
   sqflite: a5789cceda41d54d23f31d6de539d65bb14100ea
   wakelock_macos: bc3f2a9bd8d2e6c89fee1e1822e7ddac3bd004a9
-  window_manager: db713621c322d52e96064336a4ba2b7e4e30c94f
+  window_manager: 02776e5a599084cd4576e27a42dd5ec6f49132cf
 
 PODFILE CHECKSUM: 6eac6b3292e5142cfc23bdeb71848a40ec51c14c
 
-COCOAPODS: 1.10.1
+COCOAPODS: 1.11.2

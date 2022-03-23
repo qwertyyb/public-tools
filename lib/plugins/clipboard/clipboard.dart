@@ -9,7 +9,6 @@ import 'package:public_tools/pigeon/app.dart';
 import 'package:public_tools/utils/logger.dart';
 import 'package:sqflite/sqflite.dart';
 import 'package:oktoast/oktoast.dart';
-import 'package:public_tools/core/plugin_result_item.dart';
 import '../../core/plugin.dart';
 import '../../config.dart';
 
@@ -30,8 +29,9 @@ Future<Database> getDatabase() async {
   });
 }
 
-class _PasteItem extends PluginListItem {
+class _PasteItem {
   static String tableName = 'clipboardHistory';
+  String id;
   String summary;
   DateTime updatedAt;
   ContentType contentType;
@@ -42,10 +42,7 @@ class _PasteItem extends PluginListItem {
     this.updatedAt,
     this.contentType,
     this.text,
-    String title,
-    String subtitle,
-    String icon,
-  }) : super(title: title, subtitle: subtitle, icon: icon);
+  });
 
   Map<String, dynamic> toMap() {
     var map = <String, dynamic>{
@@ -140,33 +137,44 @@ class ClipboardPlugin extends Plugin {
     _startListenChange();
   }
 
-  var label = '剪切板';
+  final String id = 'clipboard';
+  final String title = '剪切板';
+  final String subtitle = '查看剪切板历史';
+  final String icon =
+      "https://vfiles.gtimg.cn/vupload/20210220/586e451613797978732.png";
 
-  var icon = "https://vfiles.gtimg.cn/vupload/20210220/586e451613797978732.png";
+  List<PluginCommand> commands = [
+    PluginCommand(
+        title: "剪切板",
+        subtitle: "查看剪切板历史",
+        keywords: ["cp", "clipboard hitory", "jqb"],
+        icon:
+            "https://vfiles.gtimg.cn/vupload/20210220/586e451613797978732.png",
+        mode: CommandMode.listView)
+  ];
 
-  onCreated() {}
+  @override
+  void onEnter(PluginCommand command) {}
 
-  onQuery(String keyword, setResult) async {
-    if (["cp", "clipboard", "jqb"]
-        .any((element) => element.contains(keyword))) {
-      setResult([
-        PluginListItem<String>(
-            id: "clipboard",
-            title: "剪切板",
-            subtitle: "查看剪切板历史",
-            icon:
-                "https://vfiles.gtimg.cn/vupload/20210220/586e451613797978732.png")
-      ]);
-      return null;
-    }
-    setResult([]);
+  @override
+  Future<List<SearchResult>> onSearch(
+      String keyword, PluginCommand command) async {
+    var list = await PasteItemHelper.instance
+        .query(where: 'text like ?', whereArgs: ['%' + keyword + '%']);
+    return list.map((e) {
+      return SearchResult(
+          title: e.summary,
+          subtitle: DateFormat('yyyy-MM-dd HH:mm:ss').format(e.updatedAt),
+          icon: 'https://img.icons8.com/officel/80/000000/paste-as-text.png',
+          description: e.text);
+    }).toList();
   }
 
-  void onResultSelect(item, {setPreview}) {
-    final result = (item as _PasteItem);
-    setPreview(HighlightView(
+  @override
+  Future<Widget> onResultSelected(SearchResult item) {
+    return Future.value(HighlightView(
       // The original code to be highlighted
-      result.text,
+      item.description,
 
       // Specify language
       // It is recommended to give it a value for performance
@@ -187,27 +195,9 @@ class ClipboardPlugin extends Plugin {
     ));
   }
 
-  onTap(item, {enterItem}) {
-    enterItem();
-  }
-
   @override
-  void onSearch(String keyword,
-      void Function(List<PluginListItem> list) setResult) async {
-    var list = await PasteItemHelper.instance
-        .query(where: 'text like ?', whereArgs: ['%' + keyword + '%']);
-    setResult(list.map((e) {
-      return _PasteItem(
-          title: e.summary,
-          subtitle: DateFormat('yyyy-MM-dd HH:mm:ss').format(e.updatedAt),
-          icon: 'https://img.icons8.com/officel/80/000000/paste-as-text.png',
-          text: e.text);
-    }).toList());
-  }
-
-  @override
-  void onResultTap(PluginListItem item) {
-    Clipboard.setData(ClipboardData(text: (item as _PasteItem).text));
+  void onResultTap(item) {
+    Clipboard.setData(ClipboardData(text: item.description));
     showToast("复制成功");
     Service().pasteToFrontestApp();
   }

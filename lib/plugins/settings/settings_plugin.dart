@@ -1,18 +1,23 @@
+import 'dart:convert';
+
+import 'package:flutter/widgets.dart';
 import 'package:hotkey_manager/hotkey_manager.dart';
 import 'package:public_tools/core/plugin.dart';
-import 'package:public_tools/core/plugin_result_item.dart';
+import 'package:public_tools/core/plugin_manager.dart';
 import 'package:public_tools/plugins/settings/basic.dart';
+import 'package:public_tools/plugins/settings/hot_key.dart';
 import 'package:public_tools/plugins/settings/utils.dart';
+import 'package:shared_preferences/shared_preferences.dart';
 import 'package:window_manager/window_manager.dart';
 
 class SettingsPlugin extends Plugin {
-  List<String> keywords = ['settings', 'preferences', '设置'];
-
-  List<PluginListItem> commands = [
-    PluginListItem(
+  List<PluginCommand> commands = [
+    PluginCommand(
       title: '设置',
       subtitle: 'Public设置',
       icon: null,
+      mode: CommandMode.listView,
+      keywords: ["settings", "preferences", "设置", "sz"],
     )
   ];
 
@@ -20,35 +25,19 @@ class SettingsPlugin extends Plugin {
     this._refreshHotkey();
   }
 
-  onQuery(query, setResult) {
-    var match = keywords.where((element) => element.contains(query)).length > 0;
-    if (match) {
-      setResult(commands);
-    } else {
-      setResult([]);
-    }
-  }
-
-  onTap(item, {enterItem}) {
-    // @todo 跳转到设置页面
-    enterItem();
-  }
+  @override
+  void onEnter(PluginCommand item) {}
 
   @override
-  void onEnter(PluginListItem item) {
-    super.onEnter(item);
-  }
-
-  @override
-  void onSearch(
+  Future<List<SearchResult>> onSearch(
     String keyword,
-    void Function(List<PluginListItem> list) setResult,
+    PluginCommand command,
   ) {
     final basicItem =
-        PluginListItem<String>(title: "基础", subtitle: '基础设置', id: 'basic');
+        SearchResult(title: "基础", subtitle: '基础设置', description: 'basic');
     final hotkeyItem =
-        PluginListItem<String>(title: '快捷键', subtitle: '插件快捷键', id: 'hotkey');
-    setResult([
+        SearchResult(title: '快捷键', subtitle: '插件快捷键', description: 'hotkey');
+    return Future.value([
       basicItem,
       hotkeyItem,
     ]);
@@ -63,15 +52,34 @@ class SettingsPlugin extends Plugin {
         await windowManager.show();
       },
     );
+    final prefs = await SharedPreferences.getInstance();
+    final pluginsHotKey = prefs.getString('pluginsHotKey');
+    if (pluginsHotKey == null || pluginsHotKey == '') return;
+    final json = jsonDecode(pluginsHotKey) as Map<String, dynamic>;
+    json.forEach((key, value) {
+      final hotKey = HotKey.fromJson(value);
+      HotKeyManager.instance.register(
+        hotKey,
+        keyDownHandler: (hotKey) async {
+          final plugin = PluginManager.instance
+              .getPlugins()
+              .firstWhere((element) => element.id == key, orElse: () => null);
+          if (plugin == null) return;
+          PluginManager.instance.onCommand(PluginResult<PluginCommand>(
+              plugin: plugin, value: plugin.commands.first));
+          await windowManager.show();
+        },
+      );
+    });
   }
 
   @override
-  void onResultSelect(PluginListItem item, {setPreview}) {
-    if (item.id == 'basic')
-      return setPreview(BasicView(
+  Future<Widget> onResultSelected(SearchResult item) {
+    if (item.description == 'basic')
+      return Future.value(BasicView(
         onHotkeyChange: this._refreshHotkey,
       ));
-    setPreview(null);
+    if (item.description == 'hotkey') return Future.value(HotKeyView());
     return null;
   }
 }

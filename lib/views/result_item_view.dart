@@ -4,7 +4,7 @@ import 'dart:io';
 import 'package:cached_network_image/cached_network_image.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
-import 'package:public_tools/core/plugin_result_item.dart';
+import 'package:public_tools/core/plugin.dart';
 
 class PluginResultItemIconView extends StatelessWidget {
   final String icon;
@@ -39,7 +39,7 @@ class PluginResultItemIconView extends StatelessWidget {
 }
 
 class PluginResultItemView extends StatelessWidget {
-  final PluginListItem item;
+  final BaseListItem item;
 
   final bool selected;
 
