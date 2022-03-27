@@ -1,42 +1,53 @@
 import 'dart:async';
 
 import 'package:flutter/material.dart';
-import 'package:hotkey_manager/hotkey_manager.dart';
-import 'package:public_tools/utils/logger.dart';
-import 'package:public_tools/views/input_bar.dart';
-import 'package:public_tools/views/list_preview.dart';
+
+import '../utils/logger.dart';
+import 'input_bar.dart';
+import 'search_result_list.dart';
 
 class SearchList<T> extends StatefulWidget {
   final Future<List> Function(String keyword) onSearch;
 
-  final Future<Widget> Function(T item) onSelect;
+  final Future<Widget?>? Function(T item)? onSelect;
 
-  final void Function(T item) onEnter;
+  final void Function(T item)? onEnter;
 
-  final void Function() onEmptyDelete;
+  final void Function()? onEmptyDelete;
 
-  final Widget inputPrefix;
+  final Widget? inputPrefix;
 
-  final Widget inputSuffix;
+  final Widget? inputSuffix;
 
-  SearchList({
-    this.onSearch,
-    this.onEnter,
-    this.onSelect,
-    this.inputPrefix,
-    this.inputSuffix,
-    this.onEmptyDelete,
-  });
+  final bool searchAtStart;
+
+  SearchList(
+      {Key? key,
+      required this.onSearch,
+      this.onEnter,
+      this.onSelect,
+      this.inputPrefix,
+      this.inputSuffix,
+      this.onEmptyDelete,
+      this.searchAtStart = false})
+      : super(key: key);
 
   @override
-  State<StatefulWidget> createState() => _SearchListState<T>();
+  State<StatefulWidget> createState() => SearchListState<T>();
 }
 
-class _SearchListState<T> extends State<SearchList<T>> {
+class SearchListState<T> extends State<SearchList<T>> {
   bool _loading = false;
   final TextEditingController _textEditingController = TextEditingController();
   List<T> _list = [];
   int _selectedIndex = 0;
+  Widget? preview;
+
+  void updateResults(List<T> results) {
+    setState(() {
+      _list = results;
+    });
+  }
 
   @override
   void initState() {
@@ -53,41 +64,100 @@ class _SearchListState<T> extends State<SearchList<T>> {
         _onKeywordChange();
       };
     })());
+    if (widget.searchAtStart) {
+      _onKeywordChange();
+    }
   }
 
   @override
   void dispose() {
+    logger.i('dispose');
     _textEditingController.dispose();
-    hotKeyManager.unregisterAll();
     super.dispose();
   }
 
-  void _onKeywordChange() async {
-    final keyword = _textEditingController.text;
-    final list = await widget.onSearch(keyword);
+  @override
+  void setState(VoidCallback fn) {
+    if (this.mounted) {
+      super.setState(fn);
+    }
+  }
+
+  void _updatePreview(selected) async {
+    if (selected == null) {
+      setState(() {
+        preview = null;
+      });
+      return;
+    }
+    final selectedPreview = await widget.onSelect?.call(selected)!;
+    final latestSelected =
+        _selectedIndex < _list.length ? _list[_selectedIndex] : null;
+    // 当前预览和选中的不一致，不更新状态
+    if (selected != latestSelected) {
+      return;
+    }
     setState(() {
-      _list = list;
-      _selectedIndex = 0;
+      preview = selectedPreview;
     });
   }
 
+  void _onKeywordChange() async {
+    setState(() {
+      _loading = true;
+    });
+    final keyword = _textEditingController.text;
+    logger.i('keyword: $keyword');
+    final list = await widget.onSearch(keyword).catchError((e) {
+      logger.e('onSearch error: $e');
+      return [];
+    });
+    // 关键词已变化，返回的结果不是当前的关键词结果，不更新状态
+    if (keyword != _textEditingController.text) {
+      return;
+    }
+    setState(() {
+      _list = list as List<T>;
+      _selectedIndex = 0;
+      _loading = false;
+    });
+    _updatePreview(list.isNotEmpty ? list[0] : null);
+  }
+
   void _selectNext() {
+    if (_list.length == 0) {
+      return;
+    }
     final nextIndex = (_selectedIndex + 1) % _list.length;
     setState(() {
       _selectedIndex = nextIndex;
     });
+    _updatePreview(_list[nextIndex]);
   }
 
   void _selectPrevious() {
+    if (_list.length == 0) {
+      return;
+    }
     final nextIndex = (_selectedIndex - 1 + _list.length) % _list.length;
     setState(() {
       _selectedIndex = nextIndex;
     });
+    _updatePreview(_list[nextIndex]);
   }
 
   void _onEnter() {
+    if (_selectedIndex >= _list.length) {
+      return;
+    }
     final selected = _list[_selectedIndex];
-    widget.onEnter(selected);
+    widget.onEnter?.call(selected);
+  }
+
+  void _onItemTap(T item, int index) {
+    _selectedIndex = index;
+    _updatePreview(item);
+    _onEnter();
   }
 
   @override
@@ -115,12 +185,30 @@ class _SearchListState<T> extends State<SearchList<T>> {
                   value: _loading ? null : 0,
                 ),
                 Expanded(
-                  child: PluginListView(
-                    list: _list,
-                    onTap: _onEnter,
-                    selectedIndex: _selectedIndex,
+                  child: Row(
+                    children: [
+                      Expanded(
+                        flex: 2,
+                        child: SearchResultList<T>(
+                          list: _list,
+                          onTap: _onItemTap,
+                          selectedIndex: _selectedIndex,
+                        ),
+                      ),
+                      if (preview != null)
+                        Expanded(
+                          flex: 3,
+                          child: Container(
+                              height: double.infinity,
+                              padding: EdgeInsets.all(8),
+                              color: Colors.grey[300],
+                              child: Container(
+                                child: preview,
+                              )),
+                        )
+                    ],
                   ),
-                )
+                ),
               ],
             ),
           ),

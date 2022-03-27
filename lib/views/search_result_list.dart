@@ -1,35 +1,30 @@
 import 'package:flutter/material.dart';
-import 'package:public_tools/core/plugin.dart';
-import 'package:public_tools/core/plugin_manager.dart';
 
 import 'result_item_view.dart';
 
-class PluginListView extends StatefulWidget {
-  final List list;
+class SearchResultList<T> extends StatefulWidget {
+  final List<T> list;
 
   final int selectedIndex;
 
-  final Widget preview;
+  final void Function(T item, int index)? onTap;
 
-  final Function onTap;
-
-  PluginListView({
-    Key key,
-    this.list,
+  SearchResultList({
+    Key? key,
+    required this.list,
     this.onTap,
-    this.selectedIndex,
-    this.preview,
+    required this.selectedIndex,
   }) : super(key: key);
 
   @override
-  State<StatefulWidget> createState() => _PluginListViewState();
+  State<StatefulWidget> createState() => _SearchResultListState();
 }
 
-class _PluginListViewState extends State<PluginListView> {
+class _SearchResultListState extends State<SearchResultList> {
   final scrollController = new ScrollController();
 
   @override
-  void didUpdateWidget(covariant PluginListView oldWidget) {
+  void didUpdateWidget(covariant SearchResultList oldWidget) {
     // 计算是否需要滚动
     final visibleMinIndex = (scrollController.offset / 48).ceil();
     final visibleMaxIndex = visibleMinIndex + 8;
@@ -57,27 +52,18 @@ class _PluginListViewState extends State<PluginListView> {
           controller: scrollController,
           itemBuilder: (pluginContext, itemIndex) {
             var resultItem = widget.list.elementAt(itemIndex);
-            var pluginView = PluginResultItemView(
+            var pluginView = ResultItemView(
               item: resultItem.value,
               selected: itemIndex == widget.selectedIndex,
-              onTap: () => Navigator.pushNamed(context, '/command'),
+              onTap: () {
+                widget.onTap?.call(resultItem, itemIndex);
+              },
             );
             return pluginView;
           },
           itemCount: widget.list.length,
         ),
       ),
-      if (widget.preview != null)
-        Expanded(
-          flex: 3,
-          child: Container(
-              height: double.infinity,
-              padding: EdgeInsets.all(8),
-              color: Colors.grey[300],
-              child: Container(
-                child: widget.preview,
-              )),
-        )
     ]);
   }
 }

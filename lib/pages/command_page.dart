@@ -1,32 +1,53 @@
 import 'package:flutter/material.dart';
-import 'package:public_tools/core/plugin.dart';
-import 'package:public_tools/views/plugin_label_view.dart';
-import 'package:public_tools/views/search_list.dart';
+
+import '../core/plugin.dart';
+import '../core/plugin_command.dart';
+import '../views/plugin_label_view.dart';
+import '../views/search_list.dart';
 
 class CommandPageParams {
   final Plugin plugin;
   final PluginCommand command;
 
-  CommandPageParams({this.plugin, this.command});
+  CommandPageParams({required this.plugin, required this.command});
 }
 
 class CommandPage extends StatefulWidget {
+  static final String routeName = 'command';
+  static CommandPage? current;
+
   final Plugin plugin;
   final PluginCommand command;
 
-  CommandPage({this.plugin, this.command});
+  CommandPage({required this.plugin, required this.command}) {
+    current = this;
+  }
 
   @override
   State<StatefulWidget> createState() {
-    return _CommandPageState();
+    return CommandPageState();
   }
 }
 
-class _CommandPageState extends State<CommandPage> {
-  Widget preview;
+class CommandPageState extends State<CommandPage> {
+  static CommandPageState? current;
+
+  GlobalKey<SearchListState<PluginResult<SearchResult>>> searchListKey =
+      GlobalKey<SearchListState<PluginResult<SearchResult>>>();
+
+  CommandPageState() : super() {
+    current = this;
+  }
+
+  @override
+  void dispose() {
+    current = null;
+    widget.command.onExit?.call();
+    super.dispose();
+  }
 
   Future<List<PluginResult<SearchResult>>> _onSearch(String keyword) async {
-    final results = await widget.plugin.onSearch(keyword, widget.command);
+    final results = await widget.command.onSearch?.call(keyword) ?? [];
     return results.map<PluginResult<SearchResult>>((result) {
       return PluginResult<SearchResult>(
         plugin: widget.plugin,
@@ -36,14 +57,15 @@ class _CommandPageState extends State<CommandPage> {
   }
 
   void _onEnter(PluginResult<SearchResult> item) {
-    widget.plugin.onResultTap(item.value);
+    widget.command.onResultTap?.call(item.value);
   }
 
-  Future<Widget> _onSelect(PluginResult<SearchResult> item) async {
-    final previewWidget = await widget.plugin.onResultSelected(item.value);
-    setState(() {
-      preview = previewWidget;
-    });
+  Future<Widget?> _onSelect(PluginResult<SearchResult>? item) async {
+    if (item == null) {
+      return null;
+    }
+    final previewWidget =
+        await widget.command.onResultPreview?.call(item.value);
     return previewWidget;
   }
 
@@ -74,6 +96,7 @@ class _CommandPageState extends State<CommandPage> {
           children: <Widget>[
             Expanded(
               child: SearchList<PluginResult<SearchResult>>(
+                key: searchListKey,
                 inputPrefix: IconButton(
                   onPressed: () {
                     Navigator.pop(context);
@@ -85,6 +108,7 @@ class _CommandPageState extends State<CommandPage> {
                   icon: widget.command.icon,
                   title: widget.command.title,
                 ),
+                searchAtStart: true,
                 onSearch: _onSearch,
                 onSelect: _onSelect,
                 onEnter: _onEnter,

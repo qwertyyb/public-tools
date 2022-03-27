@@ -5,19 +5,19 @@ enum ContentType { text, image }
 
 class PasteItem {
   static String tableName = 'clipboardHistory';
-  int id;
-  String summary;
-  DateTime updatedAt;
-  ContentType contentType;
-  String text;
+  int? id;
+  String? summary;
+  DateTime? updatedAt;
+  ContentType? contentType;
+  String? text;
 
   PasteItem({this.summary, this.updatedAt, this.contentType, this.text});
 
   Map<String, dynamic> toMap() {
     var map = <String, dynamic>{
       'summary': summary,
-      'updatedAt': DateFormat('yyyy-MM-dd HH:mm:ss').format(updatedAt),
-      'contentType': contentType.index,
+      'updatedAt': DateFormat('yyyy-MM-dd HH:mm:ss').format(updatedAt!),
+      'contentType': contentType!.index,
       'text': text
     };
     if (id != null) {
@@ -37,13 +37,13 @@ class PasteItem {
 
 class PasteItemHelper {
   // 工厂模式
-  factory PasteItemHelper() => _getInstance();
-  static PasteItemHelper get instance => _getInstance();
-  static PasteItemHelper _instance;
+  factory PasteItemHelper() => _getInstance()!;
+  static PasteItemHelper? get instance => _getInstance();
+  static PasteItemHelper? _instance;
   PasteItemHelper._internal() {
     // 初始化
   }
-  static PasteItemHelper _getInstance() {
+  static PasteItemHelper? _getInstance() {
     if (_instance == null) {
       _instance = new PasteItemHelper._internal();
     }
@@ -51,8 +51,8 @@ class PasteItemHelper {
   }
 
   Future<List<PasteItem>> query(
-      {String where, List whereArgs, List<String> columns}) async {
-    var db = await Utils.instance.getDatabase();
+      {String? where, List? whereArgs, List<String>? columns}) async {
+    var db = await Utils.instance!.getDatabase();
     var results = await db.query(PasteItem.tableName,
         orderBy: 'updatedAt desc',
         columns: columns,
@@ -63,8 +63,8 @@ class PasteItemHelper {
     }).toList();
   }
 
-  Future<PasteItem> get(int id) async {
-    return Utils.instance.getDatabase().then((db) async {
+  Future<PasteItem?> get(int id) async {
+    return Utils.instance!.getDatabase().then((db) async {
       var maps = await db.query(PasteItem.tableName,
           columns: ['id', 'updatedAt', 'summary', 'text', 'contentType'],
           where: 'id = ?',
@@ -77,13 +77,13 @@ class PasteItemHelper {
   }
 
   Future<int> delete(int id) async {
-    return Utils.instance.getDatabase().then((db) {
+    return Utils.instance!.getDatabase().then((db) {
       return db.delete(PasteItem.tableName, where: 'id = ?', whereArgs: [id]);
     });
   }
 
   Future<int> update(PasteItem pasteItem) async {
-    return Utils.instance.getDatabase().then((db) {
+    return Utils.instance!.getDatabase().then((db) {
       return db.update(PasteItem.tableName, pasteItem.toMap(),
           where: 'id = ?', whereArgs: [pasteItem.id]);
     });
@@ -93,7 +93,7 @@ class PasteItemHelper {
     if (pasteItem.id != null) {
       return this.update(pasteItem);
     }
-    var insertId = await Utils.instance.getDatabase().then((db) {
+    var insertId = await Utils.instance!.getDatabase().then((db) {
       return db.insert(PasteItem.tableName, pasteItem.toMap());
     });
     return insertId;

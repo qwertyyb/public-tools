@@ -1,6 +1,7 @@
 {
   "name": "translate",
   "title": "翻译",
+  "subtitle": "翻译文本",
   "version": "1.0.0",
   "description": "翻译文本",
   "icon": "https://img.icons8.com/color/144/000000/google-translate.png",

@@ -29,5 +29,5 @@ Module.setStatus('Downloading...');
 initFiles(Module);
 
 createCv(Module)
-console.log(Module)
+
 module.exports = Module

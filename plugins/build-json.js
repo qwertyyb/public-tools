@@ -9,7 +9,7 @@ const getPluginConfig = (pluginDir) => {
   const pkgPath = path.join(__dirname, pluginDir, './package.json')
 
   const pkg = require(pkgPath)
-  pkg.intro = fs.readFileSync(mdPath, 'utf-8')
+  pkg.description = fs.readFileSync(mdPath, 'utf-8')
 
   return pkg
 }

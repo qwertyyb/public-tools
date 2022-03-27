@@ -7,36 +7,38 @@ const getPluginList = async () => {
   return res.data
 }
 
-let list = [];
+const storePlugin = createPlugin(utils => ({
+  id: 'store',
+  title: '插件列表',
+  subtitle: '插件列表',
+  description: '插件列表',
+  mode: 'listView',
+  keywords: ['插件列表', 'plugins store'],
+  icon: 'https://img.icons8.com/color/50/000000/joomla.png',
 
+  async onSearch(keyword) {
+    const query = keyword || ''
+    const { updateTime, pluginList } = await getPluginList()
+    const list = pluginList.map(plugin => {
+      return {
+        id: plugin.name,
+        title: plugin.title,
+        subtitle: plugin.subtitle || plugin.title,
+        description: plugin.description,
+        icon: plugin.icon,
+      }
+    }).filter(plugin => plugin.id.includes(query) || plugin.title.includes(query))
+    return list
+  },
+  onResultSelected(result) {
+    const intro = markdown.toHTML(result.description || `# ${title}\n # ${subtitle}`)
+    return intro;
+  },
+  onResultTap(result) {
+    return null;
+  },
+  onEnter() {},
+  onExit() {},
+}))
 
-const plugin = createPlugin('plugin store', {
-  title: '插件市场',
-  subtitle: '搜索、下载、升级插件',
-  icon: 'https://img.icons8.com/color/50/000000/joomla.png'
-})
-
-plugin.onKeywordChange(async ({ keyword }) => {
-  const { updateTime, pluginList } = await getPluginList()
-  list = pluginList
-  const filteredList = list.map(item => {
-    return {
-      id: item.name,
-      title: item.title || '',
-      subtitle: item.description || '',
-      icon: item.icon || ''
-    }
-  }).filter(item => item.id && item.title && item.subtitle && item.icon)
-  return plugin.updateList(keyword, filteredList)
-})
-
-plugin.onSelect((item) => {
-  const id = item.id.split('-').pop()
-  const target = list.find(i => i.name === id)
-  if (!target) return
-  console.log(target)
-  const html = markdown.toHTML(target.intro)
-  plugin.updatePreview({ html })
-})
-
-module.exports = plugin;
+module.exports = storePlugin;

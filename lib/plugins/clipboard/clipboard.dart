@@ -5,12 +5,13 @@ import 'package:flutter_highlight/themes/tomorrow-night.dart';
 import 'package:intl/intl.dart';
 
 import 'package:flutter/services.dart';
-import 'package:public_tools/pigeon/app.dart';
-import 'package:public_tools/utils/logger.dart';
 import 'package:sqflite/sqflite.dart';
 import 'package:oktoast/oktoast.dart';
 import '../../core/plugin.dart';
 import '../../config.dart';
+import '../../core/plugin_command.dart';
+import '../../pigeon/app.dart';
+import '../../utils/logger.dart';
 
 enum ContentType { text, image }
 
@@ -31,11 +32,11 @@ Future<Database> getDatabase() async {
 
 class _PasteItem {
   static String tableName = 'clipboardHistory';
-  String id;
-  String summary;
-  DateTime updatedAt;
-  ContentType contentType;
-  String text;
+  String? id;
+  String? summary;
+  DateTime? updatedAt;
+  ContentType? contentType;
+  String? text;
 
   _PasteItem({
     this.summary,
@@ -47,12 +48,12 @@ class _PasteItem {
   Map<String, dynamic> toMap() {
     var map = <String, dynamic>{
       'summary': summary,
-      'updatedAt': DateFormat('yyyy-MM-dd HH:mm:ss').format(updatedAt),
-      'contentType': contentType.index,
+      'updatedAt': DateFormat('yyyy-MM-dd HH:mm:ss').format(updatedAt!),
+      'contentType': contentType!.index,
       'text': text
     };
     if (id != null) {
-      map['id'] = int.parse(id);
+      map['id'] = int.parse(id!);
     }
     return map;
   }
@@ -69,13 +70,13 @@ class _PasteItem {
 
 class PasteItemHelper {
   // 工厂模式
-  factory PasteItemHelper() => _getInstance();
-  static PasteItemHelper get instance => _getInstance();
-  static PasteItemHelper _instance;
+  factory PasteItemHelper() => _getInstance()!;
+  static PasteItemHelper? get instance => _getInstance();
+  static PasteItemHelper? _instance;
   PasteItemHelper._internal() {
     // 初始化
   }
-  static PasteItemHelper _getInstance() {
+  static PasteItemHelper? _getInstance() {
     if (_instance == null) {
       _instance = new PasteItemHelper._internal();
     }
@@ -83,7 +84,7 @@ class PasteItemHelper {
   }
 
   Future<List<_PasteItem>> query(
-      {String where, List whereArgs, List<String> columns}) async {
+      {String? where, List? whereArgs, List<String>? columns}) async {
     var db = await getDatabase();
     var results = await db.query(_PasteItem.tableName,
         orderBy: 'updatedAt desc',
@@ -95,7 +96,7 @@ class PasteItemHelper {
     }).toList();
   }
 
-  Future<_PasteItem> get(int id) async {
+  Future<_PasteItem?> get(int id) async {
     return getDatabase().then((db) async {
       var maps = await db.query(_PasteItem.tableName,
           columns: ['id', 'updatedAt', 'summary', 'text', 'contentType'],
@@ -132,120 +133,101 @@ class PasteItemHelper {
   }
 }
 
-class ClipboardPlugin extends Plugin {
-  ClipboardPlugin({this.onChange}) {
-    _startListenChange();
-  }
-
-  final String id = 'clipboard';
-  final String title = '剪切板';
-  final String subtitle = '查看剪切板历史';
-  final String icon =
-      "https://vfiles.gtimg.cn/vupload/20210220/586e451613797978732.png";
-
-  List<PluginCommand> commands = [
-    PluginCommand(
-        title: "剪切板",
-        subtitle: "查看剪切板历史",
-        keywords: ["cp", "clipboard hitory", "jqb"],
-        icon:
-            "https://vfiles.gtimg.cn/vupload/20210220/586e451613797978732.png",
-        mode: CommandMode.listView)
-  ];
-
-  @override
-  void onEnter(PluginCommand command) {}
-
-  @override
-  Future<List<SearchResult>> onSearch(
-      String keyword, PluginCommand command) async {
-    var list = await PasteItemHelper.instance
+final _command = PluginCommand(
+  id: 'clipboard',
+  title: "剪切板",
+  subtitle: "查看剪切板历史",
+  description: "查看剪切板历史",
+  keywords: ["cp", "clipboard hitory", "jqb"],
+  icon: "https://vfiles.gtimg.cn/vupload/20210220/586e451613797978732.png",
+  mode: CommandMode.listView,
+  onSearch: (String keyword) async {
+    var list = await PasteItemHelper.instance!
         .query(where: 'text like ?', whereArgs: ['%' + keyword + '%']);
     return list.map((e) {
       return SearchResult(
-          title: e.summary,
-          subtitle: DateFormat('yyyy-MM-dd HH:mm:ss').format(e.updatedAt),
+          id: e.summary!,
+          title: e.summary!,
+          subtitle: DateFormat('yyyy-MM-dd HH:mm:ss').format(e.updatedAt!),
           icon: 'https://img.icons8.com/officel/80/000000/paste-as-text.png',
-          description: e.text);
+          description: e.text!);
     }).toList();
-  }
+  },
+  onResultPreview: (SearchResult result) {
+    return Future.value(
+      HighlightView(
+        // The original code to be highlighted
+        result.description!,
 
-  @override
-  Future<Widget> onResultSelected(SearchResult item) {
-    return Future.value(HighlightView(
-      // The original code to be highlighted
-      item.description,
+        // Specify language
+        // It is recommended to give it a value for performance
+        language: 'dart',
 
-      // Specify language
-      // It is recommended to give it a value for performance
-      language: 'dart',
+        // Specify highlight theme
+        // All available themes are listed in `themes` folder
+        theme: tomorrowNightTheme,
 
-      // Specify highlight theme
-      // All available themes are listed in `themes` folder
-      theme: tomorrowNightTheme,
+        // Specify padding
+        padding: EdgeInsets.all(12),
 
-      // Specify padding
-      padding: EdgeInsets.all(12),
-
-      // Specify text style
-      // textStyle: TextStyle(
-      //   fontFamily: 'My awesome monospace font',
-      //   fontSize: 16,
-      // ),
-    ));
-  }
-
-  @override
-  void onResultTap(item) {
-    Clipboard.setData(ClipboardData(text: item.description));
+        // Specify text style
+        // textStyle: TextStyle(
+        //   fontFamily: 'My awesome monospace font',
+        //   fontSize: 16,
+        // ),
+      ),
+    );
+  },
+  onResultTap: (SearchResult result) {
+    Clipboard.setData(ClipboardData(text: result.description));
     showToast("复制成功");
     Service().pasteToFrontestApp();
-  }
+  },
+);
 
-  void Function(List<Map<String, String>>) onChange;
-
-  void _startListenChange() {
-    String lastText;
-    var callback = (Timer timer) {
-      Clipboard.getData(Clipboard.kTextPlain).then((data) {
-        if (data == null) return;
-        if (lastText == data.text) {
-          return;
-        }
-        lastText = data.text;
-        _onNewItemReceived(data.text);
-      });
-    };
-    Timer.periodic(Duration(seconds: 2), callback);
-  }
-
-  Future<_PasteItem> _existsItem(text) {
-    return PasteItemHelper.instance
-        .query(where: 'text = ?', whereArgs: [text]).then((results) {
-      return results.length > 0 ? results[0] : null;
+void _startListenChange() {
+  String? lastText;
+  var callback = (Timer timer) {
+    Clipboard.getData(Clipboard.kTextPlain).then((data) {
+      if (data == null) return;
+      if (lastText == data.text) {
+        return;
+      }
+      lastText = data.text;
+      _onNewItemReceived(data.text);
     });
-  }
-
-  void _onNewItemReceived(String text) async {
-    logger.i('[clipboard] 新的粘贴板内容: $text');
-    var item = _PasteItem(
-      contentType: ContentType.text,
-      text: text,
-      updatedAt: DateTime.now(),
-      summary: text,
-    );
-    var alreadyExistsItem = await _existsItem(text);
-    if (alreadyExistsItem != null) {
-      logger.i('数据库已存在，仅更新时间');
-      item.id = alreadyExistsItem.id;
-    }
-    await PasteItemHelper.instance.save(item);
-    if (onChange != null) {
-      var list = await PasteItemHelper.instance.query();
-      this.onChange(list.map((e) {
-        var item = Map<String, String>();
-        item["title"] = e.summary;
-      }).toList());
-    }
-  }
+  };
+  Timer.periodic(Duration(seconds: 2), callback);
 }
+
+Future<_PasteItem?> _existsItem(text) {
+  return PasteItemHelper.instance!
+      .query(where: 'text = ?', whereArgs: [text]).then((results) {
+    return results.length > 0 ? results[0] : null;
+  });
+}
+
+void _onNewItemReceived(String? text) async {
+  var item = _PasteItem(
+    contentType: ContentType.text,
+    text: text,
+    updatedAt: DateTime.now(),
+    summary: text,
+  );
+  var alreadyExistsItem = await _existsItem(text);
+  if (alreadyExistsItem != null) {
+    logger.i('数据库已存在，仅更新时间');
+    item.id = alreadyExistsItem.id;
+  }
+  await PasteItemHelper.instance!.save(item);
+}
+
+final clipboardPlugin = Plugin(
+  id: "clipboard",
+  title: "剪切板",
+  subtitle: '查看剪切板历史',
+  description: "查看剪切板历史",
+  icon: "https://vfiles.gtimg.cn/vupload/20210220/586e451613797978732.png",
+  commands: [_command],
+  onRegister: _startListenChange,
+);

@@ -18,6 +18,7 @@
     "qrcode": "^1.5.0",
     "robotjs": "^0.6.0",
     "simple-mac-clipboard": "^1.0.1",
+    "uuid": "^8.3.2",
     "ws": "^8.3.0"
   }
 }

@@ -2,13 +2,12 @@ import 'package:flutter/material.dart';
 import 'package:hotkey_manager/hotkey_manager.dart';
 
 import 'package:oktoast/oktoast.dart';
-import 'package:provider/provider.dart';
-import 'package:public_tools/core/plugin_manager.dart';
-import 'package:public_tools/pages/command_page.dart';
-import 'package:public_tools/pages/main_page.dart';
 import 'package:window_manager/window_manager.dart';
-import 'views/main_view.dart';
-import 'pages/settings_page.dart';
+import 'core/plugin_manager.dart';
+import 'pages/command_page.dart';
+import 'pages/main_page.dart';
+
+final GlobalKey<NavigatorState> navigatorKey = GlobalKey<NavigatorState>();
 
 void main() async {
   WidgetsFlutterBinding.ensureInitialized();
@@ -25,27 +24,28 @@ class MainApp extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return OKToast(
-        child: MaterialApp(
-      title: 'Flutter Demo',
-      theme: ThemeData(
-        // This is the theme of your application.
-        //
-        // Try running your application with "flutter run". You'll see the
-        // application has a blue toolbar. Then, without quitting the app, try
-        // changing the primarySwatch below to Colors.green and then invoke
-        // "hot reload" (press "r" in the console where you ran "flutter run",
-        // or simply save your changes to "hot reload" in a Flutter IDE).
-        // Notice that the counter didn't reset back to zero; the application
-        // is not restarted.
-        primarySwatch: Colors.blue,
+      child: MaterialApp(
+        title: 'Flutter Demo',
+        theme: ThemeData(
+          // This is the theme of your application.
+          //
+          // Try running your application with "flutter run". You'll see the
+          // application has a blue toolbar. Then, without quitting the app, try
+          // changing the primarySwatch below to Colors.green and then invoke
+          // "hot reload" (press "r" in the console where you ran "flutter run",
+          // or simply save your changes to "hot reload" in a Flutter IDE).
+          // Notice that the counter didn't reset back to zero; the application
+          // is not restarted.
+          primarySwatch: Colors.blue,
+        ),
+        home: HomePage(title: 'Public'),
       ),
-      home: HomePage(title: 'Public'),
-    ));
+    );
   }
 }
 
 class HomePage extends StatefulWidget {
-  HomePage({Key key, this.title}) : super(key: key);
+  HomePage({Key? key, this.title}) : super(key: key);
 
   // This widget is the home page of your application. It is stateful, meaning
   // that it has a State object (defined below) that contains fields that affect
@@ -56,14 +56,14 @@ class HomePage extends StatefulWidget {
   // used by the build method of the State. Fields in a Widget subclass are
   // always marked "final".
 
-  final String title;
+  final String? title;
 
   @override
   _HomePageState createState() => _HomePageState();
 }
 
 class _HomePageState extends State<HomePage> {
-  PluginManager pluginManager = PluginManager.instance;
+  PluginManager? pluginManager = PluginManager.instance;
 
   @override
   Widget build(BuildContext context) {
@@ -73,29 +73,26 @@ class _HomePageState extends State<HomePage> {
     // The Flutter framework has been optimized to make rerunning build methods
     // fast, so that you can just rebuild anything that needs updating rather
     // than having to individually change instances of widgets.
-    return ChangeNotifierProvider.value(
-        value: PluginManager.instance.state,
-        child: MaterialApp(
-          color: Color.fromARGB(255, 0, 0, 0),
-          title: "hello",
-          routes: {
-            '/settings': (BuildContext context) => SettingsPage(),
-            // '/command': (BuildContext context) => Scaffold(body: MainView()),
-          },
-          onGenerateRoute: (settings) {
-            if (settings.name == 'command') {
-              final args = settings.arguments as CommandPageParams;
-              return MaterialPageRoute(
-                builder: (context) => CommandPage(
-                  plugin: args.plugin,
-                  command: args.command,
-                ),
-              );
-            }
-            return null;
-          },
-          home: MainPage(),
-        ) // This trailing comma makes auto-formatting nicer for build methods.
-        );
+    return MaterialApp(
+      color: Color.fromARGB(255, 0, 0, 0),
+      title: "hello",
+      navigatorKey: navigatorKey,
+      onGenerateRoute: (settings) {
+        if (settings.name == 'command') {
+          final args = settings.arguments as CommandPageParams?;
+          return PageRouteBuilder(
+            settings: settings,
+            transitionDuration: Duration.zero,
+            reverseTransitionDuration: Duration.zero,
+            pageBuilder: (_, __, ___) => CommandPage(
+              plugin: args!.plugin,
+              command: args.command,
+            ),
+          );
+        }
+        return null;
+      },
+      home: MainPage(),
+    );
   }
 }

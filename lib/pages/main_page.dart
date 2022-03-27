@@ -1,10 +1,13 @@
 import 'package:flutter/material.dart';
-import 'package:public_tools/core/plugin.dart';
-import 'package:public_tools/core/plugin_manager.dart';
-import 'package:public_tools/pages/command_page.dart';
-import 'package:public_tools/views/search_list.dart';
+
+import '../core/plugin.dart';
+import '../core/plugin_command.dart';
+import '../core/plugin_manager.dart';
+import '../views/search_list.dart';
 
 class MainPage extends StatefulWidget {
+  static final String routeName = 'main';
+
   MainPage();
 
   @override
@@ -18,8 +21,8 @@ class _MainPageState extends State<MainPage> {
     return Future.value(PluginManager.instance.searchCommands(keyword));
   }
 
-  Future<Widget> _onSelect(PluginResult<PluginCommand> item) {
-    return null;
+  void _onEnter(PluginResult<PluginCommand> item) {
+    PluginManager.instance.onCommand(item.value, item.plugin);
   }
 
   @override
@@ -50,12 +53,7 @@ class _MainPageState extends State<MainPage> {
             Expanded(
               child: SearchList<PluginResult<PluginCommand>>(
                 onSearch: _onSearch,
-                onSelect: _onSelect,
-                onEnter: (PluginResult<PluginCommand> item) {
-                  Navigator.pushNamed(context, 'command',
-                      arguments: CommandPageParams(
-                          plugin: item.plugin, command: item.value));
-                },
+                onEnter: _onEnter,
               ),
             ),
           ],

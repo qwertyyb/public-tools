@@ -1,23 +1,19 @@
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
-import 'package:provider/provider.dart';
-import 'package:public_tools/core/plugin.dart';
-import 'package:public_tools/core/plugin_manager.dart';
-import 'package:public_tools/views/plugin_label_view.dart';
 import 'package:window_manager/window_manager.dart';
 
 class _TextInput extends StatelessWidget {
-  final TextEditingController controller;
+  final TextEditingController? controller;
 
-  final void Function() onArrowDown;
+  final void Function()? onArrowDown;
 
-  final void Function() onArrowUp;
+  final void Function()? onArrowUp;
 
-  final void Function() onEnter;
+  final void Function()? onEnter;
 
-  final void Function() onEmptyDelete;
+  final void Function()? onEmptyDelete;
 
-  FocusNode _focusNode;
+  final FocusNode _focusNode;
 
   _TextInput({
     this.controller,
@@ -25,34 +21,33 @@ class _TextInput extends StatelessWidget {
     this.onEnter,
     this.onArrowUp,
     this.onEmptyDelete,
-  }) {
-    _focusNode = FocusNode(
-        canRequestFocus: false,
-        onKey: (node, event) {
-          // 防止按向上或向下箭头时，光标移动
-          if (event.isKeyPressed(LogicalKeyboardKey.arrowDown) ||
-              event.isKeyPressed(LogicalKeyboardKey.arrowUp) ||
-              event.isKeyPressed(LogicalKeyboardKey.enter)) {
-            return KeyEventResult.handled;
-          }
-          return KeyEventResult.ignored;
-        });
-  }
+  }) : _focusNode = FocusNode(
+          canRequestFocus: false,
+          onKey: (node, event) {
+            // 防止按向上或向下箭头时，光标移动
+            if (event.isKeyPressed(LogicalKeyboardKey.arrowDown) ||
+                event.isKeyPressed(LogicalKeyboardKey.arrowUp) ||
+                event.isKeyPressed(LogicalKeyboardKey.enter)) {
+              return KeyEventResult.handled;
+            }
+            return KeyEventResult.ignored;
+          },
+        );
 
   void _onKey(RawKeyEvent event) {
     if (event.isKeyPressed(LogicalKeyboardKey.arrowDown)) {
-      this.onArrowDown();
+      this.onArrowDown!();
     } else if (event.isKeyPressed(LogicalKeyboardKey.enter)) {
-      this.onEnter();
+      this.onEnter!();
     } else if (event.isKeyPressed(LogicalKeyboardKey.arrowUp)) {
-      this.onArrowUp();
+      this.onArrowUp!();
     } else if (event.isKeyPressed(LogicalKeyboardKey.backspace) &&
-        controller.text.length <= 0) {
+        controller!.text.length <= 0) {
       // onKey事件在textfield value change之前，所以这里需要延迟一下
       // 否则会导致在onEmptyDelete中设置controller.text之后，textfield处理删除键时，删掉新设置的text
       if (this.onEmptyDelete == null) return;
       Future.delayed(Duration.zero, () {
-        this.onEmptyDelete();
+        this.onEmptyDelete!();
       });
     }
   }
@@ -77,14 +72,14 @@ class _TextInput extends StatelessWidget {
 }
 
 class InputBar extends StatelessWidget {
-  final Function onEnter;
-  final Function selectNext;
-  final Function selectPrev;
-  final Widget inputPrefix;
-  final Widget inputSuffix;
-  final Function onEmptyDelete;
+  final Function? onEnter;
+  final Function? selectNext;
+  final Function? selectPrev;
+  final Widget? inputPrefix;
+  final Widget? inputSuffix;
+  final Function? onEmptyDelete;
 
-  final TextEditingController controller;
+  final TextEditingController? controller;
 
   InputBar({
     this.onEnter,
@@ -106,21 +101,21 @@ class InputBar extends StatelessWidget {
       Expanded(
         child: _TextInput(
           controller: controller,
-          onEnter: onEnter,
-          onArrowDown: selectNext,
-          onArrowUp: selectPrev,
-          onEmptyDelete: onEmptyDelete,
+          onEnter: onEnter as void Function()?,
+          onArrowDown: selectNext as void Function()?,
+          onArrowUp: selectPrev as void Function()?,
+          onEmptyDelete: onEmptyDelete as void Function()?,
         ),
       ),
     ];
     if (inputPrefix != null) {
       widgets.insert(
         0,
-        inputPrefix,
+        inputPrefix!,
       );
     }
     if (inputSuffix != null) {
-      widgets.add(inputSuffix);
+      widgets.add(inputSuffix!);
     }
     return Container(
       height: 48,

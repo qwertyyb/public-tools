@@ -1,9 +1,10 @@
 import 'package:flutter/material.dart';
-import 'package:public_tools/views/result_item_view.dart';
+
+import 'result_item_view.dart';
 
 class PluginLabelView extends StatelessWidget {
-  final String icon;
-  final String title;
+  final String? icon;
+  final String? title;
 
   PluginLabelView({this.icon, this.title});
 
@@ -11,9 +12,9 @@ class PluginLabelView extends StatelessWidget {
   Widget build(BuildContext context) {
     return Row(
       children: [
-        PluginResultItemIconView(icon),
+        ItemIconView(icon),
         Padding(padding: EdgeInsets.only(left: 6)),
-        Text(title)
+        Text(title!)
       ],
     );
   }

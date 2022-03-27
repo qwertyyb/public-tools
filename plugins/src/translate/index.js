@@ -4,24 +4,14 @@ const clip = require('simple-mac-clipboard')
 
 const TRIGGERS = ['fy', 'ts', 'trans', 'translate', '翻译']
 
-// const getResponse = (text) => axios.get(`http://fanyi.youdao.com/translate?&doctype=json&type=AUTO&i=${encodeURIComponent(text)}`)
-//   .then(res => {
-//     const { tgt } = res.data.translateResult[0][0]
-//     return [{
-//       id: tgt,
-//       title: tgt,
-//       subtitle: '来自有道翻译',
-//       icon: 'https://img.icons8.com/color/144/000000/google-translate.png'
-//     }]
-//   })
-
 const getResponse = (text) => axios.get(`https://dict-co.iciba.com/api/dictionary.php?w=${encodeURIComponent(text)}&type=json&key=0CD3A4C079D2D23C683BBFF96300E924`)
   .then(res => {
     const { symbols, exchange, word_name: word = '' } = res.data;
     const first = {
       id: word,
       title: word,
-      subtitle: '',
+      subtitle: text,
+      description: '',
       icon: 'https://img.icons8.com/color/144/000000/google-translate.png'
     }
     console.log(text, res.data)
@@ -33,6 +23,7 @@ const getResponse = (text) => axios.get(`https://dict-co.iciba.com/api/dictionar
           return part.means.map(mean => {
             const title = mean.word_mean
             const subtitle = ''
+            const description = mean.word_mean
             const icon = 'https://img.icons8.com/color/144/000000/google-translate.png'
             return { title, subtitle, icon, id: title}
           })
@@ -47,21 +38,28 @@ const getResponse = (text) => axios.get(`https://dict-co.iciba.com/api/dictionar
     return list;
   })
 
-const plugin = createPlugin('translate', {
+const translatePlugin = createPlugin(utils => ({
+  id: 'translate',
   title: '翻译',
-  subtitle: '翻译输入内容',
+  subtitle: '翻译所选内容',
+  description: '翻译文本',
+  mode: 'listView',
+  keywords: TRIGGERS,
   icon: 'https://img.icons8.com/color/144/000000/google-translate.png',
-})
+  async onSearch(keyword) {
+    if (!keyword) return [];
+    const list = await getResponse(keyword)
+    return list;
+  },
+  onEnter () {},
+  onExit () {},
+  onResultSelected(result) {
+    return null;
+  },
+  onResultTap(result) {
+    clip.writeText(clip.FORMAT_PLAIN_TEXT, result.id)
+    utils.toast('已复制到粘贴板')
+  }
+}));
 
-plugin.onKeywordChange(async ({ keyword }) => {
-  if (!keyword) return plugin.updateList(keyword, [])
-  const list = await getResponse(keyword)
-  console.log('keyword', keyword, list);
-  plugin.updateList(keyword, list)
-})
-plugin.onTap((item) => {
-  clip.writeText(clip.FORMAT_PLAIN_TEXT, item.id)
-  plugin.toast({ content: '已复制到粘贴板' })
-})
-
-module.exports = plugin
+module.exports = translatePlugin;

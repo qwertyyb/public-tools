@@ -1,8 +1,9 @@
 import 'dart:convert';
 
 import 'package:hotkey_manager/hotkey_manager.dart';
-import 'package:public_tools/utils/logger.dart';
 import 'package:shared_preferences/shared_preferences.dart';
+
+import '../../utils/logger.dart';
 
 Future<HotKey> getHotkeyFromPrefs() async {
   final prefs = await SharedPreferences.getInstance();
@@ -16,7 +17,7 @@ Future<HotKey> getHotkeyFromPrefs() async {
   }
   savedHotkey = prefs.getString('hotkey');
   print(savedHotkey);
-  final json = jsonDecode(savedHotkey);
+  final json = jsonDecode(savedHotkey!);
   final savedModifiers = List<String>.from(json["modifiers"]);
   final savedKeyCode = json["keyCode"];
   final modifiers =
