@@ -168,10 +168,31 @@ void runClient(binPath) async {
   if (Platform.environment["REMOTE_PLUGIN_MODE"] == 'local') {
     pluginDir = Directory.current.path + '/plugins';
   }
-  final clientProcess = await Process.start(
+  final newEnv = Map<String, String>.from(Platform.environment);
+  newEnv['PATH'] = '$binPath:${newEnv['PATH']}';
+  // 安装依赖
+  final installProcess = await Process.start(
     '$binPath/npm',
-    ['run', 'start'],
+    ['install'],
+    environment: newEnv,
     workingDirectory: pluginDir,
   );
+  final exitCode = await installProcess.exitCode;
+  logger.i(exitCode);
+  var args = ['./src/index.js'];
+  if (Platform.environment['MODE'] == 'debug') {
+    args.insert(0, '--inspect');
+  }
+  final clientProcess = await Process.start(
+    '$binPath/node',
+    args,
+    workingDirectory: pluginDir,
+    environment: newEnv,
+    runInShell: true,
+  );
   clientProcess.stdout.transform(utf8.decoder).forEach(print);
+  clientProcess.stderr.transform(utf8.decoder).forEach(print);
+  clientProcess.exitCode.then((code) {
+    print('client exit code: $code');
+  });
 }

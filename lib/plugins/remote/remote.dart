@@ -16,20 +16,44 @@ import 'server.dart';
 
 Future<String> _downloadNodeJs() async {
   const downloadUrl =
-      'https://nodejs.org/dist/v16.13.1/node-v16.13.1-darwin-x64.tar.gz';
+      'https://nodejs.org/dist/v16.13.0/node-v16.13.0-darwin-x64.tar.gz';
   final dir = await getApplicationSupportDirectory();
-  final filePath = '${dir.path}/node-v16.13.1-darwin-x64.tar.gz';
-  final nodeDir = '${dir.path}/node-v16.13.1-darwin-x64';
-  if (File(filePath).existsSync()) return '$nodeDir/bin';
+  final filePath = '${dir.path}/node-v16.13.0-darwin-x64.tar.gz';
+  final nodeDir = '${dir.path}/node-v16.13.0-darwin-x64/';
+  final binDir = '$nodeDir/bin';
+  final npmPath = '$binDir/npm';
+  final nodePath = '$binDir/node';
+  if (File(npmPath).existsSync() && File(nodePath).existsSync()) {
+    return binDir;
+  }
+  // 删除文件，重新下载
+  if (File(npmPath).existsSync() || File(nodePath).existsSync()) {
+    Directory(nodeDir).deleteSync(recursive: true);
+  }
+  if (File(filePath).existsSync()) {
+    File(filePath).deleteSync();
+  }
   final request = await HttpClient().getUrl(Uri.parse(downloadUrl));
   final response = await request.close();
   final file = File(filePath);
   await response.pipe(file.openWrite()).catchError((error) {
     file.deleteSync();
+    logger.e('download nodejs error: $error');
+    throw error;
   }, test: (error) => false);
-  Process.run("tar", ['-zxf', 'node-v16.13.1-darwin-x64.tar.gz'],
-      workingDirectory: dir.path);
-  return '$nodeDir/bin';
+  logger.i('download success');
+  final process = await Process.run(
+    "tar",
+    ['-zxf', 'node-v16.13.0-darwin-x64.tar.gz'],
+    workingDirectory: dir.path,
+  );
+  final exitCode = process.exitCode;
+  if (exitCode != 0) {
+    file.deleteSync();
+    throw Exception('download nodejs error');
+  }
+  logger.i('untar success');
+  return binDir;
 }
 
 late RemotePluginServer _server;

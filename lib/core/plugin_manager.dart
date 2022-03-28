@@ -1,5 +1,3 @@
-import 'package:flutter/material.dart';
-
 import '../main.dart';
 import '../pages/command_page.dart';
 import '../plugins/application/application.dart';

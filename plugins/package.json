@@ -4,7 +4,7 @@
   "description": "",
   "main": "index.js",
   "scripts": {
-    "start": "node src/index.js",
+    "start": "npm --version && node --version && node src/index.js",
     "build-json": "node build-json.js",
     "test": "echo \"Error: no test specified\" && exit 1"
   },

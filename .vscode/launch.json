@@ -11,6 +11,7 @@
       "type": "dart",
       "flutterMode": "debug",
       "env": {
+        "MODE": "debug",
         "REMOTE_PLUGIN_MODE": "local",
       }
     }
