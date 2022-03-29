@@ -32,7 +32,10 @@ const storePlugin = createPlugin(utils => ({
   },
   onResultSelected(result) {
     const intro = markdown.toHTML(result.description || `# ${title}\n # ${subtitle}`)
-    return intro;
+    return `<div>
+      <div><text-button>下载</text-button></div>
+      <div>${intro}</div>
+    </div>`;
   },
   onResultTap(result) {
     return null;

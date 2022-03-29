@@ -124,43 +124,25 @@ void _onRegistery() {
               "result": result.toJson(),
             });
             if (data["html"] == null) return null;
-            double? attrDouble(Map<String, String> attributes, String attr) {
-              final widthString = attributes[attr];
-              return widthString == null
-                  ? widthString as double?
-                  : double.tryParse(widthString);
-            }
-
-            ImageRender customBase64ImageRender() =>
-                (context, attributes, element) {
-                  final decodedImage = base64
-                      .decode(attributes['src']!.split("base64,")[1].trim());
-                  precacheImage(
-                    MemoryImage(decodedImage),
-                    context.buildContext,
-                    onError: (exception, StackTrace? stackTrace) {
-                      context.parser.onImageError!.call(exception, stackTrace);
-                    },
-                  );
-                  return Image.memory(
-                    decodedImage,
-                    fit: BoxFit.fitWidth,
-                    width: attrDouble(attributes, 'width'),
-                    height: attrDouble(attributes, 'height'),
-                    frameBuilder: (ctx, child, frame, _) {
-                      if (frame == null) {
-                        return Text(attributes['alt'] ?? "",
-                            style: context.style.generateTextStyle());
-                      }
-                      return child;
-                    },
-                  );
-                };
+            CustomRenderMatcher isTextButton =
+                (context) => context.tree.element?.localName == 'text-button';
+            CustomRender textButtonRender = CustomRender.widget(
+                widget: (RenderContext context, buildChildren) {
+              return TextButton(
+                child: Text(context.tree.element?.text ?? ''),
+                onPressed: () {
+                  _server.invoke('onTextButtonPressed', {
+                    "command": element,
+                    "result": result.toJson(),
+                  });
+                },
+              );
+            });
             return Html(
               data: data["html"],
-              customImageRenders: {
-                dataUriMatcher(): customBase64ImageRender(),
-              },
+              anchorKey: GlobalKey(),
+              customRenders: {isTextButton: textButtonRender},
+              tagsList: Html.tags..addAll(['text-button']),
             );
           },
         );
