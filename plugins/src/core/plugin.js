@@ -76,7 +76,7 @@ ws.on('message',async  (message) => {
   if (type === 'onSearch') {
     const plugin = plugins.get(payload.command.id)
     if (!plugin) {
-      throw new Error(`插件${payload.command.id}不存在`)
+      console.warn(`插件${payload.command.id}不存在`)
     }
     const results = await plugin.onSearch(payload.keyword)
     return send(messageData.makeReplyMessage({ results }))
@@ -84,7 +84,7 @@ ws.on('message',async  (message) => {
 
   if (type === 'onResultSelected') {
     if (!curPlugin) {
-      throw new Error(`插件不存在`)
+      console.warn(`插件不存在`)
     }
     const html = await curPlugin.onResultSelected(payload.result)
     return send(messageData.makeReplyMessage({ html }))
@@ -93,7 +93,7 @@ ws.on('message',async  (message) => {
   if (type === 'onEnter') {
     const plugin = plugins.get(payload.command.id)
     if (!plugin) {
-      throw new Error(`插件${payload.command.id}不存在`)
+      console.warn(`插件${payload.command.id}不存在`)
     }
     curPlugin = plugin;
     plugin.onEnter(payload.command);
@@ -101,19 +101,29 @@ ws.on('message',async  (message) => {
 
   if (type === 'onResultTap') {
     if (!curPlugin) {
-      throw new Error(`插件不存在`)
+      console.warn(`插件不存在`)
     }
     curPlugin.onResultTap(payload.result)
   }
 
   if (type === 'onExit') {
     if (!curPlugin) {
-      throw new Error(`插件不存在`)
+      console.warn(`插件不存在`)
     }
     let plugin = curPlugin;
     curPlugin = null;
     plugin.onExit(payload.command)
   }
+
+  if (type === 'event') {
+    const { event, handlerName, handlerArgs } = payload;
+    if (curPlugin && curPlugin[handlerName]) {
+      curPlugin[handlerName](handlerArgs);
+    } else if (curPlugin && !curPlugin[handlerName]) {
+      console.warn('插件中不存在事件处理器', handlerName)
+    }
+  }
+
   return send(messageData.makeReplyMessage({}))
 })
 
@@ -137,7 +147,7 @@ const createPlugin = (pluginCreator) => {
   const plugin = pluginCreator(createUtils())
   const { id } = plugin;
   if (plugins.get(id)) {
-    throw new Error('当前插件已存在')
+    console.warn('当前插件已存在');
   }
   plugins.set(id, plugin)
   return plugin

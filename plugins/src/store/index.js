@@ -33,12 +33,25 @@ const storePlugin = createPlugin(utils => ({
   onResultSelected(result) {
     const intro = markdown.toHTML(result.description || `# ${title}\n # ${subtitle}`)
     return `<div>
-      <div><text-button>下载</text-button></div>
+      <flutter-container>
+        <row>
+          <spacer></spacer>
+          <text-button onpressed="downloadPlugin" data-id="${result.id}">
+            <row>
+              <icon size="16"></icon>
+              <text>下载</text>
+            </row>
+          </text-button>
+        </row>
+      </flutter-container>
       <div>${intro}</div>
     </div>`;
   },
   onResultTap(result) {
     return null;
+  },
+  downloadPlugin() {
+    console.log('download plugin')
   },
   onEnter() {},
   onExit() {},

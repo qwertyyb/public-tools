@@ -49,6 +49,10 @@ class SearchListState<T> extends State<SearchList<T>> {
     });
   }
 
+  void clearSearch() {
+    _textEditingController.clear();
+  }
+
   @override
   void initState() {
     super.initState();

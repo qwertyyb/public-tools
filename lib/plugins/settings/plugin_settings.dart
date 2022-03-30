@@ -3,9 +3,12 @@ import 'dart:convert';
 import 'package:flutter/material.dart';
 import 'package:hotkey_manager/hotkey_manager.dart';
 import 'package:shared_preferences/shared_preferences.dart';
+import 'package:shortcut_launcher/plugins/settings/setting_key.dart';
 
 import '../../core/plugin.dart';
+import '../../core/plugin_command.dart';
 import '../../core/plugin_manager.dart';
+import '../../utils/logger.dart';
 import '../../views/plugin_label_view.dart';
 import 'hotkey_recorder.dart';
 
@@ -23,16 +26,25 @@ class PluginSettingsView extends StatefulWidget {
 const noExpandedPluginIds = const ['applicationLauncher'];
 
 class PluginSettingsState extends State<PluginSettingsView> {
-  Map<String, HotKey> _pluginsHotkey = {};
+  Map<String, Map<String, HotKey>> _pluginsHotkey = {};
   Map<Plugin, bool> _expandedState = {};
 
-  Future<Map<String, HotKey>> _getPluginsHotKey() async {
+  Future<Map<String, Map<String, HotKey>>> _getPluginsHotKey() async {
     final prefs = await SharedPreferences.getInstance();
-    final savedValue = prefs.getString('pluginsHotKey');
+    final savedValue = prefs.getString(SettingKey.pluginsCommandsHotKey);
     if (savedValue == null || savedValue == '') return {};
     final json = jsonDecode(savedValue) as Map<String, dynamic>;
-    return json.map<String, HotKey>(
-        (key, value) => MapEntry(key, HotKey.fromJson(value)));
+    return json.map<String, Map<String, HotKey>>(
+      (key, value) => MapEntry(
+        key,
+        (value as Map<String, dynamic>).map<String, HotKey>(
+          (commandId, commandHotKey) => MapEntry(
+            commandId,
+            HotKey.fromJson(commandHotKey),
+          ),
+        ),
+      ),
+    );
   }
 
   void refreshPluginsHotKey() async {
@@ -42,14 +54,24 @@ class PluginSettingsState extends State<PluginSettingsView> {
     });
   }
 
-  void saveHotKey(String pluginId, HotKey? hotkey) async {
-    if (hotkey == null) {
+  void saveHotKey(
+    String pluginId,
+    PluginCommand command,
+    HotKey? hotKey,
+  ) async {
+    logger.i('saveHotKey: $pluginId, $command, $hotKey');
+    if (hotKey == null) {
       _pluginsHotkey.remove(pluginId);
     } else {
-      _pluginsHotkey[pluginId] = hotkey;
+      _pluginsHotkey[pluginId] = {
+        command.id: hotKey,
+      };
     }
     final prefs = await SharedPreferences.getInstance();
-    prefs.setString('pluginsHotKey', jsonEncode(_pluginsHotkey));
+    prefs.setString(
+      SettingKey.pluginsCommandsHotKey,
+      jsonEncode(_pluginsHotkey),
+    );
     refreshPluginsHotKey();
     widget.onHotKeyChange!();
     setState(() {});
@@ -83,9 +105,10 @@ class PluginSettingsState extends State<PluginSettingsView> {
                 SizedBox(
                   width: 160,
                   child: HotKeyRecorderView(
-                    disabled: plugin.commands.length != 1,
-                    onHotKeyRecorded: (hotkey) => saveHotKey(plugin.id, hotkey),
-                    hotKey: null,
+                    disabled: false,
+                    onHotKeyRecorded: (hotkey) =>
+                        saveHotKey(plugin.id, command, hotkey),
+                    hotKey: (_pluginsHotkey[plugin.id] ?? const {})[command.id],
                   ),
                 )
               ],
@@ -97,12 +120,14 @@ class PluginSettingsState extends State<PluginSettingsView> {
 
   @override
   Widget build(BuildContext context) {
-    final plugins = PluginManager.instance.plugins
-        .where((plugin) => plugin.title != '' && plugin.id != '');
+    final plugins = PluginManager.instance.plugins.where((plugin) =>
+        plugin.title != '' && plugin.id != '' && plugin.commands.isNotEmpty);
 
     final rows = plugins.map<Column>((plugin) {
-      final hotKey = _pluginsHotkey[plugin.id];
+      final commandsHotKey = _pluginsHotkey[plugin.id];
       final expanded = _expandedState[plugin] ?? false;
+      // logger.i(
+      // '${plugin.id}, ${plugin.commands.first.id}, ${},${(commandsHotKey ?? const {})[plugin.commands.first]}');
       return Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
@@ -139,8 +164,10 @@ class PluginSettingsState extends State<PluginSettingsView> {
                   width: 160,
                   child: HotKeyRecorderView(
                     disabled: plugin.commands.length != 1,
-                    onHotKeyRecorded: (hotkey) => saveHotKey(plugin.id, hotkey),
-                    hotKey: hotKey,
+                    onHotKeyRecorded: (hotkey) =>
+                        saveHotKey(plugin.id, plugin.commands.first, hotkey),
+                    hotKey:
+                        (commandsHotKey ?? const {})[plugin.commands.first.id],
                   ),
                 )
               ],

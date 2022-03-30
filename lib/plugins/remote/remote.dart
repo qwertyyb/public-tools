@@ -1,4 +1,4 @@
-import 'dart:convert';
+import 'dart:collection';
 import 'dart:io';
 
 import 'package:collection/collection.dart' show IterableExtension;
@@ -7,6 +7,7 @@ import 'package:flutter_html/flutter_html.dart';
 import 'package:oktoast/oktoast.dart';
 import 'package:path_provider/path_provider.dart';
 import 'package:window_manager/window_manager.dart';
+import 'package:html/dom.dart' as dom;
 
 import '../../core/plugin.dart';
 import '../../core/plugin_command.dart';
@@ -124,25 +125,75 @@ void _onRegistery() {
               "result": result.toJson(),
             });
             if (data["html"] == null) return null;
-            CustomRenderMatcher isTextButton =
-                (context) => context.tree.element?.localName == 'text-button';
-            CustomRender textButtonRender = CustomRender.widget(
+
+            CustomRenderMatcher isFlutterContainer = (context) =>
+                context.tree.element?.localName == 'flutter-container';
+
+            Widget _getFirstWidget(List<Widget> widgets) {
+              return widgets.isEmpty ? Text('no child') : widgets.first;
+            }
+
+            List<Widget> _renderNodes(dom.NodeList nodes) {
+              logger.i(nodes.where((node) => node is dom.Element));
+              return nodes
+                  .where((node) => node is dom.Element)
+                  .map<Widget>((node) {
+                final element = node as dom.Element;
+                if (element.localName == 'row') {
+                  return Row(
+                    mainAxisAlignment: MainAxisAlignment.center,
+                    children: _renderNodes(element.nodes),
+                  );
+                } else if (element.localName == 'text-button') {
+                  return TextButton(
+                    child: _getFirstWidget(_renderNodes(element.nodes)),
+                    onPressed: () {
+                      logger.i(element.attributes);
+                      LinkedHashMap args = LinkedHashMap<Object, String>.from(
+                          element.attributes);
+                      args.removeWhere((key, value) {
+                        if (key is String) {
+                          return !(key).startsWith('data-');
+                        }
+                        return true;
+                      });
+                      final fargs = args.map((key, value) => MapEntry(
+                          (key as String).substring('data-'.length), value));
+                      _server.invoke('event', {
+                        'event': 'onPressed',
+                        // @todo attributes不区分大小写?
+                        'handlerName': element.attributes['onpressed'],
+                        'handlerArgs': fargs,
+                      });
+                    },
+                  );
+                } else if (element.localName == 'spacer') {
+                  return Spacer();
+                } else if (element.localName == 'text') {
+                  return Text(element.text);
+                } else if (element.localName == 'icon') {
+                  return Icon(
+                    Icons.download,
+                    size: double.parse(element.attributes['size'] ?? '20'),
+                  );
+                }
+                return Text('unsupport element');
+              }).toList();
+            }
+
+            CustomRender flutterContainerRender = CustomRender.widget(
                 widget: (RenderContext context, buildChildren) {
-              return TextButton(
-                child: Text(context.tree.element?.text ?? ''),
-                onPressed: () {
-                  _server.invoke('onTextButtonPressed', {
-                    "command": element,
-                    "result": result.toJson(),
-                  });
-                },
-              );
+              final widget =
+                  _renderNodes(context.tree.element!.nodes).firstOrNull;
+              if (widget == null) return Text('no child');
+              return widget;
             });
             return Html(
               data: data["html"],
-              anchorKey: GlobalKey(),
-              customRenders: {isTextButton: textButtonRender},
-              tagsList: Html.tags..addAll(['text-button']),
+              customRenders: {
+                isFlutterContainer: flutterContainerRender,
+              },
+              tagsList: Html.tags..addAll(['flutter-container']),
             );
           },
         );
