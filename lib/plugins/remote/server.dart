@@ -2,6 +2,7 @@ import 'dart:async';
 import 'dart:convert';
 import 'dart:io';
 
+import 'package:path_provider/path_provider.dart';
 import 'package:uuid/uuid.dart';
 
 import '../../utils/logger.dart';
@@ -127,8 +128,7 @@ class RemotePluginServer {
   }
 
   Future invoke(String action, Map<String, dynamic> payload) async {
-    assert(_server != null);
-    assert(_socket != null);
+    if (_socket == null) return;
     final message = MessageData(type: action, payload: payload);
     // ignore: close_sinks
     final streamController = StreamController<MessageData>();
@@ -163,11 +163,36 @@ class RemotePluginServer {
   }
 }
 
+void _downloadJSFiles() async {
+  // @todo 下载地址
+  const downloadUrl =
+      'https://nodejs.org/dist/v16.13.0/node-v16.13.0-darwin-x64.tar.gz';
+  final dir = await getApplicationSupportDirectory();
+  final filePath = '${dir.path}/inner-plugins.zip';
+  final pluginsDirPath = '${dir.path}/inner-plugins';
+  if (File(filePath).existsSync()) {
+    File(filePath).deleteSync();
+  }
+  if (Directory(pluginsDirPath).existsSync()) {
+    File(pluginsDirPath).deleteSync(recursive: true);
+  }
+  final request = await HttpClient().getUrl(Uri.parse(downloadUrl));
+  final response = await request.close();
+  final file = File(filePath);
+  await response.pipe(file.openWrite()).catchError((error) {
+    file.deleteSync();
+    logger.e('download nodejs error: $error');
+    throw error;
+  }, test: (error) => false);
+  logger.i('download success');
+  Process.run("unzip", ['-d', pluginsDirPath]);
+}
+
 void runClient(binPath) async {
   if (Platform.environment['REMOTE_PLUGIN_MODE'] == 'debug') {
     return;
   }
-  var pluginDir = '';
+  var pluginDir = '/Users/qwertyyb/projects/YPaste-flutter/plugins';
   if (Platform.environment["REMOTE_PLUGIN_MODE"] == 'local') {
     pluginDir = Directory.current.path + '/plugins';
   }

@@ -1,10 +1,3 @@
-import 'dart:async';
-
-import 'package:flutter/services.dart';
-import 'package:shared_preferences/shared_preferences.dart';
-import 'package:shortcut_launcher/pages/main_page.dart';
-import 'package:shortcut_launcher/plugins/settings/setting_key.dart';
-
 import '../main.dart';
 import '../pages/command_page.dart';
 import '../plugins/application/application.dart';
