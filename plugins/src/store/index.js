@@ -51,6 +51,7 @@ const storePlugin = createPlugin(utils => ({
     return null;
   },
   downloadPlugin() {
+    // @todo 未完成
     console.log('download plugin')
   },
   onEnter() {},
