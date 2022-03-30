@@ -164,6 +164,9 @@ class RemotePluginServer {
 }
 
 void runClient(binPath) async {
+  if (Platform.environment['REMOTE_PLUGIN_MODE'] == 'debug') {
+    return;
+  }
   var pluginDir = '';
   if (Platform.environment["REMOTE_PLUGIN_MODE"] == 'local') {
     pluginDir = Directory.current.path + '/plugins';

@@ -161,7 +161,6 @@ void _onRegistery() {
                           (key as String).substring('data-'.length), value));
                       _server.invoke('event', {
                         'event': 'onPressed',
-                        // @todo attributes不区分大小写?
                         'handlerName': element.attributes['onpressed'],
                         'handlerArgs': fargs,
                       });

@@ -86,7 +86,7 @@ const initFiles = (Module) => {
       };
 
       function handleError(error) {
-        console.error('package error:', error);
+        // console.error('package error:', error);
       };
     
         var fetchedCallback = null;

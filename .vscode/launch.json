@@ -12,7 +12,7 @@
       "flutterMode": "debug",
       "env": {
         "MODE": "debug",
-        "REMOTE_PLUGIN_MODE": "local",
+        "REMOTE_PLUGIN_MODE": "debug",
       }
     }
   ]

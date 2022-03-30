@@ -12,14 +12,14 @@ const Module = {
   },
   print: (function() {
     return function(text) {
-      console.log(text);
+      // console.log(text);
     };
   })(),
   printErr: function(text) {
-    console.error(text);
+    // console.error(text);
   },
   setStatus: function(text) {
-    console.log(text);
+    // console.log(text);
   },
   totalDependencies: 0
 };
