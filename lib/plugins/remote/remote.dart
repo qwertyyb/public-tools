@@ -20,7 +20,7 @@ Future<String> _downloadNodeJs() async {
       'https://nodejs.org/dist/v16.13.0/node-v16.13.0-darwin-x64.tar.gz';
   final dir = await getApplicationSupportDirectory();
   final filePath = '${dir.path}/node-v16.13.0-darwin-x64.tar.gz';
-  final nodeDir = '${dir.path}/node-v16.13.0-darwin-x64/';
+  final nodeDir = '${dir.path}/node-v16.13.0-darwin-x64';
   final binDir = '$nodeDir/bin';
   final npmPath = '$binDir/npm';
   final nodePath = '$binDir/node';

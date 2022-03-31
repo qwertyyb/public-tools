@@ -163,13 +163,13 @@ class RemotePluginServer {
   }
 }
 
-void _downloadJSFiles() async {
-  // @todo 下载地址
+Future<void> _downloadPlugin() async {
   const downloadUrl =
-      'https://nodejs.org/dist/v16.13.0/node-v16.13.0-darwin-x64.tar.gz';
+      'https://github.com/qwertyyb/YPaste-flutter/releases/latest/download/plugins.zip';
   final dir = await getApplicationSupportDirectory();
   final filePath = '${dir.path}/inner-plugins.zip';
   final pluginsDirPath = '${dir.path}/inner-plugins';
+  if (File('$pluginsDirPath/main.js').existsSync()) return;
   if (File(filePath).existsSync()) {
     File(filePath).deleteSync();
   }
@@ -181,33 +181,36 @@ void _downloadJSFiles() async {
   final file = File(filePath);
   await response.pipe(file.openWrite()).catchError((error) {
     file.deleteSync();
-    logger.e('download nodejs error: $error');
+    logger.e('download plugins error: $error');
     throw error;
   }, test: (error) => false);
   logger.i('download success');
-  Process.run("unzip", ['-d', pluginsDirPath]);
+  final result = await Process.start("unzip", [filePath, '-d', pluginsDirPath]);
+  logger.i('unzip inner_plugin.zip: ${result.exitCode}');
+  if (await result.exitCode != 0) {
+    result.stderr.transform(utf8.decoder).forEach((print));
+    throw Exception('unzip plugin error');
+  }
+}
+
+bool _isProduction() => Platform.environment['REMOTE_PLUGIN_MODE'] != 'debug';
+
+Future<String?> _getPluginsDirPath() async {
+  if (Platform.environment['REMOTE_PLUGIN_MODE'] == 'debug') {
+    return null;
+  }
+  // 正式环境
+  final dir = await getApplicationSupportDirectory();
+  return '${dir.path}/inner-plugins';
 }
 
 void runClient(binPath) async {
-  if (Platform.environment['REMOTE_PLUGIN_MODE'] == 'debug') {
-    return;
-  }
-  var pluginDir = '';
-  if (Platform.environment["REMOTE_PLUGIN_MODE"] == 'local') {
-    pluginDir = Directory.current.path + '/plugins';
-  }
+  final pluginDir = await _getPluginsDirPath();
+  if (pluginDir == null) return;
+  await _downloadPlugin();
   final newEnv = Map<String, String>.from(Platform.environment);
   newEnv['PATH'] = '$binPath:${newEnv['PATH']}';
-  // 安装依赖
-  final installProcess = await Process.start(
-    '$binPath/npm',
-    ['install'],
-    environment: newEnv,
-    workingDirectory: pluginDir,
-  );
-  final exitCode = await installProcess.exitCode;
-  logger.i(exitCode);
-  var args = ['./src/index.js'];
+  var args = ['./main.js'];
   if (Platform.environment['MODE'] == 'debug') {
     args.insert(0, '--inspect');
   }
