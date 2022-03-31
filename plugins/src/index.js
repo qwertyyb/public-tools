@@ -1,9 +1,10 @@
-const mdnPlugin = require('./mdn')
-const qrcodePlugin = require('./qrcode/index.js')
-const magicPlugin = require('./magic')
-const translatePlugin = require('./translate')
-const storePlugin = require('./store')
+const path = require('path')
+const registerPlugin = require('./core/plugin')
 
-module.exports = () => ([magicPlugin, qrcodePlugin, mdnPlugin, storePlugin, translatePlugin])
+const getPath = (filePath) => path.join(__dirname, filePath)
+
+const paths = ['mdn/plugin.json', 'qrcode/plugin.json', 'translate/plugin.json', 'store/plugin.json'].map(getPath)
+
+paths.forEach(configPath => registerPlugin(configPath))
 
 console.log('remote plugin is running')

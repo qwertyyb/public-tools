@@ -7,15 +7,7 @@ const getPluginList = async () => {
   return res.data
 }
 
-const storePlugin = createPlugin(utils => ({
-  id: 'store',
-  title: '插件列表',
-  subtitle: '插件列表',
-  description: '插件列表',
-  mode: 'listView',
-  keywords: ['插件列表', 'plugins store'],
-  icon: 'https://img.icons8.com/color/50/000000/joomla.png',
-
+const storePlugin = utils => ({
   async onSearch(keyword) {
     const query = keyword || ''
     const { updateTime, pluginList } = await getPluginList()
@@ -56,6 +48,6 @@ const storePlugin = createPlugin(utils => ({
   },
   onEnter() {},
   onExit() {},
-}))
+})
 
 module.exports = storePlugin;

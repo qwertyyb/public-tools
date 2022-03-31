@@ -6,10 +6,11 @@
   "description": "翻译文本",
   "icon": "https://img.icons8.com/color/144/000000/google-translate.png",
   "main": "index.js",
+  "mode": "listView",
   "scripts": {
     "test": "echo \"Error: no test specified\" && exit 1"
   },
-  "keywords": [],
+  "keywords": ["fy", "ts", "trans", "translate", "翻译"],
   "author": "",
   "license": "ISC"
 }

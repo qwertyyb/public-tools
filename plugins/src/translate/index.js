@@ -1,8 +1,5 @@
 const axios = require("axios");
-const createPlugin = require("../core/plugin");
 const clip = require('simple-mac-clipboard')
-
-const TRIGGERS = ['fy', 'ts', 'trans', 'translate', '翻译']
 
 const getResponse = (text) => axios.get(`https://dict-co.iciba.com/api/dictionary.php?w=${encodeURIComponent(text)}&type=json&key=0CD3A4C079D2D23C683BBFF96300E924`)
   .then(res => {
@@ -38,14 +35,7 @@ const getResponse = (text) => axios.get(`https://dict-co.iciba.com/api/dictionar
     return list;
   })
 
-const translatePlugin = createPlugin(utils => ({
-  id: 'translate',
-  title: '翻译',
-  subtitle: '翻译所选内容',
-  description: '翻译文本',
-  mode: 'listView',
-  keywords: TRIGGERS,
-  icon: 'https://img.icons8.com/color/144/000000/google-translate.png',
+const translatePlugin = utils => ({
   async onSearch(keyword) {
     if (!keyword) return [];
     const list = await getResponse(keyword)
@@ -60,6 +50,6 @@ const translatePlugin = createPlugin(utils => ({
     clip.writeText(clip.FORMAT_PLAIN_TEXT, result.id)
     utils.toast('已复制到粘贴板')
   }
-}));
+});
 
 module.exports = translatePlugin;

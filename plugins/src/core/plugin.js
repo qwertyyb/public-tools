@@ -1,5 +1,6 @@
 const { v4: uuidv4 } = require('uuid')
 const ws = require('./ws')
+const path = require('path')
 
 let curPlugin = null;
 const plugins = new Map();
@@ -153,4 +154,38 @@ const createPlugin = (pluginCreator) => {
   return plugin
 }
 
-module.exports = createPlugin;
+const validatePluginConfig = config => {
+  const { name, title, subtitle = '', description = '', icon, mode, keywords } = config;
+  const required = []
+  if (!name) {
+    required.push('name')
+  }
+  if (!title) {
+    required.push('title')
+  }
+  if (!icon) {
+    required.push('icon')
+  }
+  if (!mode) {
+    required.push('mode')
+  }
+  if (!keywords || !keywords.length) {
+    required.push('keywords')
+  }
+  return { pass: required.length <= 0, msg: `${required.join('、')} 为必填项` };
+}
+
+const registerPlugin = (pkgPath) => {
+  const config = require(pkgPath);
+  const { pass, msg } = validatePluginConfig(config);
+  if (!pass) {
+    return createUtils().toast(msg);
+  }
+  const pluginCreator = require(path.join(pkgPath, '../'));
+  const plugin = pluginCreator(createUtils());
+
+  const { name, title, subtitle = '', description = '', icon, mode, keywords } = config;
+  plugins.set(name, { ...plugin, id: name, title, subtitle, description, icon, mode, keywords });
+}
+
+module.exports = registerPlugin

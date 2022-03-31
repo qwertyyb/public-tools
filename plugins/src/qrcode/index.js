@@ -3,7 +3,6 @@ const robot = require('robotjs')
 const jimp = require('jimp')
 const QRCode = require('qrcode')
 const detectWithOpencv = require('./detectWithOpencv')
-const createPlugin = require('../core/plugin')
 
 const readQrcodeFromClipboard = () => {
   const pngBuffer = clip.readBuffer('public.png')
@@ -20,15 +19,7 @@ const readQrcodeFromClipboard = () => {
   }
 }
 
-const plugin = createPlugin((utils) => ({
-  id: 'qrcode',
-  title: '二维码',
-  subtitle: '生成、识别二维码',
-  description: '生成、识别二维码',
-  mode: 'listView',
-  keywords: ['二维码', 'qrcode', 'qr', '二维码识别', 'qrcode识别', 'qr识别'],
-  icon: 'https://img.icons8.com/pastel-glyph/64/4a90e2/qr-code--v1.png',
-
+const plugin = (utils) => ({
   onEnter: async () => {
     console.log('onEnter')
   },
@@ -115,7 +106,7 @@ const plugin = createPlugin((utils) => ({
 
   onExit: async (command) => {
   }
-}))
+})
 
 module.exports = plugin
 
