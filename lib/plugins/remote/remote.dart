@@ -59,6 +59,115 @@ Future<String> _downloadNodeJs() async {
 
 late RemotePluginServer _server;
 
+PluginCommand _createCommandItem(element) {
+  final command = PluginCommand.fromJsonAndFunction(
+    element,
+    onEnter: () {
+      _server.invoke("onEnter", {
+        "command": element,
+      });
+    },
+    onSearch: (String keyword) async {
+      final data = await _server
+          .invoke('onSearch', {"keyword": keyword, "command": element});
+      return data["results"]
+          .map<SearchResult>((element) => SearchResult.fromJson(element))
+          .toList();
+    },
+    onResultTap: (SearchResult result) async {
+      _server.invoke('onResultTap', {
+        "command": element,
+        "result": result.toJson(),
+      });
+    },
+    onExit: () async {
+      _server.invoke("onExit", {
+        "command": element,
+      });
+    },
+    onResultPreview: (SearchResult result) async {
+      final data = await _server.invoke('onResultSelected', {
+        "command": element,
+        "result": result.toJson(),
+      });
+      if (data["html"] == null) return null;
+
+      CustomRenderMatcher isFlutterContainer =
+          (context) => context.tree.element?.localName == 'flutter-container';
+
+      Widget _getFirstWidget(List<Widget> widgets) {
+        return widgets.isEmpty ? Text('no child') : widgets.first;
+      }
+
+      List<Widget> _renderNodes(dom.NodeList nodes) {
+        logger.i(nodes.where((node) => node is dom.Element));
+        return nodes.where((node) => node is dom.Element).map<Widget>((node) {
+          final element = node as dom.Element;
+          if (element.localName == 'row') {
+            return Row(
+              mainAxisAlignment: MainAxisAlignment.center,
+              children: _renderNodes(element.nodes),
+            );
+          } else if (element.localName == 'text-button') {
+            return TextButton(
+              child: _getFirstWidget(_renderNodes(element.nodes)),
+              onPressed: () {
+                logger.i(element.attributes);
+                LinkedHashMap args =
+                    LinkedHashMap<Object, String>.from(element.attributes);
+                args.removeWhere((key, value) {
+                  if (key is String) {
+                    return !(key).startsWith('data-');
+                  }
+                  return true;
+                });
+                final fargs = args.map((key, value) =>
+                    MapEntry((key as String).substring('data-'.length), value));
+                _server.invoke('event', {
+                  'event': 'onPressed',
+                  'handlerName': element.attributes['onpressed'],
+                  'handlerArgs': fargs,
+                });
+              },
+            );
+          } else if (element.localName == 'spacer') {
+            return Spacer();
+          } else if (element.localName == 'text') {
+            return Text(element.text);
+          } else if (element.localName == 'icon') {
+            return Icon(
+              Icons.download,
+              size: double.parse(element.attributes['size'] ?? '20'),
+            );
+          }
+          return Text('unsupport element');
+        }).toList();
+      }
+
+      CustomRender flutterContainerRender =
+          CustomRender.widget(widget: (RenderContext context, buildChildren) {
+        final widget = _renderNodes(context.tree.element!.nodes).firstOrNull;
+        if (widget == null) return Text('no child');
+        return widget;
+      });
+      return Html(
+        data: data["html"],
+        customRenders: {
+          isFlutterContainer: flutterContainerRender,
+        },
+        tagsList: Html.tags..addAll(['flutter-container']),
+      );
+    },
+  );
+  return command;
+}
+
+void _updateCommands(Map<String, dynamic> data) {
+  remotePlugin.commands = data["commands"].map<PluginCommand>((element) {
+    return _createCommandItem(element);
+  }).toList();
+}
+
 void _bindServerListener() async {
   _server.on('toast', (data) {
     showToast(data["content"]);
@@ -68,6 +177,9 @@ void _bindServerListener() async {
   });
   _server.on('showApp', (data) async {
     await windowManager.show();
+  });
+  _server.on('updateCommands', (data) {
+    _updateCommands(data);
   });
   _server.on('updateResults', (data) {
     final jsonCommand = data['command'];
@@ -93,111 +205,7 @@ void _onRegistery() {
     onReady: () async {
       final data = await _server.invoke("getCommands", {});
       logger.i('getCommands: $data');
-      remotePlugin.commands = data["commands"].map<PluginCommand>((element) {
-        final command = PluginCommand.fromJsonAndFunction(
-          element,
-          onEnter: () {
-            _server.invoke("onEnter", {
-              "command": element,
-            });
-          },
-          onSearch: (String keyword) async {
-            final data = await _server
-                .invoke('onSearch', {"keyword": keyword, "command": element});
-            return data["results"]
-                .map<SearchResult>((element) => SearchResult.fromJson(element))
-                .toList();
-          },
-          onResultTap: (SearchResult result) async {
-            _server.invoke('onResultTap', {
-              "command": element,
-              "result": result.toJson(),
-            });
-          },
-          onExit: () async {
-            _server.invoke("onExit", {
-              "command": element,
-            });
-          },
-          onResultPreview: (SearchResult result) async {
-            final data = await _server.invoke('onResultSelected', {
-              "command": element,
-              "result": result.toJson(),
-            });
-            if (data["html"] == null) return null;
-
-            CustomRenderMatcher isFlutterContainer = (context) =>
-                context.tree.element?.localName == 'flutter-container';
-
-            Widget _getFirstWidget(List<Widget> widgets) {
-              return widgets.isEmpty ? Text('no child') : widgets.first;
-            }
-
-            List<Widget> _renderNodes(dom.NodeList nodes) {
-              logger.i(nodes.where((node) => node is dom.Element));
-              return nodes
-                  .where((node) => node is dom.Element)
-                  .map<Widget>((node) {
-                final element = node as dom.Element;
-                if (element.localName == 'row') {
-                  return Row(
-                    mainAxisAlignment: MainAxisAlignment.center,
-                    children: _renderNodes(element.nodes),
-                  );
-                } else if (element.localName == 'text-button') {
-                  return TextButton(
-                    child: _getFirstWidget(_renderNodes(element.nodes)),
-                    onPressed: () {
-                      logger.i(element.attributes);
-                      LinkedHashMap args = LinkedHashMap<Object, String>.from(
-                          element.attributes);
-                      args.removeWhere((key, value) {
-                        if (key is String) {
-                          return !(key).startsWith('data-');
-                        }
-                        return true;
-                      });
-                      final fargs = args.map((key, value) => MapEntry(
-                          (key as String).substring('data-'.length), value));
-                      _server.invoke('event', {
-                        'event': 'onPressed',
-                        'handlerName': element.attributes['onpressed'],
-                        'handlerArgs': fargs,
-                      });
-                    },
-                  );
-                } else if (element.localName == 'spacer') {
-                  return Spacer();
-                } else if (element.localName == 'text') {
-                  return Text(element.text);
-                } else if (element.localName == 'icon') {
-                  return Icon(
-                    Icons.download,
-                    size: double.parse(element.attributes['size'] ?? '20'),
-                  );
-                }
-                return Text('unsupport element');
-              }).toList();
-            }
-
-            CustomRender flutterContainerRender = CustomRender.widget(
-                widget: (RenderContext context, buildChildren) {
-              final widget =
-                  _renderNodes(context.tree.element!.nodes).firstOrNull;
-              if (widget == null) return Text('no child');
-              return widget;
-            });
-            return Html(
-              data: data["html"],
-              customRenders: {
-                isFlutterContainer: flutterContainerRender,
-              },
-              tagsList: Html.tags..addAll(['flutter-container']),
-            );
-          },
-        );
-        return command;
-      }).toList();
+      _updateCommands(data);
     },
   );
   _bindServerListener();

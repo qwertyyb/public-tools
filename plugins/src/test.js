@@ -7,8 +7,10 @@ base.onKeywordChange((keyword) => {
       icon: 'https://via.placeholder.com/50',
       title: keyword,
       subtitle: 'subtitle-' + keyword,
-      id: 'abc'
+      id: 'abc',
     }
   ]
   base.updateList(keyword, list)
 })
+
+console.log('abc')

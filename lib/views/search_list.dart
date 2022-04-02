@@ -46,7 +46,9 @@ class SearchListState<T> extends State<SearchList<T>> {
   void updateResults(List<T> results) {
     setState(() {
       _list = results;
+      _selectedIndex = 0;
     });
+    this._updatePreview(results.isNotEmpty ? results[0] : null);
   }
 
   void clearSearch() {

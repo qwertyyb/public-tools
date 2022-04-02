@@ -53,25 +53,29 @@ const send = (obj) => {
   return ws.send(JSON.stringify(obj))
 }
 
+const getCommands = () => {
+  const commands = Array.from(plugins.values()).map(plugin => {
+    const { title, subtitle, description, id, icon, mode, keywords } = plugin;
+    return {
+      id,
+      title,
+      subtitle,
+      description,
+      icon,
+      mode,
+      keywords
+    }
+  })
+  return commands;
+}
+
 ws.on('message',async  (message) => {
   const messageData = MessageData.fromJSON(message);
   const { type, payload, replyId } = JSON.parse(message)
   console.log('receive Message', JSON.parse(message))
 
   if (type === 'getCommands') {
-    const commands = Array.from(plugins.values()).map(plugin => {
-      const { title, subtitle, description, id, icon, mode, keywords } = plugin;
-      return {
-        id,
-        title,
-        subtitle,
-        description,
-        icon,
-        mode,
-        keywords
-      }
-    })
-    return send(messageData.makeReplyMessage({ commands }))
+    return send(messageData.makeReplyMessage({ commands: getCommands() }))
   }
 
   if (type === 'onSearch') {
@@ -139,7 +143,7 @@ const createUtils = () => ({
     send(MessageData.makeEventMessage('showApp'))
   },
   updateResults(results) {
-    send(MessageData.makeEventMessage('updateResults', { results, command: curPlugin.command }))
+    send(MessageData.makeEventMessage('updateResults', { results, command: curPlugin }))
   }
 })
 
@@ -172,6 +176,9 @@ const validatePluginConfig = config => {
   if (!keywords || !keywords.length) {
     required.push('keywords')
   }
+  if (name && plugins.get(name)) {
+    return { pass: false, msg: `插件${name}已存在` }
+  }
   return { pass: required.length <= 0, msg: `${required.join('、')} 为必填项` };
 }
 
@@ -179,13 +186,19 @@ const registerPlugin = (pkgPath) => {
   const config = require(pkgPath);
   const { pass, msg } = validatePluginConfig(config);
   if (!pass) {
-    return createUtils().toast(msg);
+    createUtils().toast(msg);
+    return { msg };
   }
   const pluginCreator = require(path.join(pkgPath, '../'));
   const plugin = pluginCreator(createUtils());
 
   const { name, title, subtitle = '', description = '', icon, mode, keywords } = config;
   plugins.set(name, { ...plugin, id: name, title, subtitle, description, icon, mode, keywords });
+  send(MessageData.makeEventMessage('updateCommands', { commands: getCommands() }));
+  return () => {
+    plugins.delete(name);
+    send(MessageData.makeEventMessage('updateCommands', { commands: getCommands() }));
+  }
 }
 
 module.exports = registerPlugin
