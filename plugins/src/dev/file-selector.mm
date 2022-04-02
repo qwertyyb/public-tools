@@ -14,7 +14,6 @@ Napi::Value SelectFile(const Napi::CallbackInfo& info)
     NSModalResponse result = [openPanel runModal];
     if (result == NSModalResponseOK) {
         NSString* selectedPath = [[openPanel URL] path];
-        printf("%s", selectedPath.UTF8String);
         return Napi::String::New(env, selectedPath.UTF8String);
     }
     return Napi::String::New(env, "");
