@@ -1,9 +1,0 @@
-{
-  "name": "MDN",
-  "title": "MDN",
-  "subtitle": "搜索MDN",
-  "description": "搜索MDN",
-  "icon": "https://vfiles.gtimg.cn/vupload/20211129/2da75c1638159214694.png",
-  "mode": "listView",
-  "keywords": ["mdn", "docs", "文档"]
-}

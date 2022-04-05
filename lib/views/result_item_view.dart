@@ -68,7 +68,7 @@ class ResultItemView<T> extends StatelessWidget {
         onKey: onKey,
         child: Container(
             height: 48,
-            color: selected! ? Colors.grey[300] : null,
+            color: selected! ? Color.fromARGB(72, 78, 78, 78) : null,
             child: InkWell(
                 onTap: onTap as void Function()?,
                 focusNode: FocusNode(canRequestFocus: false),
@@ -97,12 +97,13 @@ class ResultItemView<T> extends StatelessWidget {
                                   ),
                                 ),
                               ),
-                              Text(
-                                item.subtitle,
-                                maxLines: 1,
-                                style: TextStyle(
-                                    fontSize: 10, color: Colors.black38),
-                              )
+                              if (item.subtitle.isNotEmpty)
+                                Text(
+                                  item.subtitle,
+                                  maxLines: 1,
+                                  style: TextStyle(
+                                      fontSize: 10, color: Colors.black38),
+                                )
                             ],
                           ),
                         ),

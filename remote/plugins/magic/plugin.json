@@ -1,0 +1,10 @@
+{
+  "name": "magic",
+  "version": "0.0.1",
+  "title": "快捷打开魔方平台",
+  "description": "快捷打开魔方平台",
+  "subtitle": "快捷打开魔方平台",
+  "mode": "listView",
+  "keywords": ["魔方", "magic"],
+  "icon": "https://vfiles.gtimg.cn/vupload/20211210/13075e1639102744067.png"
+}

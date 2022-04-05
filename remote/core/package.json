@@ -1,0 +1,20 @@
+{
+  "name": "core",
+  "version": "1.0.0",
+  "description": "",
+  "main": "index.js",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1",
+    "start": "node src/index.js"
+  },
+  "keywords": [],
+  "author": "",
+  "license": "ISC",
+  "dependencies": {
+    "axios": "^0.26.1",
+    "chokidar": "^3.5.3",
+    "macos-open-file-dialog": "^1.0.1",
+    "uuid": "^8.3.2",
+    "ws": "^8.5.0"
+  }
+}

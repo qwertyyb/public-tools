@@ -138,7 +138,7 @@ final _command = PluginCommand(
   title: "剪切板",
   subtitle: "查看剪切板历史",
   description: "查看剪切板历史",
-  keywords: ["cp", "clipboard hitory", "jqb"],
+  keywords: ["cp", "clipboard history", "jqb"],
   icon: "https://vfiles.gtimg.cn/vupload/20210220/586e451613797978732.png",
   mode: CommandMode.listView,
   onSearch: (String keyword) async {

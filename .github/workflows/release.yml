@@ -61,19 +61,17 @@ jobs:
         with:
           node-version: '16.13.0'
 
-      - name: bulild plugins
-        run: cd plugins && npm install && npm run build
+      - name: install deps
+        run: pnpm install
 
-      - uses: actions/upload-artifact@v2
-        with:
-          name: plugin-dist
-          path: "dist"
-      
-      - name: compress plugin dist
-        run: zip -r -q dist.zip dist
+      - name: bulild store.json
+        run: pnpm run build-store
+
+      - name: deploy store
+        run: pnpm run deploy-store
 
       - uses: ncipollo/release-action@v1
         with:
-          artifacts: "../build/macos/Build/Products/Release/public tools.zip,dist.zip"
+          artifacts: "build/macos/Build/Products/Release/public tools.zip,build/store.json"
           generateReleaseNotes: true
           token: ${{ secrets.GITHUB_TOKEN }}

@@ -1,0 +1,10 @@
+{
+  "name": "MDN",
+  "version": "0.0.1",
+  "title": "MDN",
+  "subtitle": "搜索MDN",
+  "description": "搜索MDN",
+  "icon": "https://img.icons8.com/fluency/48/000000/program.png",
+  "mode": "listView",
+  "keywords": ["mdn", "docs", "文档"]
+}

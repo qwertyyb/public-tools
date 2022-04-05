@@ -1,0 +1,15 @@
+{
+	"dependencies": {
+		"axios": "^0.26.1"
+	},
+	"pnpm": {
+    "packageExtensions": {
+      "simple-mac-clipboard": {
+        "dependencies": {
+          "node-gyp": "^6.1.0",
+					"node-addon-api": "^3.2.0"
+        }
+      }
+    }
+  }
+}

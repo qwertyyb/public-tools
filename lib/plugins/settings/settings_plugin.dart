@@ -80,7 +80,7 @@ final _command = PluginCommand(
   id: 'settings',
   title: '设置',
   subtitle: 'Public设置',
-  icon: '',
+  icon: 'https://img.icons8.com/color/96/000000/settings--v1.png',
   mode: CommandMode.listView,
   keywords: ["settings", "preferences", "设置", "sz"],
   onSearch: (String keyword) {
