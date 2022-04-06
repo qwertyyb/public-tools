@@ -1,0 +1,17 @@
+{
+  "name": "remote",
+  "version": "1.0.0",
+  "description": "",
+  "main": "index.js",
+  "dependencies": {
+    "mime-types": "^2.1.35"
+  },
+  "devDependencies": {},
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1",
+    "start": "pnpm --filter core run start"
+  },
+  "keywords": [],
+  "author": "",
+  "license": "ISC"
+}

@@ -4,6 +4,8 @@ const chokidar = require('chokidar');
 const { openFile } = require("macos-open-file-dialog")
 const registerPlugin = require('../../core/plugin');
 
+const devFilePath = process.env.HOME + '/Library/Application Support/cn.qwertyyb.public/dev-plugins.json';
+
 const selectPluginFile = async() => {
   try {
     const filePath = await openFile("Select a file", ['public.json'])
@@ -18,7 +20,7 @@ const devPlugins = new Map()
 
 const save = () => {
   const configPathList = Array.from(devPlugins.values()).map(({ path }) => path)
-  fs.writeFileSync(path.join(__dirname, './dev-plugins.json'), JSON.stringify(configPathList))
+  fs.writeFileSync(devFilePath, JSON.stringify(configPathList))
 }
 
 let registered = false
@@ -26,7 +28,7 @@ let registered = false
 const registerSavedPlugin = (utils) => {
   let configPathList = []
   try {
-  configPathList = JSON.parse(fs.readFileSync(path.join(__dirname, './dev-plugins.json'), 'utf-8'))
+  configPathList = JSON.parse(fs.readFileSync(devFilePath, 'utf-8'))
   } catch(err) {}
   configPathList.forEach(configPath => {
     addDevPlugin(configPath, utils)
@@ -44,6 +46,7 @@ const removeDevPlugin = (name) => {
 }
 
 const addDevPlugin = (configPath, utils) => {
+  console.log('addDevPlugin', configPath)
   const unregister = registerPlugin(configPath)
   if (unregister.msg) {
     utils.showApp()

@@ -102,6 +102,7 @@ ws.on('message',async  (message) => {
   }
 
   if (type === 'onEnter') {
+    console.log('onEnter', payload.command)
     setCurPlugin(payload.command.id);
     if (!curPlugin) {
       console.warn(`插件${payload.command.id}不存在`)
