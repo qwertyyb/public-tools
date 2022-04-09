@@ -46,13 +46,11 @@ importers:
     dependencies:
       axios: 0.26.1
 
+  plugins/snipaste:
+    specifiers: {}
+
   plugins/translate:
-    specifiers:
-      axios: ^0.26.1
-      simple-mac-clipboard: ^1.0.1
-    dependencies:
-      axios: 0.26.1
-      simple-mac-clipboard: 1.0.1
+    specifiers: {}
 
   scripts:
     specifiers:
@@ -2107,7 +2105,7 @@ packages:
     name: jsonfile
     version: 4.0.0
     optionalDependencies:
-      graceful-fs: registry.npmmirror.com/graceful-fs/4.2.10
+      graceful-fs: 4.2.10
     dev: false
 
   registry.npmmirror.com/locate-path/5.0.0:
