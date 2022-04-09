@@ -1,12 +1,16 @@
 {
   "name": "mdn",
-  "version": "1.0.0",
-  "description": "## 功能",
+  "version": "0.0.1",
+  "title": "MDN",
+  "subtitle": "搜索MDN",
+  "description": "搜索MDN",
+  "icon": "https://img.icons8.com/fluency/48/000000/program.png",
+  "mode": "listView",
+  "keywords": ["mdn", "docs", "文档"],
   "main": "index.js",
   "scripts": {
     "test": "echo \"Error: no test specified\" && exit 1"
   },
-  "keywords": [],
   "author": "",
   "license": "ISC",
   "dependencies": {

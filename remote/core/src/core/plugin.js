@@ -1,3 +1,4 @@
+const fs = require('fs');
 const path = require('path')
 const { v4: uuidv4 } = require('uuid')
 const ws = require('./ws')
@@ -178,26 +179,42 @@ const validatePluginConfig = config => {
 }
 
 const registerPlugin = (configPath) => {
-  const config = require(configPath);
-  const { pass, msg } = validatePluginConfig(config);
-  if (!pass) {
-    createUtils().toast(msg);
-    return { msg };
-  }
-  const pluginCreator = require(path.join(configPath, '../index.js'));
-  const plugin = pluginCreator(createUtils(config.name));
-
-  const { name, title, subtitle = '', description = '', icon, mode, keywords } = config;
-  plugins.set(name, { ...plugin, id: name, title, subtitle, description, icon, mode, keywords });
-  console.log(`插件${name}注册成功`);
-  send(MessageData.makeEventMessage('updateCommands', { commands: getCommands() }));
-  return () => {
-    plugins.delete(name);
-    send(MessageData.makeEventMessage('updateCommands', { commands: getCommands() }));
-    if (curPlugin?.name === name) {
-      curPlugin = null;
+  try {
+    if (!fs.existsSync(configPath)) {
+      throw new Error(`文件 ${configPath} 不存在`)
     }
+    const config = require(configPath);
+    const { pass, msg } = validatePluginConfig(config);
+    if (!pass) {
+      createUtils().toast(msg);
+      return { msg };
+    }
+    const pluginCreator = require(path.join(configPath, '../index.js'));
+    const plugin = pluginCreator(createUtils(config.name));
+
+    const { name, title, subtitle = '', description = '', icon, mode, keywords } = config;
+    plugins.set(name, { ...plugin, id: name, title, subtitle, description, icon, mode, keywords });
+    console.log(`插件${name}注册成功`);
+    send(MessageData.makeEventMessage('updateCommands', { commands: getCommands() }));
+    return () => {
+      plugins.delete(name);
+      send(MessageData.makeEventMessage('updateCommands', { commands: getCommands() }));
+      if (curPlugin?.name === name) {
+        curPlugin = null;
+      }
+    }
+  } catch(err) {
+    console.error(err);
+    createUtils().toast(err.message);
+    return { msg: err.message };
   }
 }
+
+process.on('uncaughtException', (err) => {
+  console.error(err)
+});
+process.on('unhandledRejection', (err) => {
+  console.error(err)
+})
 
 module.exports = registerPlugin

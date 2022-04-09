@@ -61,6 +61,12 @@ jobs:
         with:
           node-version: '16.13.0'
 
+      - name: install pnpm
+        run: npm install -g pnpm
+
+      - name: to remote path
+        run: cd remote
+
       - name: install deps
         run: pnpm install
 
@@ -70,8 +76,11 @@ jobs:
       - name: deploy store
         run: pnpm run deploy-store
 
+      - name: to root path
+        run: cd ..
+
       - uses: ncipollo/release-action@v1
         with:
-          artifacts: "build/macos/Build/Products/Release/public tools.zip,build/store.json"
+          artifacts: "build/macos/Build/Products/Release/public tools.zip,remote/gh-pages/store.json"
           generateReleaseNotes: true
           token: ${{ secrets.GITHUB_TOKEN }}

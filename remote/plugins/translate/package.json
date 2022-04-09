@@ -1,16 +1,11 @@
 {
   "name": "translate",
-  "version": "1.0.0",
-  "description": "## 功能",
-  "main": "index.js",
-  "dependencies": {
-    "axios": "^0.26.1",
-    "simple-mac-clipboard": "^1.0.1"
-  },
-  "scripts": {
-    "test": "echo \"Error: no test specified\" && exit 1"
-  },
-  "keywords": [],
-  "author": "",
-  "license": "ISC"
+  "version": "0.0.1",
+  "title": "翻译",
+  "subtitle": "翻译文本",
+  "description": "翻译文本",
+  "icon": "https://img.icons8.com/color/144/000000/google-translate.png",
+  "mode": "listView",
+  "keywords": ["fy", "translate", "ts"],
+  "main": "index.js"
 }

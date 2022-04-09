@@ -10,7 +10,7 @@ on:
         default: 'v1.0.2'
   push:
     paths:
-      - 'plugins/**'
+      - 'remote/**'
 
 jobs:
   build:
@@ -23,8 +23,14 @@ jobs:
         with:
           node-version: '16.13.0'
 
+      - name: install pnpm
+        run: npm install -g pnpm
+
       - name: install deps
         run: pnpm install
+
+      - name: to remote path
+        run: cd remote
 
       - name: bulild store.json
         run: pnpm run build-store
@@ -32,8 +38,4 @@ jobs:
       - name: deploy store
         run: pnpm run deploy-store
 
-      - uses: actions/upload-artifact@v2
-        with:
-          name: plugins
-          path: "build/store.json"
 

@@ -1,0 +1,11 @@
+{
+  "name": "snipaste",
+  "version": "1.0.0",
+  "description": "Snipaste is a free and open-source clipboard manager for Windows, Linux and Mac OS X. It's a simple, fast and easy to use clipboard manager.",
+  "title": "snipaste快捷操作",
+  "subtitle": "snipaste快捷操作",
+  "keywords": ["snipaste", "截图", "screenshot"],
+  "mode": "noView",
+  "icon": "https://vfiles.gtimg.cn/vupload/20220406/149eda1649224654554.jpg",
+  "main": "index.js"
+}

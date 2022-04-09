@@ -28,11 +28,16 @@ let registered = false
 const registerSavedPlugin = (utils) => {
   let configPathList = []
   try {
-  configPathList = JSON.parse(fs.readFileSync(devFilePath, 'utf-8'))
-  } catch(err) {}
-  configPathList.forEach(configPath => {
-    addDevPlugin(configPath, utils)
-  })
+    configPathList = JSON.parse(fs.readFileSync(devFilePath, 'utf-8'))
+  } catch(err) {
+    if (fs.existsSync) {
+      // 文件格式有问题，删除掉
+      fs.unlink(devFilePath)
+    }
+  }
+    configPathList.forEach(configPath => {
+      addDevPlugin(configPath, utils)
+    })
 }
 
 const removeDevPlugin = (name) => {
@@ -143,8 +148,8 @@ const plugin = utils => ({
     if (result.id === 'select-plugin') {
       selectPluginFile().then(filePath => {
         if (!filePath) return;
-        if (!filePath.endsWith('/plugin.json')) {
-          return utils.toast('请选择plugin.json文件')
+        if (!filePath.endsWith('/package.json')) {
+          return utils.toast('请选择package.json文件')
         }
         addDevPlugin(filePath, utils)
       })

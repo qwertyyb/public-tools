@@ -9,7 +9,10 @@
   "devDependencies": {},
   "scripts": {
     "test": "echo \"Error: no test specified\" && exit 1",
-    "start": "pnpm --filter core run start"
+    "start": "pnpm --filter core run start",
+    "clean": "rm -rf node_modules && rm -rf core/**/node_modules && rm -rf plugins/**/node_modules",
+    "build-store": "pnpm --filter scripts run build-store",
+    "deploy-store": "pnpm --filter scripts run deploy-store"
   },
   "keywords": [],
   "author": "",

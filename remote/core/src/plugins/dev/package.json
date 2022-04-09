@@ -1,0 +1,10 @@
+{
+  "name": "dev",
+  "title": "插件开发",
+  "subtitle": "插件开发",
+  "description": "插件开发",
+  "mode": "listView",
+  "keywords": ["插件开发", "plugins development", "developer"],
+  "icon": "https://img.icons8.com/emoji/96/000000/hammer-and-wrench.png",
+  "main": "index.js"
+}
