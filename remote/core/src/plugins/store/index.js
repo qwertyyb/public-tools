@@ -159,15 +159,10 @@ const storePlugin = utils => ({
         downloadStatus[name] = false
         return
       }
-      const { msg } = installPlugin(pluginPath)
-      if (msg) {
-        utils.toast(msg)
-        downloadStatus[name] = false
-        return
-      }
+      installPlugin(pluginPath)
       downloadStatus[name] = false
       utils.toast('插件已下载')
-      updateResults(cachedList)
+      utils.updateResults(cachedList)
     },
   },
   onEnter() {},
