@@ -1,4 +1,4 @@
-name: build plugins
+name: release store
 
 
 on:
@@ -41,13 +41,11 @@ jobs:
           NPM_TOKEN: ${{ secrets.NPM_TOKEN }}
 
       - name: deploy store.json
-        uses: Cecilapp/GitHub-Pages-deploy@v3
+        uses: crazy-max/ghaction-github-pages@v2
+        with:
+          target_branch: gh-pages
+          build_dir: remote/gh-pages
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-        with:
-          email: qwertyyb@foxmail.com
-          build_dir: remote/gh-pages               # optional
-          jekyll: no                     # optional
-          commit_message: update store # optional
 
 
