@@ -1,10 +1,8 @@
-import 'dart:collection';
-
 import 'package:cached_network_image/cached_network_image.dart';
 import 'package:flutter/material.dart';
-import 'package:flutter/rendering.dart';
 import 'package:html/dom.dart' as dom;
 
+import '../utils/logger.dart';
 import 'utils.dart';
 
 typedef void InvokeDomEvent(String handlerName, Map<String, dynamic> eventData);
@@ -79,17 +77,21 @@ WidgetRender renderPadding = (element, invokeEvent) {
 
 WidgetRender renderTextButton = (element, invokeEvent) {
   final foregroundColor = colors[element.attributes['foregroundcolor']];
+  final disabled = element.attributes['disabled'] != null;
   return TextButton(
     style: ButtonStyle(
+      padding: MaterialStateProperty.all(EdgeInsets.zero),
       foregroundColor: MaterialStateProperty.all(foregroundColor),
     ),
     child: getFirstWidget(renderNodes(element.nodes, invokeEvent)),
-    onPressed: () {
-      invokeEvent(
-        element.attributes['onpressed'] ?? 'onpressed',
-        createEventData(element.attributes),
-      );
-    },
+    onPressed: disabled
+        ? null
+        : () {
+            invokeEvent(
+              element.attributes['onpressed'] ?? 'onpressed',
+              createEventData(element.attributes),
+            );
+          },
   );
 };
 
@@ -150,17 +152,46 @@ WidgetRender renderImage = (element, invokeEvent) {
 
 WidgetRender renderElevatedButton = (element, invokeEvent) {
   final attrs = element.attributes;
+  final disabled = element.attributes['disabled'] != null;
   return ElevatedButton(
-    onPressed: () {
-      if (attrs['onpressed'] != null) {
-        invokeEvent(
-          attrs['onpressed']!,
-          createEventData(element.attributes),
-        );
-      }
-    },
+    onPressed: disabled
+        ? null
+        : () {
+            if (attrs['onpressed'] != null) {
+              invokeEvent(
+                attrs['onpressed']!,
+                createEventData(element.attributes),
+              );
+            }
+          },
     child: getFirstWidget(renderNodes(element.nodes, invokeEvent)),
     style: ButtonStyle(
+      padding: MaterialStateProperty.all(EdgeInsets.zero),
+      backgroundColor: colors['backgroundcolor'] != null
+          ? MaterialStateProperty.all(colors[attrs['backgroundcolor']!])
+          : null,
+    ),
+  );
+};
+
+WidgetRender renderOutlinedButton = (element, invokeEvent) {
+  final attrs = element.attributes;
+  final disabled = element.attributes['disabled'] != null;
+  logger.i(element.attributes);
+  return OutlinedButton(
+    onPressed: disabled
+        ? null
+        : () {
+            if (attrs['onpressed'] != null) {
+              invokeEvent(
+                attrs['onpressed']!,
+                createEventData(element.attributes),
+              );
+            }
+          },
+    child: getFirstWidget(renderNodes(element.nodes, invokeEvent)),
+    style: ButtonStyle(
+      padding: MaterialStateProperty.all(EdgeInsets.zero),
       backgroundColor: colors['backgroundcolor'] != null
           ? MaterialStateProperty.all(colors[attrs['backgroundcolor']!])
           : null,
@@ -226,6 +257,7 @@ Map<String, WidgetRender> widgetRenderMap = {
   'list-view': renderListView,
   'expanded': renderExpanded,
   'sizedbox': renderSizedBox,
+  'outlined-button': renderOutlinedButton,
 };
 
 List<Widget> renderNodes(

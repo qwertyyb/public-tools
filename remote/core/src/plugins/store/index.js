@@ -1,13 +1,47 @@
 const { default: axios } = require("axios");
+const fs = require('fs')
+const path = require('path')
+const { exec } = require('child_process')
+const { promisify } = require('util');
+const { installPlugin } = require("../../core");
+const { getPlugin } = require("../../core/plugin");
+
+const p = (promise) => promise.then(res => ([null, res])).catch(err => ([err, null]))
 
 const storeUrl = 'https://qwertyyb.github.io/public-tools/store.json'
+const pluginsDirPath = process.env.HOME + '/Library/Application Support/cn.qwertyyb.public/plugins'
 
 const getPluginList = async () => {
   const res = await axios.get(storeUrl)
   return res.data
 }
 
+const initPluginsDir = () => {
+  if (fs.existsSync(pluginsDirPath)) return [null, null];
+  fs.mkdirSync(pluginsDirPath, { recursive: true })
+  return p(promisify(exec)('npm init -y'))
+}
+
+const isPnpmInstalled = async () => {
+  const [err] = await p(promisify(exec)('pnpm --version'))
+  return !err
+}
+
+const installPnpm = () => {
+  return p(promisify(exec)('npm install -g pnpm'))
+}
+
+const installPluginWithPnpm = async (pluginName) => {
+  const pluginNpmName = '@public-tools/plugin-' + pluginName
+  const [err, result] = await p(promisify(exec)(`pnpm install ${pluginNpmName}`, {
+    cwd: pluginsDirPath
+  }))
+  if (err) return [err, result]
+  return [null, path.join(pluginsDirPath, 'node_modules', pluginNpmName, 'package.json')]
+}
+
 let cachedList = [];
+const downloadStatus = {}
 
 const storePlugin = utils => ({
   async onSearch(keyword) {
@@ -32,6 +66,10 @@ const storePlugin = utils => ({
   },
   onResultSelected(result) {
     const selectedPlugin = cachedList.find(item => item.id === result.id)
+    const downloading = downloadStatus[selectedPlugin.id]
+    const fullName = `@public-tools/plugin-${result.id}`
+    const installed = !!getPlugin(fullName)
+    console.log('installed', installed)
     return `<div>
       <flutter-container>
         <column crossAxisAlignment="start">
@@ -43,12 +81,22 @@ const storePlugin = utils => ({
               <text fontSize="16" fontWeight="bold">${result.title}</text>
               <text fontSize="12" color="black54">${result.subtitle}</text>
               <padding top="12">
-                <elevated-button onPressed="download" data-name="${result.id}">
-                  <row>
-                    <icon size="16" icon="download"></icon>
-                    <text>下载</text>
-                  </row>
-                </elevated-button>
+                ${installed
+                  ? `<outlined-button disabled>
+                      <row crossAxisAlignment="center">
+                        <icon size="12"
+                          icon="download"></icon>
+                        <text fontSize="12">已安装</text>
+                      </row>
+                    <outlined-button>`
+                  : `<elevated-button onPressed="download" data-name="${result.id}">
+                      <row crossAxisAlignment="center">
+                        <icon size="12"
+                          icon="${downloading ? 'downloading' : 'download'}"></icon>
+                        <text fontSize="12">${installed ? '已安装' : downloading ? '下载中' : '下载'}</text>
+                      </row>
+                    </elevated-button>`
+                  }
               </padding>
             </column>
           </row>
@@ -85,10 +133,41 @@ const storePlugin = utils => ({
     return null;
   },
   methods: {
-    download(e) {
-      // @todo 未完成
+    async download(e) {
       console.log('download plugin: ', e)
-      utils.toast('插件下载尚在开发中')
+      const { name } = e.target.dataset;
+      if (downloadStatus[name]) return;
+      downloadStatus[name] = true;
+      utils.updateResults(cachedList);
+      const [initErr] = await initPluginsDir()
+      if (initErr) {
+        utils.toast(initErr.message || initErr)
+        downloadStatus[name] = false
+        return
+      }
+      // 使用pnpm进行下载
+      const pnpmInstalled = await isPnpmInstalled()
+      if (!pnpmInstalled) {
+        const [installPnpmErr] = await installPnpm()
+        utils.toast(installPnpmErr.message || installPnpmErr)
+        downloadStatus[name] = false
+      }
+
+      const [installErr, pluginPath] = await installPluginWithPnpm(name)
+      if (installErr) {
+        utils.toast(installErr.message || installErr)
+        downloadStatus[name] = false
+        return
+      }
+      const { msg } = installPlugin(pluginPath)
+      if (msg) {
+        utils.toast(msg)
+        downloadStatus[name] = false
+        return
+      }
+      downloadStatus[name] = false
+      utils.toast('插件已下载')
+      updateResults(cachedList)
     },
   },
   onEnter() {},

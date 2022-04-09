@@ -40,6 +40,7 @@ final fontWeight = {
 final icons = {
   'download': Icons.download,
   'delete': Icons.delete,
+  'downloading': Icons.downloading
 };
 
 final scrollDirection = {

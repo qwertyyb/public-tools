@@ -163,38 +163,6 @@ class RemotePluginServer {
   }
 }
 
-Future<void> _downloadPlugin() async {
-  const downloadUrl =
-      'https://github.com/qwertyyb/YPaste-flutter/releases/latest/download/plugins.zip';
-  final dir = await getApplicationSupportDirectory();
-  final filePath = '${dir.path}/inner-plugins.zip';
-  final pluginsDirPath = '${dir.path}/inner-plugins';
-  if (File('$pluginsDirPath/main.js').existsSync()) return;
-  if (File(filePath).existsSync()) {
-    File(filePath).deleteSync();
-  }
-  if (Directory(pluginsDirPath).existsSync()) {
-    File(pluginsDirPath).deleteSync(recursive: true);
-  }
-  final request = await HttpClient().getUrl(Uri.parse(downloadUrl));
-  final response = await request.close();
-  final file = File(filePath);
-  await response.pipe(file.openWrite()).catchError((error) {
-    file.deleteSync();
-    logger.e('download plugins error: $error');
-    throw error;
-  }, test: (error) => false);
-  logger.i('download success');
-  final result = await Process.start("unzip", [filePath, '-d', pluginsDirPath]);
-  logger.i('unzip inner_plugin.zip: ${result.exitCode}');
-  if (await result.exitCode != 0) {
-    result.stderr.transform(utf8.decoder).forEach((print));
-    throw Exception('unzip plugin error');
-  }
-}
-
-bool _isProduction() => Platform.environment['REMOTE_PLUGIN_MODE'] != 'debug';
-
 Future<String?> _getPluginsDirPath() async {
   if (Platform.environment['REMOTE_PLUGIN_MODE'] == 'debug') {
     return null;
@@ -207,7 +175,6 @@ Future<String?> _getPluginsDirPath() async {
 void runClient(binPath) async {
   final pluginDir = await _getPluginsDirPath();
   if (pluginDir == null) return;
-  await _downloadPlugin();
   final newEnv = Map<String, String>.from(Platform.environment);
   newEnv['PATH'] = '$binPath:${newEnv['PATH']}';
   var args = ['./main.js'];

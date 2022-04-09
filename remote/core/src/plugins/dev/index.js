@@ -2,7 +2,7 @@ const path = require('path')
 const fs = require('fs')
 const chokidar = require('chokidar');
 const { openFile } = require("macos-open-file-dialog")
-const registerPlugin = require('../../core/plugin');
+const { addPlugin, removePlugin } = require('../../core/plugin');
 
 const devFilePath = process.env.HOME + '/Library/Application Support/cn.qwertyyb.public/dev-plugins.json';
 
@@ -41,21 +41,20 @@ const registerSavedPlugin = (utils) => {
 }
 
 const removeDevPlugin = (name) => {
-  if (devPlugins.has(name)) {
-    const { unregister, fileWatcher } = devPlugins.get(name)
-    unregister()
-    fileWatcher.close()
-    devPlugins.delete(name)
-    save();
-  }
+  if (!devPlugins.has(name)) return;
+  removePlugin(name)
+  const { fileWatcher } = devPlugins.get(name)
+  fileWatcher.close()
+  devPlugins.delete(name)
+  save();
 }
 
 const addDevPlugin = (configPath, utils) => {
   console.log('addDevPlugin', configPath)
-  const unregister = registerPlugin(configPath)
-  if (unregister.msg) {
+  const res = addPlugin(configPath)
+  if (res.msg) {
     utils.showApp()
-    utils.toast(unregister.msg)
+    utils.toast(res.msg)
   } else {
     delete require.cache[configPath];
     const { name, ...info } = require(configPath)
@@ -67,7 +66,7 @@ const addDevPlugin = (configPath, utils) => {
       });
       watcher.on('all', (event, filePath) => {
         console.log('file changed, reloading plugin: ', event, filePath);
-        unregister();
+        removePlugin(name)
         // 删除缓存
         delete require.cache[require.resolve(path.dirname(configPath))];
         addDevPlugin(configPath, utils);
@@ -77,7 +76,6 @@ const addDevPlugin = (configPath, utils) => {
     }
     devPlugins.set(name, {
       ...value,
-      unregister,
       config: {
         name, ...info
       },

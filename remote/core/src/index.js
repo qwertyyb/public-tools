@@ -1,7 +1,8 @@
-const path = require('path')
-const registerPlugin = require('./core/plugin')
+const core = require('./core')
 
-registerPlugin(path.join(__dirname, './plugins/dev/package.json'))
-registerPlugin(path.join(__dirname, './plugins/store/package.json'))
+const start = () => {
+  core.launch()
+  console.log('remote plugin is running')
+}
 
-console.log('remote plugin is running')
+start()

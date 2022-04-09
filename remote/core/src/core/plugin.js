@@ -1,56 +1,18 @@
 const fs = require('fs');
 const path = require('path')
-const { v4: uuidv4 } = require('uuid')
 const ws = require('./ws')
+const MessageData = require('./message-data')
 
 let curPlugin = null;
 const plugins = new Map();
 
-class MessageData {
-  time = Date.now();
-  id = uuidv4();
-  replyId = uuidv4();
-  type = 'event';
-  payload = {};
-
-  constructor(data) {
-    this.type = data.type;
-    this.payload = data.payload;
-    this.replyId = data.replyId;
-    this.time = data.time;
-    this.id = data.id;
-  }
-
-  static fromJSON(data) {
-    return new MessageData(JSON.parse(data));
-  }
-
-  makeReplyMessage(payload = {}) {
-    return new MessageData({
-      id: this.replyId,
-      time: Date.now(),
-      replyId: uuidv4(),
-      type: 'callback',
-      payload
-    });
-  }
-
-  static makeEventMessage(eventName, payload = {}) {
-    return new MessageData({
-      id: uuidv4(),
-      time: Date.now(),
-      replyId: uuidv4(),
-      type: 'event',
-      payload: {
-        ...payload,
-        event: eventName
-      }
-    });
-  }
+const setCurPlugin = (targetPluginName) => {
+  curPlugin = plugins.get(targetPluginName);
+  return curPlugin
 }
 
-const send = (obj) => {
-  console.log('send', JSON.stringify(obj, null, 2));
+const invoke = (obj) => {
+  console.log('invoke', JSON.stringify(obj, null, 2));
   return ws.send(JSON.stringify(obj))
 }
 
@@ -70,18 +32,13 @@ const getCommands = () => {
   return commands;
 }
 
-const setCurPlugin = (targetPluginName) => {
-  curPlugin = plugins.get(targetPluginName);
-  return curPlugin
-}
-
 ws.on('message',async  (message) => {
   const messageData = MessageData.fromJSON(message);
-  const { type, payload, replyId } = JSON.parse(message)
+  const { type, payload } = JSON.parse(message)
   console.log('receive Message', JSON.parse(message))
 
   if (type === 'getCommands') {
-    return send(messageData.makeReplyMessage({ commands: getCommands() }))
+    return invoke(messageData.makeReplyMessage({ commands: getCommands() }))
   }
 
   if (type === 'onSearch') {
@@ -90,7 +47,7 @@ ws.on('message',async  (message) => {
       console.warn(`插件${payload.command.id}不存在`)
     }
     const results = (await plugin?.onSearch(payload.keyword)) || [];
-    return send(messageData.makeReplyMessage({ results }))
+    return invoke(messageData.makeReplyMessage({ results }))
   }
 
   if (type === 'onResultSelected') {
@@ -99,7 +56,7 @@ ws.on('message',async  (message) => {
       console.warn(`插件不存在`)
     }
     const html = (await curPlugin?.onResultSelected(payload.result)) ?? null
-    return send(messageData.makeReplyMessage({ html }))
+    return invoke(messageData.makeReplyMessage({ html }))
   }
 
   if (type === 'onEnter') {
@@ -136,26 +93,26 @@ ws.on('message',async  (message) => {
     }
   }
 
-  return send(messageData.makeReplyMessage({}))
+  return invoke(messageData.makeReplyMessage({}))
 })
 
 const createUtils = (name) => ({
   toast(content) {
-    send(MessageData.makeEventMessage('toast', { content }))
+    invoke(MessageData.makeEventMessage('toast', { content }))
   },
   hideApp() {
-    send(MessageData.makeEventMessage('hideApp'))
+    invoke(MessageData.makeEventMessage('hideApp'))
   },
   showApp() {
-    send(MessageData.makeEventMessage('showApp'))
+    invoke(MessageData.makeEventMessage('showApp'))
   },
   updateResults(results) {
-    send(MessageData.makeEventMessage('updateResults', { results, command: plugins.get(name) }))
-  }
+    invoke(MessageData.makeEventMessage('updateResults', { results, command: plugins.get(name) }))
+  },
 })
 
 const validatePluginConfig = config => {
-  const { name, title, subtitle = '', description = '', icon, mode, keywords } = config;
+  const { name, title, icon, mode, keywords } = config;
   const required = []
   if (!name) {
     required.push('name')
@@ -178,7 +135,7 @@ const validatePluginConfig = config => {
   return { pass: required.length <= 0, msg: `${required.join('、')} 为必填项` };
 }
 
-const registerPlugin = (configPath) => {
+const addPlugin = (configPath) => {
   try {
     if (!fs.existsSync(configPath)) {
       throw new Error(`文件 ${configPath} 不存在`)
@@ -189,24 +146,27 @@ const registerPlugin = (configPath) => {
       createUtils().toast(msg);
       return { msg };
     }
-    const pluginCreator = require(path.join(configPath, '../index.js'));
+    const pluginCreator = require(path.dirname(configPath));
     const plugin = pluginCreator(createUtils(config.name));
 
     const { name, title, subtitle = '', description = '', icon, mode, keywords } = config;
-    plugins.set(name, { ...plugin, id: name, title, subtitle, description, icon, mode, keywords });
+    plugins.set(name, { ...plugin, pluginPath: configPath, id: name, title, subtitle, description, icon, mode, keywords });
     console.log(`插件${name}注册成功`);
-    send(MessageData.makeEventMessage('updateCommands', { commands: getCommands() }));
-    return () => {
-      plugins.delete(name);
-      send(MessageData.makeEventMessage('updateCommands', { commands: getCommands() }));
-      if (curPlugin?.name === name) {
-        curPlugin = null;
-      }
-    }
+    invoke(MessageData.makeEventMessage('updateCommands', { commands: getCommands() }));
+    return {};
   } catch(err) {
     console.error(err);
     createUtils().toast(err.message);
     return { msg: err.message };
+  }
+}
+
+const removePlugin = (name) => {
+  if (!plugins.has(name)) return;
+  plugins.delete(name);
+  invoke(MessageData.makeEventMessage('updateCommands', { commands: getCommands() }));
+  if (curPlugin?.name === name) {
+    curPlugin = null;
   }
 }
 
@@ -217,4 +177,9 @@ process.on('unhandledRejection', (err) => {
   console.error(err)
 })
 
-module.exports = registerPlugin
+module.exports = {
+  addPlugin,
+  removePlugin,
+  getPlugins: () => Array.from(plugins.values()),
+  getPlugin: name => plugins.get(name),
+}

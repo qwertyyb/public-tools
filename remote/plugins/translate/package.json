@@ -6,6 +6,14 @@
   "description": "翻译文本",
   "icon": "https://img.icons8.com/color/144/000000/google-translate.png",
   "mode": "listView",
-  "keywords": ["fy", "translate", "ts"],
-  "main": "index.js"
+  "keywords": [
+    "fy",
+    "translate",
+    "ts"
+  ],
+  "main": "index.js",
+  "dependencies": {
+    "axios": "^0.26.1",
+    "simple-mac-clipboard": "^1.0.1"
+  }
 }
