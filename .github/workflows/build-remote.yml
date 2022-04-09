@@ -32,6 +32,9 @@ jobs:
       - name: install pnpm
         run: npm install -g pnpm
 
+      - name: install build deps
+        run: cd remote/scripts/ && pnpm install
+
       - name: bulild store.json
         run: cd remote && pnpm run build-store
         env:
