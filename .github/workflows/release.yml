@@ -75,11 +75,15 @@ jobs:
         env:
           NPM_TOKEN: ${{ secrets.NPM_TOKEN }}
 
-      - name: deploy store
-        run: pnpm run deploy-store
-
-      - name: to root path
-        run: cd ..
+      - name: deploy store.json
+        uses: Cecilapp/GitHub-Pages-deploy@v3
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        with:
+          email: qwertyyb@foxmail.com
+          build_dir: remote/gh-pages               # optional
+          jekyll: no                     # optional
+          commit_message: update store # optional
 
       - uses: ncipollo/release-action@v1
         with:
