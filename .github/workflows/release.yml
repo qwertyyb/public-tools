@@ -64,14 +64,13 @@ jobs:
       - name: install pnpm
         run: npm install -g pnpm
 
-      - name: to remote path
-        run: cd remote
-
       - name: install deps
-        run: pnpm install
+        run: cd remote && pnpm install
 
       - name: bulild store.json
-        run: pnpm run build-store
+        run: cd remote && pnpm run build-store
+        env:
+          NPM_TOKEN: ${{ secrets.NPM_TOKEN }}
 
       - name: deploy store
         run: pnpm run deploy-store

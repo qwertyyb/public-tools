@@ -4,10 +4,10 @@ name: build plugins
 on:
   workflow_dispatch:
     inputs: 
-      release:
-        description: 'release version'
+      ref:
+        description: 'branch or tag'
         required: true
-        default: 'v1.0.2'
+        default: 'main'
   push:
     paths:
       - 'remote/**'
@@ -18,6 +18,12 @@ jobs:
 
     steps:
       - uses: actions/checkout@v2
+        if: ${{ github.event_name != 'workflow_dispatch' }}
+
+      - uses: actions/checkout@v2
+        if: ${{ github.event_name == 'workflow_dispatch' }}
+        with:
+          ref: ${{ github.event.inputs.ref }}
       
       - uses: actions/setup-node@v2
         with:
@@ -26,16 +32,12 @@ jobs:
       - name: install pnpm
         run: npm install -g pnpm
 
-      - name: install deps
-        run: pnpm install
-
-      - name: to remote path
-        run: cd remote
-
       - name: bulild store.json
-        run: pnpm run build-store
+        run: cd remote && pnpm run build-store
+        env:
+          NPM_TOKEN: ${{ secrets.NPM_TOKEN }}
 
       - name: deploy store
-        run: pnpm run deploy-store
+        run: cd remote pnpm run deploy-store
 
 
