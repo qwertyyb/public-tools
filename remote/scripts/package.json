@@ -5,7 +5,8 @@
   "main": "publish-plugin.js",
   "scripts": {
     "build-store": "node build-remote-plugin-store.js",
-    "deploy-store": "gh-pages -d ../gh-pages"
+    "deploy-store": "gh-pages -d ../gh-pages",
+    "publish-core": "node publish-core.js"
   },
   "keywords": [],
   "author": "",

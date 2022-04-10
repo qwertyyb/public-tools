@@ -1,4 +1,4 @@
-name: release store
+name: publish core
 
 
 on:
@@ -10,7 +10,7 @@ on:
         default: 'main'
   push:
     paths:
-      - 'remote/plugins/**'
+      - 'remote/core/**'
 
 jobs:
   build:
@@ -35,17 +35,10 @@ jobs:
       - name: install build deps
         run: cd remote/scripts/ && pnpm install
 
-      - name: bulild store.json
-        run: cd remote && pnpm run build-store
+      - name: publish core
+        run: cd remote && pnpm run publish-core
         env:
           NPM_TOKEN: ${{ secrets.NPM_TOKEN }}
 
-      - name: deploy store.json
-        uses: crazy-max/ghaction-github-pages@v2
-        with:
-          target_branch: gh-pages
-          build_dir: remote/gh-pages
-        env:
-          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
 
 
