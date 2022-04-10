@@ -86,6 +86,9 @@ class RemotePluginServer {
       (HttpRequest req) async {
         logger.i('新的链接: ${req.uri}');
         if (req.uri.path != '/ws' || this._socket != null) {
+          req.response.statusCode = 403;
+          req.response.write('a client has already connected');
+          req.response.close();
           return;
         }
         logger.i('新的socket已连接');

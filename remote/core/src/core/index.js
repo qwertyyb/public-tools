@@ -36,16 +36,6 @@ const uninstallPlugin = (name) => {
   setStorage(config)
 }
 
-const launch = () => {
-  const config = getStorage(defaultConfig)
-  config.plugins.forEach(({ pluginPath, disabled }) => {
-    if (!disabled) {
-      addPlugin(pluginPath)
-    }
-  })
-}
-
-
 module.exports = {
   launch,
   installPlugin,

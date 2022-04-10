@@ -1,8 +1,16 @@
-const core = require('./core')
+const { addPlugin, removePlugin, getPlugin, getPlugins } = require('./core/plugin')
+const { installPlugin, uninstallPlugin } = require('./core/index')
+const { getStorage, setStorage } = require('./core/storage')
 
-const start = () => {
-  core.launch()
-  console.log('remote plugin is running')
+module.exports = {
+  addPlugin,
+  removePlugin,
+  getPlugin,
+  getPlugins,
+
+  installPlugin,
+  uninstallPlugin,
+
+  getStorage,
+  setStorage,
 }
-
-start()

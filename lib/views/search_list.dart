@@ -208,7 +208,7 @@ class SearchListState<T> extends State<SearchList<T>> {
                             height: double.infinity,
                             padding: EdgeInsets.zero,
                             color: Color.fromARGB(49, 165, 165, 165),
-                            child: Expanded(
+                            child: SizedBox(
                               child: preview!,
                             ),
                           ),

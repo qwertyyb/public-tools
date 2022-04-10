@@ -1,9 +1,13 @@
 #!/usr/bin/env node
-const core = require('../core')
+const { getStorage, addPlugin } = require('..')
 
-const start = () => {
-  core.launch()
-  console.log('remote plugin is running')
+const launch = () => {
+  const config = getStorage(defaultConfig)
+  config.plugins.forEach(({ pluginPath, disabled }) => {
+    if (!disabled) {
+      addPlugin(pluginPath)
+    }
+  })
 }
 
-start()
+launch()

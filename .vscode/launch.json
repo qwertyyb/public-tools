@@ -13,6 +13,15 @@
       "env": {
         "REMOTE_PLUGIN_MODE": "debug",
       }
+    },
+    {
+      "name": "public tools(plugin)",
+      "request": "launch",
+      "program": "lib/main.dart",
+      "type": "dart",
+      "flutterMode": "debug",
+      "env": {
+      }
     }
   ]
 }
