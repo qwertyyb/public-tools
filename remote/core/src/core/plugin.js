@@ -109,6 +109,9 @@ const createUtils = (name) => ({
   updateResults(results) {
     invoke(MessageData.makeEventMessage('updateResults', { results, command: plugins.get(name) }))
   },
+  updatePreview(html) {
+    invoke(MessageData.makeEventMessage('updatePreview', { html, command: plugins.get(name) }))
+  }
 })
 
 const validatePluginConfig = config => {

@@ -205,12 +205,13 @@ class SearchListState<T> extends State<SearchList<T>> {
                         Expanded(
                           flex: 3,
                           child: Container(
-                              height: double.infinity,
-                              padding: EdgeInsets.zero,
-                              color: Color.fromARGB(49, 165, 165, 165),
-                              child: SingleChildScrollView(
-                                child: preview,
-                              )),
+                            height: double.infinity,
+                            padding: EdgeInsets.zero,
+                            color: Color.fromARGB(49, 165, 165, 165),
+                            child: Expanded(
+                              child: preview!,
+                            ),
+                          ),
                         )
                     ],
                   ),

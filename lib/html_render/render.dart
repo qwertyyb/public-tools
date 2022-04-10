@@ -2,14 +2,48 @@ import 'package:collection/collection.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_html/flutter_html.dart';
 
+import '../utils/logger.dart';
 import 'custom_render.dart';
 
-class HTMLRender extends StatelessWidget {
-  final String html;
+class HTMLRuntime extends StatefulWidget {
   final InvokeDomEvent? onEvent;
-  final Key uniqueKey = UniqueKey();
+  final String initialHtml;
 
-  HTMLRender({required this.html, this.onEvent});
+  HTMLRuntime(this.initialHtml, {Key? key, this.onEvent}) : super(key: key);
+
+  @override
+  State<StatefulWidget> createState() {
+    return HTMLRuntimeState();
+  }
+}
+
+class HTMLRuntimeState extends State<HTMLRuntime> {
+  String html = '';
+  Key uniqueKey = UniqueKey();
+
+  void updateHTML(String html) {
+    logger.i('updatePreview: $html');
+    setState(() {
+      this.html = html;
+      this.uniqueKey = UniqueKey();
+    });
+  }
+
+  @override
+  void didUpdateWidget(covariant HTMLRuntime oldWidget) {
+    logger.i('didUpdate');
+    if (this.widget.initialHtml != html) {
+      this.html = this.widget.initialHtml;
+      this.uniqueKey = UniqueKey();
+    }
+    super.didUpdateWidget(oldWidget);
+  }
+
+  @override
+  void initState() {
+    this.html = widget.initialHtml;
+    super.initState();
+  }
 
   @override
   Widget build(BuildContext context) {
@@ -20,7 +54,7 @@ class HTMLRender extends StatelessWidget {
         CustomRender.widget(widget: (RenderContext context, buildChildren) {
       final widget =
           renderNodes(context.tree.element!.nodes, (handlerName, eventData) {
-        onEvent?.call(handlerName, eventData);
+        this.widget.onEvent?.call(handlerName, eventData);
       }).firstOrNull;
       if (widget == null) return Text('no child');
       return widget;

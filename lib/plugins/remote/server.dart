@@ -162,35 +162,3 @@ class RemotePluginServer {
     _handlers[eventName] = eventHandlers;
   }
 }
-
-Future<String?> _getPluginsDirPath() async {
-  if (Platform.environment['REMOTE_PLUGIN_MODE'] == 'debug') {
-    return null;
-  }
-  // 正式环境
-  final dir = await getApplicationSupportDirectory();
-  return '${dir.path}/inner-plugins';
-}
-
-void runClient(binPath) async {
-  final pluginDir = await _getPluginsDirPath();
-  if (pluginDir == null) return;
-  final newEnv = Map<String, String>.from(Platform.environment);
-  newEnv['PATH'] = '$binPath:${newEnv['PATH']}';
-  var args = ['./main.js'];
-  if (Platform.environment['MODE'] == 'debug') {
-    args.insert(0, '--inspect');
-  }
-  final clientProcess = await Process.start(
-    '$binPath/node',
-    args,
-    workingDirectory: pluginDir,
-    environment: newEnv,
-    runInShell: true,
-  );
-  clientProcess.stdout.transform(utf8.decoder).forEach(print);
-  clientProcess.stderr.transform(utf8.decoder).forEach(print);
-  clientProcess.exitCode.then((code) {
-    print('client exit code: $code');
-  });
-}

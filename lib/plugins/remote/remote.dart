@@ -1,9 +1,10 @@
 import 'dart:io';
 
 import 'package:collection/collection.dart' show IterableExtension;
+import 'package:flutter/material.dart';
 import 'package:oktoast/oktoast.dart';
-import 'package:path_provider/path_provider.dart';
 import 'package:shortcut_launcher/html_render/render.dart';
+import 'package:shortcut_launcher/plugins/remote/runtime.dart';
 import 'package:window_manager/window_manager.dart';
 
 import '../../core/plugin.dart';
@@ -12,49 +13,8 @@ import '../../pigeon/app.dart';
 import '../../utils/logger.dart';
 import 'server.dart';
 
-Future<String> _downloadNodeJs() async {
-  const downloadUrl =
-      'https://nodejs.org/dist/v16.13.0/node-v16.13.0-darwin-x64.tar.gz';
-  final dir = await getApplicationSupportDirectory();
-  final filePath = '${dir.path}/node-v16.13.0-darwin-x64.tar.gz';
-  final nodeDir = '${dir.path}/node-v16.13.0-darwin-x64';
-  final binDir = '$nodeDir/bin';
-  final npmPath = '$binDir/npm';
-  final nodePath = '$binDir/node';
-  if (File(npmPath).existsSync() && File(nodePath).existsSync()) {
-    return binDir;
-  }
-  // 删除文件，重新下载
-  if (File(npmPath).existsSync() || File(nodePath).existsSync()) {
-    Directory(nodeDir).deleteSync(recursive: true);
-  }
-  if (File(filePath).existsSync()) {
-    File(filePath).deleteSync();
-  }
-  final request = await HttpClient().getUrl(Uri.parse(downloadUrl));
-  final response = await request.close();
-  final file = File(filePath);
-  await response.pipe(file.openWrite()).catchError((error) {
-    file.deleteSync();
-    logger.e('download nodejs error: $error');
-    throw error;
-  }, test: (error) => false);
-  logger.i('download success');
-  final process = await Process.run(
-    "tar",
-    ['-zxf', 'node-v16.13.0-darwin-x64.tar.gz'],
-    workingDirectory: dir.path,
-  );
-  final exitCode = process.exitCode;
-  if (exitCode != 0) {
-    file.deleteSync();
-    throw Exception('download nodejs error');
-  }
-  logger.i('untar success');
-  return binDir;
-}
-
 late RemotePluginServer _server;
+GlobalKey<HTMLRuntimeState> _previewKey = GlobalKey<HTMLRuntimeState>();
 
 PluginCommand _createCommandItem(element) {
   final command = PluginCommand.fromJsonAndFunction(
@@ -89,15 +49,18 @@ PluginCommand _createCommandItem(element) {
       });
       if (data["html"] == null) return null;
 
-      return HTMLRender(
-        html: data['html'],
-        onEvent: (handlerName, eventData) {
-          _server.invoke('event', {
-            'event': 'domEvent',
-            'handlerName': handlerName,
-            'eventData': eventData,
-          });
-        },
+      return SingleChildScrollView(
+        child: HTMLRuntime(
+          data['html'],
+          key: _previewKey,
+          onEvent: (handlerName, eventData) {
+            _server.invoke('event', {
+              'event': 'domEvent',
+              'handlerName': handlerName,
+              'eventData': eventData,
+            });
+          },
+        ),
       );
     },
   );
@@ -134,12 +97,17 @@ void _bindServerListener() async {
           .toList(),
     );
   });
+  _server.on('updatePreview', (data) {
+    if (data['html'] != null) {
+      _previewKey.currentState?.updateHTML(data['html']!);
+    }
+  });
 }
 
 void _onRegistery() {
-  _downloadNodeJs().then((binPath) {
-    runClient(binPath);
-  });
+  if (Platform.environment['REMOTE_PLUGIN_MODE'] != 'debug') {
+    startRemote();
+  }
   _server = RemotePluginServer(
     onDisconnect: () {
       remotePlugin.commands = [];

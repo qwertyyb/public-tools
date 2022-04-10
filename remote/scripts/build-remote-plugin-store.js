@@ -13,7 +13,11 @@ const getPluginConfigList = () => {
     })
     .filter(i => i)
     .map(configPath => {
-      return require(configPath)
+      const config = require(configPath)
+      return {
+        ...config,
+        name: '@public-tools/plugin-' + config.name,
+      }
     })
 }
 
