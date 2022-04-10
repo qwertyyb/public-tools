@@ -1,4 +1,3 @@
-const path = require('path')
 const { removePlugin, addPlugin } = require('./plugin')
 const { getStorage, setStorage } = require('./storage')
 
@@ -24,7 +23,6 @@ const uninstallPlugin = (name) => {
 }
 
 module.exports = {
-  launch,
   installPlugin,
   uninstallPlugin,
 }
