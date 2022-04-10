@@ -5,7 +5,6 @@ import 'package:collection/collection.dart';
 import 'package:flutter/services.dart';
 import 'package:hotkey_manager/hotkey_manager.dart';
 import 'package:shared_preferences/shared_preferences.dart';
-import 'package:shortcut_launcher/plugins/settings/setting_key.dart';
 import 'package:window_manager/window_manager.dart';
 
 import '../../core/plugin.dart';
@@ -16,6 +15,7 @@ import '../../pages/main_page.dart';
 import '../../utils/logger.dart';
 import 'basic_settings.dart';
 import 'plugin_settings.dart';
+import 'setting_key.dart';
 
 void _refreshHotKey() async {
   logger.i('setting._refreshHotKey');

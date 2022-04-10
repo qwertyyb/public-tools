@@ -36,7 +36,7 @@ jobs:
         run: cd remote/scripts/ && pnpm install
 
       - name: publish core
-        run: cd remote && pnpm run publish-core
+        run: cd remote/scripts/ && pnpm run publish-core
         env:
           NPM_TOKEN: ${{ secrets.NPM_TOKEN }}
 

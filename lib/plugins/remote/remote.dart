@@ -3,14 +3,14 @@ import 'dart:io';
 import 'package:collection/collection.dart' show IterableExtension;
 import 'package:flutter/material.dart';
 import 'package:oktoast/oktoast.dart';
-import 'package:shortcut_launcher/html_render/render.dart';
-import 'package:shortcut_launcher/plugins/remote/runtime.dart';
 import 'package:window_manager/window_manager.dart';
 
 import '../../core/plugin.dart';
 import '../../core/plugin_command.dart';
+import '../../html_render/render.dart';
 import '../../pigeon/app.dart';
 import '../../utils/logger.dart';
+import 'runtime.dart';
 import 'server.dart';
 
 late RemotePluginServer _server;

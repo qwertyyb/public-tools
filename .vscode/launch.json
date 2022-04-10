@@ -5,7 +5,7 @@
   "version": "0.2.0",
   "configurations": [
     {
-      "name": "shortcut_launcher",
+      "name": "public tools",
       "request": "launch",
       "program": "lib/main.dart",
       "type": "dart",

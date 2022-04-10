@@ -3,10 +3,9 @@ import 'dart:convert';
 import 'package:flutter/material.dart';
 import 'package:hotkey_manager/hotkey_manager.dart';
 import 'package:shared_preferences/shared_preferences.dart';
-import 'package:shortcut_launcher/plugins/settings/setting_key.dart';
 
-import '../../utils/logger.dart';
 import 'hotkey_recorder.dart';
+import 'setting_key.dart';
 
 class BasicSettingsView extends StatefulWidget {
   final void Function()? onHotKeyChange;

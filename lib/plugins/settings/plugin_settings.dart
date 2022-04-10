@@ -3,7 +3,6 @@ import 'dart:convert';
 import 'package:flutter/material.dart';
 import 'package:hotkey_manager/hotkey_manager.dart';
 import 'package:shared_preferences/shared_preferences.dart';
-import 'package:shortcut_launcher/plugins/settings/setting_key.dart';
 
 import '../../core/plugin.dart';
 import '../../core/plugin_command.dart';
@@ -11,6 +10,7 @@ import '../../core/plugin_manager.dart';
 import '../../utils/logger.dart';
 import '../../views/plugin_label_view.dart';
 import 'hotkey_recorder.dart';
+import 'setting_key.dart';
 
 class PluginSettingsView extends StatefulWidget {
   final Function? onHotKeyChange;
