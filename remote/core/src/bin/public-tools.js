@@ -2,21 +2,16 @@
 const path = require('path')
 const { getStorage, addPlugin } = require('..')
 
-const defaultConfig = {
-  plugins: [
-    {
-      pluginPath: path.join(__dirname, '../plugins/dev/package.json'),
-      disabled: false,
-    },
-    {
-      pluginPath: path.join(__dirname, '../plugins/store/package.json'),
-      disabled: false
-    }
-  ]
-}
+const corePlugins = [
+  path.join(__dirname, '../plugins/dev/package.json'),
+  path.join(__dirname, '../plugins/store/package.json'),
+]
 
 const launch = () => {
-  const config = getStorage(defaultConfig)
+  const config = getStorage({ plugins: [] })
+  corePlugins.forEach(pluginPath => {
+    addPlugin(pluginPath)
+  })
   config.plugins.forEach(({ pluginPath, disabled }) => {
     if (!disabled) {
       addPlugin(pluginPath)
