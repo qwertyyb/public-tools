@@ -17,18 +17,26 @@ const getPluginList = async () => {
 }
 
 const initPluginsDir = () => {
-  if (fs.existsSync(pluginsDirPath)) return [null, null];
-  fs.mkdirSync(pluginsDirPath, { recursive: true })
-  return p(promisify(exec)('npm init -y'))
+  if (fs.existsSync(path.join(pluginsDirPath, './package.json'))) return [null, null];
+  if (!fs.existsSync(pluginsDirPath)) {
+    fs.mkdirSync(pluginsDirPath, { recursive: true })
+  }
+  return p(promisify(exec)('npm init -y', {
+    cwd: pluginsDirPath
+  }))
 }
 
 const isPnpmInstalled = async () => {
-  const [err] = await p(promisify(exec)('pnpm --version'))
+  const [err] = await p(promisify(exec)('pnpm --version', {
+    cwd: pluginsDirPath
+  }))
   return !err
 }
 
 const installPnpm = () => {
-  return p(promisify(exec)('npm install -g pnpm'))
+  return p(promisify(exec)('npm install -g pnpm', {
+    cwd: pluginsDirPath
+  }))
 }
 
 const installPluginWithPnpm = async (pluginName) => {
@@ -39,6 +47,7 @@ const installPluginWithPnpm = async (pluginName) => {
   const [err, result] = await p(promisify(exec)(`pnpm install ${pluginNpmName}@latest`, {
     cwd: pluginsDirPath
   }))
+  console.log(err, result);
   if (err) return [err, result]
   return [null, path.join(pluginsDirPath, 'node_modules', pluginNpmName, 'package.json')]
 }
