@@ -86,14 +86,16 @@ final _command = PluginCommand(
   onSearch: (String keyword) {
     final basicItem = SearchResult(
       id: 'basic',
+      icon: 'https://img.icons8.com/fluency/96/000000/imac-settings.png',
       title: "基础",
       subtitle: '基础设置',
       description: 'basic',
     );
     final hotkeyItem = SearchResult(
       id: 'plugins',
+      icon: 'https://img.icons8.com/color-glass/96/000000/puzzle.png',
       title: '快捷键',
-      subtitle: '插件快捷键',
+      subtitle: '插件设置',
       description: 'plugins',
     );
     return Future.value([

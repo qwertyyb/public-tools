@@ -89,7 +89,7 @@ class PluginSettingsState extends State<PluginSettingsView> {
     return plugin.commands
         .map<Padding>(
           (command) => Padding(
-            padding: EdgeInsets.only(left: 12, right: 10),
+            padding: EdgeInsets.only(left: 12, right: 6, top: 2, bottom: 2),
             child: Row(
               crossAxisAlignment: CrossAxisAlignment.center,
               children: [
@@ -100,6 +100,7 @@ class PluginSettingsState extends State<PluginSettingsView> {
                 PluginLabelView(
                   icon: command.icon,
                   title: command.title,
+                  iconSize: 20,
                 ),
                 Spacer(),
                 SizedBox(
@@ -158,6 +159,7 @@ class PluginSettingsState extends State<PluginSettingsView> {
                 PluginLabelView(
                   icon: plugin.icon,
                   title: plugin.title,
+                  iconSize: 20,
                 ),
                 Spacer(),
                 SizedBox(

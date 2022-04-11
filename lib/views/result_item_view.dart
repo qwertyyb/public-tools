@@ -10,16 +10,15 @@ import '../core/base_list_item.dart';
 class ItemIconView extends StatelessWidget {
   final String? icon;
 
-  final double size = 30;
+  final double size;
 
-  ItemIconView(this.icon);
+  ItemIconView(this.icon, {this.size = 30});
 
   @override
   Widget build(BuildContext context) {
     if (icon == null || icon == '') {
-      return Icon(
-        Icons.account_circle_rounded,
-        size: size,
+      return FlutterLogo(
+        size: this.size,
       );
     }
     return icon!.startsWith('http://') || icon!.startsWith('https://')

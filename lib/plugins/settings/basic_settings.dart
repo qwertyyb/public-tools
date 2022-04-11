@@ -60,66 +60,68 @@ class _BasicSettingsState extends State<BasicSettingsView> {
   @override
   Widget build(BuildContext context) {
     return Padding(
-      padding: const EdgeInsets.only(top: 64.0),
-      child: Expanded(
-        child: Column(
-          mainAxisAlignment: MainAxisAlignment.center,
-          crossAxisAlignment: CrossAxisAlignment.center,
-          children: [
-            Row(
-              mainAxisAlignment: MainAxisAlignment.start,
-              children: [
-                SizedBox(
-                  width: 180,
-                  child: Text(
-                    '快捷键',
-                    textAlign: TextAlign.right,
+      padding: const EdgeInsets.only(top: 24.0),
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.center,
+        children: [
+          Row(
+            mainAxisAlignment: MainAxisAlignment.start,
+            children: [
+              SizedBox(
+                width: 180,
+                child: Text(
+                  '快捷键',
+                  textAlign: TextAlign.right,
+                ),
+              ),
+              Padding(
+                padding: EdgeInsets.only(left: 20),
+                child: SizedBox(
+                  width: 160,
+                  child: HotKeyRecorderView(
+                    onHotKeyRecorded: _saveHotKey,
+                    hotKey: _hotKey,
+                    canRemove: false,
                   ),
                 ),
-                Padding(
-                  padding: EdgeInsets.only(left: 20),
-                  child: SizedBox(
-                    width: 160,
-                    child: HotKeyRecorderView(
-                      onHotKeyRecorded: _saveHotKey,
-                      hotKey: _hotKey,
-                      canRemove: false,
+              ),
+            ],
+          ),
+          Row(
+            mainAxisAlignment: MainAxisAlignment.start,
+            children: [
+              SizedBox(
+                width: 180,
+                child: Text(
+                  '自动到顶层搜索',
+                  textAlign: TextAlign.right,
+                ),
+              ),
+              Padding(
+                padding: EdgeInsets.only(left: 20),
+                child: SizedBox(
+                  width: 160,
+                  child: Center(
+                    child: DropdownButton(
+                      value: _exitCommandDuration,
+                      items: <int>[0, 10, 30, 60, 90, -1]
+                          .map<DropdownMenuItem<int>>(
+                            (value) => DropdownMenuItem(
+                              value: value,
+                              child: Text(
+                                '${value == 0 ? '立刻' : value == -1 ? '永不' : '$value秒后'}',
+                              ),
+                            ),
+                          )
+                          .toList(),
+                      onChanged: _saveExitCommandDuration,
                     ),
                   ),
                 ),
-              ],
-            ),
-            Row(
-              mainAxisAlignment: MainAxisAlignment.start,
-              children: [
-                SizedBox(
-                  width: 180,
-                  child: Text(
-                    '自动到顶层搜索',
-                    textAlign: TextAlign.right,
-                  ),
-                ),
-                Padding(
-                  padding: EdgeInsets.only(left: 20),
-                  child: DropdownButton(
-                    value: _exitCommandDuration,
-                    items: <int>[0, 10, 30, 60, 90, -1]
-                        .map<DropdownMenuItem<int>>(
-                          (value) => DropdownMenuItem(
-                            value: value,
-                            child: Text(
-                              '${value == 0 ? '立刻' : value == -1 ? '永不' : '$value秒后'}',
-                            ),
-                          ),
-                        )
-                        .toList(),
-                    onChanged: _saveExitCommandDuration,
-                  ),
-                ),
-              ],
-            )
-          ],
-        ),
+              ),
+            ],
+          )
+        ],
       ),
     );
   }
