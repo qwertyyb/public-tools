@@ -1,0 +1,25 @@
+{
+  "name": "qrcode",
+  "version": "0.0.1",
+  "title": "二维码",
+  "subtitle": "识别或生成二维码",
+  "description": "识别或生成二维码",
+  "icon": "https://img.icons8.com/pastel-glyph/64/4a90e2/qr-code--v1.png",
+  "mode": "listView",
+  "keywords": ["二维码识别", "qrcode识别", "qr识别"],
+  "main": "index.js",
+  "directories": {
+    "lib": "lib"
+  },
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "author": "",
+  "license": "ISC",
+  "dependencies": {
+    "jimp": "^0.16.1",
+    "qrcode": "^1.5.0",
+    "robotjs": "^0.6.0",
+    "simple-mac-clipboard": "^1.0.1"
+  }
+}

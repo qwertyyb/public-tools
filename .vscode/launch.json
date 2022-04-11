@@ -5,14 +5,22 @@
   "version": "0.2.0",
   "configurations": [
     {
-      "name": "shortcut_launcher",
+      "name": "public tools",
       "request": "launch",
       "program": "lib/main.dart",
       "type": "dart",
       "flutterMode": "debug",
       "env": {
-        "MODE": "debug",
-        "REMOTE_PLUGIN_MODE": "local",
+        "REMOTE_PLUGIN_MODE": "debug",
+      }
+    },
+    {
+      "name": "public tools(plugin)",
+      "request": "launch",
+      "program": "lib/main.dart",
+      "type": "dart",
+      "flutterMode": "debug",
+      "env": {
       }
     }
   ]

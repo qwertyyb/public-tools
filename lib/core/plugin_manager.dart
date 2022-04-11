@@ -41,7 +41,7 @@ class PluginManager {
   }
 
   void updateResults(PluginCommand command, List<SearchResult>? results) {
-    if (CommandPageState.current?.widget.command == command) {
+    if (CommandPageState.current?.widget.command.id == command.id) {
       CommandPageState.current!.searchListKey.currentState!
           .updateResults(results!.map<PluginResult<SearchResult>>((result) {
         return PluginResult<SearchResult>(

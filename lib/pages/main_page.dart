@@ -12,11 +12,22 @@ class MainPage extends StatefulWidget {
 
   @override
   State<StatefulWidget> createState() {
-    return _MainPageState();
+    return MainPageState();
   }
 }
 
-class _MainPageState extends State<MainPage> {
+class MainPageState extends State<MainPage> {
+  static MainPageState? current;
+
+  GlobalKey<SearchListState<PluginResult<PluginCommand>>> searchListKey =
+      GlobalKey<SearchListState<PluginResult<PluginCommand>>>();
+
+  @override
+  void initState() {
+    current = this;
+    super.initState();
+  }
+
   Future<List<PluginResult<PluginCommand>>> _onSearch(String keyword) {
     return Future.value(PluginManager.instance.searchCommands(keyword));
   }
@@ -52,6 +63,7 @@ class _MainPageState extends State<MainPage> {
           children: <Widget>[
             Expanded(
               child: SearchList<PluginResult<PluginCommand>>(
+                key: searchListKey,
                 onSearch: _onSearch,
                 onEnter: _onEnter,
               ),

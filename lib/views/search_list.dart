@@ -46,7 +46,13 @@ class SearchListState<T> extends State<SearchList<T>> {
   void updateResults(List<T> results) {
     setState(() {
       _list = results;
+      _selectedIndex = 0;
     });
+    this._updatePreview(results.isNotEmpty ? results[0] : null);
+  }
+
+  void clearSearch() {
+    _textEditingController.clear();
   }
 
   @override
@@ -166,7 +172,7 @@ class SearchListState<T> extends State<SearchList<T>> {
       children: [
         Expanded(
           child: Container(
-            color: Colors.white,
+            color: Colors.transparent,
             child: Column(
               children: [
                 InputBar(
@@ -199,12 +205,13 @@ class SearchListState<T> extends State<SearchList<T>> {
                         Expanded(
                           flex: 3,
                           child: Container(
-                              height: double.infinity,
-                              padding: EdgeInsets.all(8),
-                              color: Colors.grey[300],
-                              child: Container(
-                                child: preview,
-                              )),
+                            height: double.infinity,
+                            padding: EdgeInsets.zero,
+                            color: Color.fromARGB(49, 165, 165, 165),
+                            child: SizedBox(
+                              child: preview!,
+                            ),
+                          ),
                         )
                     ],
                   ),

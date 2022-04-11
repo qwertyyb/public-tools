@@ -2,6 +2,7 @@ import 'dart:async';
 import 'dart:convert';
 import 'dart:io';
 
+import 'package:path_provider/path_provider.dart';
 import 'package:uuid/uuid.dart';
 
 import '../../utils/logger.dart';
@@ -85,6 +86,9 @@ class RemotePluginServer {
       (HttpRequest req) async {
         logger.i('新的链接: ${req.uri}');
         if (req.uri.path != '/ws' || this._socket != null) {
+          req.response.statusCode = 403;
+          req.response.write('a client has already connected');
+          req.response.close();
           return;
         }
         logger.i('新的socket已连接');
@@ -127,8 +131,7 @@ class RemotePluginServer {
   }
 
   Future invoke(String action, Map<String, dynamic> payload) async {
-    assert(_server != null);
-    assert(_socket != null);
+    if (_socket == null) return;
     final message = MessageData(type: action, payload: payload);
     // ignore: close_sinks
     final streamController = StreamController<MessageData>();
@@ -161,38 +164,4 @@ class RemotePluginServer {
     eventHandlers.remove(callback);
     _handlers[eventName] = eventHandlers;
   }
-}
-
-void runClient(binPath) async {
-  var pluginDir = '';
-  if (Platform.environment["REMOTE_PLUGIN_MODE"] == 'local') {
-    pluginDir = Directory.current.path + '/plugins';
-  }
-  final newEnv = Map<String, String>.from(Platform.environment);
-  newEnv['PATH'] = '$binPath:${newEnv['PATH']}';
-  // 安装依赖
-  final installProcess = await Process.start(
-    '$binPath/npm',
-    ['install'],
-    environment: newEnv,
-    workingDirectory: pluginDir,
-  );
-  final exitCode = await installProcess.exitCode;
-  logger.i(exitCode);
-  var args = ['./src/index.js'];
-  if (Platform.environment['MODE'] == 'debug') {
-    args.insert(0, '--inspect');
-  }
-  final clientProcess = await Process.start(
-    '$binPath/node',
-    args,
-    workingDirectory: pluginDir,
-    environment: newEnv,
-    runInShell: true,
-  );
-  clientProcess.stdout.transform(utf8.decoder).forEach(print);
-  clientProcess.stderr.transform(utf8.decoder).forEach(print);
-  clientProcess.exitCode.then((code) {
-    print('client exit code: $code');
-  });
 }

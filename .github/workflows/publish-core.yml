@@ -1,0 +1,44 @@
+name: publish core
+
+
+on:
+  workflow_dispatch:
+    inputs: 
+      ref:
+        description: 'branch or tag'
+        required: true
+        default: 'main'
+  push:
+    paths:
+      - 'remote/core/**'
+
+jobs:
+  build:
+    runs-on: macOS-latest
+
+    steps:
+      - uses: actions/checkout@v2
+        if: ${{ github.event_name != 'workflow_dispatch' }}
+
+      - uses: actions/checkout@v2
+        if: ${{ github.event_name == 'workflow_dispatch' }}
+        with:
+          ref: ${{ github.event.inputs.ref }}
+      
+      - uses: actions/setup-node@v2
+        with:
+          node-version: '16.13.0'
+
+      - name: install pnpm
+        run: npm install -g pnpm
+
+      - name: install build deps
+        run: cd remote/scripts/ && pnpm install
+
+      - name: publish core
+        run: cd remote/scripts/ && pnpm run publish-core
+        env:
+          NPM_TOKEN: ${{ secrets.NPM_TOKEN }}
+
+
+

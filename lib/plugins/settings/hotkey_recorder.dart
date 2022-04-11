@@ -59,11 +59,11 @@ class _HotKeyRecorderViewState extends State<HotKeyRecorderView> {
             child: _isRecordingHotKey
                 ? Stack(
                     children: [
+                      HotKeyRecorder(
+                        initalHotKey: widget.hotKey,
+                        onHotKeyRecorded: _onHotKeyRecorded,
+                      ),
                       Text('按下键盘快捷键', style: TextStyle(fontSize: 12)),
-                      // HotKeyRecorder(
-                      //   initalHotKey: widget.hotKey,
-                      //   onHotKeyRecorded: _onHotKeyRecorded,
-                      // ),
                     ],
                   )
                 : widget.hotKey != null
