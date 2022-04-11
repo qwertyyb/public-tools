@@ -59,6 +59,7 @@ jobs:
 
       - uses: ncipollo/release-action@v1
         with:
+          allowUpdates: true
           artifacts: "build/macos/Build/Products/Release/public tools.zip"
           generateReleaseNotes: true
           token: ${{ secrets.GITHUB_TOKEN }}
