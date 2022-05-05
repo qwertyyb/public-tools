@@ -15,6 +15,8 @@ class SearchList<T> extends StatefulWidget {
 
   final void Function()? onEmptyDelete;
 
+  final void Function(T item)? onSpace;
+
   final Widget? inputPrefix;
 
   final Widget? inputSuffix;
@@ -29,6 +31,7 @@ class SearchList<T> extends StatefulWidget {
       this.inputPrefix,
       this.inputSuffix,
       this.onEmptyDelete,
+      this.onSpace,
       this.searchAtStart = false})
       : super(key: key);
 
@@ -160,6 +163,14 @@ class SearchListState<T> extends State<SearchList<T>> {
     widget.onEnter?.call(selected);
   }
 
+  void _onSpace() {
+    if (_selectedIndex >= _list.length) {
+      return;
+    }
+    final selected = _list[_selectedIndex];
+    widget.onSpace?.call(selected);
+  }
+
   void _onItemTap(T item, int index) {
     _selectedIndex = index;
     _updatePreview(item);
@@ -179,6 +190,7 @@ class SearchListState<T> extends State<SearchList<T>> {
                   controller: _textEditingController,
                   onEnter: this._onEnter,
                   onEmptyDelete: this.widget.onEmptyDelete,
+                  onSpace: this._onSpace,
                   selectNext: this._selectNext,
                   selectPrev: this._selectPrevious,
                   inputPrefix: widget.inputPrefix,

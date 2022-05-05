@@ -27,11 +27,11 @@ class PluginManager {
   }
 
   List<Plugin> _corePluginList = [
+    remotePlugin,
     applicationLauncherPlugin,
     settingsPlugin,
     systemCommandPlugin,
     clipboardPlugin,
-    remotePlugin,
   ];
 
   List<Plugin> _pluginList = [];
@@ -53,11 +53,17 @@ class PluginManager {
   }
 
   List<PluginResult<PluginCommand>> searchCommands(String keyword) {
+    final reg = new RegExp(keyword
+        .split('')
+        .map<String>(
+          (e) => e + '.*',
+        )
+        .join(''));
     final commands = _pluginList
         .map((plugin) {
           return plugin.commands
-              .where((command) => command.keywords
-                  .any((element) => element.startsWith(keyword)))
+              .where((command) =>
+                  command.keywords.any((element) => reg.hasMatch(element)))
               .map((command) =>
                   PluginResult<PluginCommand>(plugin: plugin, value: command));
         })

@@ -36,6 +36,10 @@ class MainPageState extends State<MainPage> {
     PluginManager.instance.onCommand(item.value, item.plugin);
   }
 
+  void _onSpace(PluginResult<PluginCommand> item) {
+    PluginManager.instance.onCommand(item.value, item.plugin);
+  }
+
   @override
   Widget build(BuildContext context) {
     return Scaffold(
@@ -66,6 +70,7 @@ class MainPageState extends State<MainPage> {
                 key: searchListKey,
                 onSearch: _onSearch,
                 onEnter: _onEnter,
+                onSpace: _onSpace,
               ),
             ),
           ],
