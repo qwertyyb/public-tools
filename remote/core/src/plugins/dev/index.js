@@ -63,7 +63,8 @@ const addDevPlugin = (configPath, utils) => {
     if (!value.fileWatcher) {
       const watcher = chokidar.watch(path.dirname(configPath), {
         ignoreInitial: true, 
-        usePolling: true
+        usePolling: true,
+        ignored: /node_modules/
       });
       watcher.on('all', (event, filePath) => {
         console.log('file changed, reloading plugin: ', event, filePath);
