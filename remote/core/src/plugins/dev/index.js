@@ -51,41 +51,41 @@ const removeDevPlugin = (name) => {
 
 const addDevPlugin = (configPath, utils) => {
   console.log('addDevPlugin', configPath)
-  const res = addPlugin(configPath)
-  if (res.msg) {
+  try {
+    addPlugin(configPath)
+  } catch (err) {
     utils.showApp()
     utils.toast(res.msg)
     delete require.cache[configPath]
-  } else {
-    delete require.cache[configPath];
-    const { name, ...info } = require(configPath)
-    const value = devPlugins.get(name) || {}
-    if (!value.fileWatcher) {
-      const watcher = chokidar.watch(path.dirname(configPath), {
-        ignoreInitial: true, 
-        usePolling: true,
-        ignored: /node_modules/
-      });
-      watcher.on('all', (event, filePath) => {
-        console.log('file changed, reloading plugin: ', event, filePath);
-        removePlugin(name)
-        // 删除缓存
-        delete require.cache[require.resolve(path.dirname(configPath))];
-        addDevPlugin(configPath, utils);
-      });
-      utils.showApp();
-      value.fileWatcher = watcher;
-    }
-    devPlugins.set(name, {
-      ...value,
-      config: {
-        name, ...info
-      },
-      path: configPath
-    })
-    save();
-    utils.updateResults(getSearchResultList())
+    throw err;
   }
+  const { name, ...info } = require(configPath)
+  const value = devPlugins.get(name) || {}
+  if (!value.fileWatcher) {
+    const watcher = chokidar.watch(path.dirname(configPath), {
+      ignoreInitial: true, 
+      usePolling: true,
+      ignored: /node_modules/
+    });
+    watcher.on('all', (event, filePath) => {
+      console.log('file changed, reloading plugin: ', event, filePath);
+      removePlugin(name)
+      // 删除缓存
+      delete require.cache[require.resolve(path.dirname(configPath))];
+      addDevPlugin(configPath, utils);
+    });
+    utils.showApp();
+    value.fileWatcher = watcher;
+  }
+  devPlugins.set(name, {
+    ...value,
+    config: {
+      name, ...info
+    },
+    path: configPath
+  })
+  save();
+  utils.updateResults(getSearchResultList())
 }
 
 const getSearchResultList = () => {
