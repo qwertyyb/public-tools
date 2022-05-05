@@ -1,0 +1,16 @@
+{
+  "name": "convert",
+  "version": "0.0.1",
+  "title": "转换工具",
+  "subtitle": "转换工具",
+  "description": "日期、URL转换等工具",
+  "mode": "listView",
+  "main": "index.js",
+  "icon": "https://img.icons8.com/fluency/96/000000/sorting-arrows.png",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "keywords": ["convert", "转换工具"],
+  "author": "",
+  "license": "ISC"
+}

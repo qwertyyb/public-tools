@@ -55,6 +55,7 @@ const addDevPlugin = (configPath, utils) => {
   if (res.msg) {
     utils.showApp()
     utils.toast(res.msg)
+    delete require.cache[configPath]
   } else {
     delete require.cache[configPath];
     const { name, ...info } = require(configPath)
