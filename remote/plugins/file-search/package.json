@@ -1,0 +1,23 @@
+{
+  "name": "file-search",
+  "version": "1.0.0",
+  "title": "文件搜索",
+  "subtitle": "快速查找文件",
+  "description": "",
+  "icon": "https://img.icons8.com/emoji/96/000000/open-file-folder-emoji.png",
+  "mode": "listView",
+  "main": "index.js",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "keywords": [
+    "file search",
+    "search",
+    "文件搜索"
+  ],
+  "author": "",
+  "license": "ISC",
+  "dependencies": {
+    "mdfind": "^1.0.0"
+  }
+}
