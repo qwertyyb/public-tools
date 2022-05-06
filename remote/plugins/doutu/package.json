@@ -1,0 +1,25 @@
+{
+  "name": "doutu",
+  "version": "0.0.1",
+  "title": "斗图",
+  "subtitle": "斗图",
+  "description": "",
+  "icon": "https://static.pkdoutu.com/img/wechat_share.jpg",
+  "mode": "listView",
+  "main": "index.js",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "keywords": [
+    "doutu",
+    "斗图",
+    "dt"
+  ],
+  "author": "",
+  "license": "ISC",
+  "dependencies": {
+    "axios": "^0.26.1",
+    "cheerio": "^1.0.0-rc.10",
+    "simple-mac-clipboard": "^1.0.1"
+  }
+}

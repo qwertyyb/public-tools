@@ -55,7 +55,7 @@ const addDevPlugin = (configPath, utils) => {
     addPlugin(configPath)
   } catch (err) {
     utils.showApp()
-    utils.toast(res.msg)
+    utils.toast('添加失败: ' + err.message)
     delete require.cache[configPath]
     throw err;
   }
