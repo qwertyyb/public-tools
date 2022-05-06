@@ -1,3 +1,5 @@
+import 'dart:math';
+
 import '../main.dart';
 import '../pages/command_page.dart';
 import '../plugins/application/application.dart';
@@ -8,6 +10,13 @@ import '../plugins/settings/settings_plugin.dart';
 import '../utils/logger.dart';
 import 'plugin.dart';
 import 'plugin_command.dart';
+
+double _getMatchPoints(String keyword, String candidate) {
+  final reg =
+      new RegExp(keyword.split('').map<String>((e) => e + '.*').join(''));
+  if (!reg.hasMatch(candidate)) return 0;
+  return keyword.length.toDouble() / candidate.length.toDouble();
+}
 
 class PluginManager {
   // 工厂模式
@@ -53,23 +62,24 @@ class PluginManager {
   }
 
   List<PluginResult<PluginCommand>> searchCommands(String keyword) {
-    final reg = new RegExp(keyword
-        .split('')
-        .map<String>(
-          (e) => e + '.*',
-        )
-        .join(''));
-    final commands = _pluginList
-        .map((plugin) {
-          return plugin.commands
-              .where((command) =>
-                  command.keywords.any((element) => reg.hasMatch(element)))
-              .map((command) =>
-                  PluginResult<PluginCommand>(plugin: plugin, value: command));
-        })
-        .expand((element) => element)
-        .toList();
-    return commands;
+    var results = <PluginResult<PluginCommand>>[];
+    _pluginList.forEach((plugin) {
+      plugin.commands.forEach((command) {
+        final points = command.keywords
+            .map<double>((candidate) => _getMatchPoints(keyword, candidate));
+        final maxPoint = points.reduce(max);
+        if (maxPoint > 0) {
+          results.add(PluginResult<PluginCommand>(
+            plugin: plugin,
+            value: command,
+            point: maxPoint,
+          ));
+        }
+        // return command.keywords.any((element) => reg.hasMatch(element));
+      });
+    });
+    results.sort((prev, next) => ((next.point - prev.point) * 100000).round());
+    return results;
   }
 
   void onCommand(PluginCommand command, Plugin plugin) {
