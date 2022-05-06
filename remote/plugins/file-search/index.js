@@ -1,5 +1,6 @@
 const path = require('path')
 const mdfind = require('mdfind')
+const fs = require('fs')
 
 const findFiles = (keyword) => {
   return new Promise(resolve => {
@@ -18,6 +19,7 @@ const findFiles = (keyword) => {
       })
     })
     res.output.on('end', () => {
+      results.sort((prev, next) => prev.path.length - next.path.length)
       resolve(results)
       res.terminate()
     })
