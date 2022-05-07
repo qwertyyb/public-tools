@@ -9,8 +9,8 @@ import 'package:window_manager/window_manager.dart';
 import '../../core/plugin.dart';
 import '../../core/plugin_command.dart';
 import '../../html_render/render.dart';
-import '../../pigeon/app.dart';
 import '../../utils/logger.dart';
+import '../../pigeon/instance.dart';
 import 'runtime.dart';
 import 'server.dart';
 

@@ -15,10 +15,10 @@ class BlurryContainerViewController: NSViewController {
   override func loadView() {
     let blurView = NSVisualEffectView()
     blurView.autoresizingMask = [.width, .height]
-    blurView.blendingMode = .behindWindow
+    blurView.blendingMode = .withinWindow
     blurView.state = .active
     if #available(macOS 10.14, *) {
-      blurView.material = .underWindowBackground
+      blurView.material = .fullScreenUI
     }
     self.view = blurView
   }
@@ -85,5 +85,6 @@ class MainFlutterWindow: NSWindow, FlutterStreamHandler {
     isOpaque = false
     backgroundColor = .clear
     self.setFrame(windowFrame, display: true)
+    self.contentView?.wantsLayer = true
   }
 }
