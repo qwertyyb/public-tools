@@ -3,6 +3,7 @@ import 'dart:io';
 import 'package:collection/collection.dart' show IterableExtension;
 import 'package:flutter/material.dart';
 import 'package:oktoast/oktoast.dart';
+import 'package:public_tools/pigeon/instance.dart';
 import 'package:window_manager/window_manager.dart';
 
 import '../../core/plugin.dart';
@@ -78,7 +79,7 @@ void _bindServerListener() async {
     showToast(data["content"]);
   });
   _server.on('hideApp', (data) async {
-    await Service().hideApp();
+    await platformService.hideApp();
   });
   _server.on('showApp', (data) async {
     await windowManager.show();

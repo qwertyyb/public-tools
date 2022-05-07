@@ -1,12 +1,13 @@
 import 'dart:io';
 
+import 'package:public_tools/pigeon/instance.dart';
+
 import '../../core/plugin_command.dart';
 import '../../core/plugin.dart';
-import '../../pigeon/app.dart';
 import '../../utils/logger.dart';
 
 Future<List<PluginCommand>> _getInstalledApps() async {
-  final installedApps = await Service().getInstalledApplicationList();
+  final installedApps = await platformService.getInstalledApplicationList();
   final transformPinyinToKeywords = (String? pinyin) {
     // 获取首字母
     final cc = pinyin!.split(" ").map((e) => e[0]).join("");
@@ -29,7 +30,7 @@ Future<List<PluginCommand>> _getInstalledApps() async {
           mode: CommandMode.noView,
           onEnter: () async {
             logger.i('enter ${app.name}');
-            Service().hideApp();
+            platformService.hideApp();
             Process.run("open", ["-a", app.name!]);
           },
         ),

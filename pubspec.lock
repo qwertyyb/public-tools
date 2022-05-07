@@ -78,6 +78,13 @@ packages:
       url: "https://pub.flutter-io.cn"
     source: hosted
     version: "0.3.5"
+  clipboard_watcher:
+    dependency: "direct main"
+    description:
+      name: clipboard_watcher
+      url: "https://pub.flutter-io.cn"
+    source: hosted
+    version: "0.1.2"
   clock:
     dependency: transitive
     description:
@@ -407,7 +414,7 @@ packages:
       name: pigeon
       url: "https://pub.flutter-io.cn"
     source: hosted
-    version: "2.0.3"
+    version: "3.0.3"
   platform:
     dependency: transitive
     description:
@@ -539,6 +546,13 @@ packages:
       url: "https://pub.flutter-io.cn"
     source: hosted
     version: "2.2.1"
+  sqflite_migration:
+    dependency: "direct main"
+    description:
+      name: sqflite_migration
+      url: "https://pub.flutter-io.cn"
+    source: hosted
+    version: "0.3.0"
   stack_trace:
     dependency: transitive
     description:

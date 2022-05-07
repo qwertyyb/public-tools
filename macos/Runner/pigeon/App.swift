@@ -67,23 +67,18 @@ extension NSImage {
 }
 
 public class AppService: NSObject, PBCService {
-  private var listener: Any?;
-  
-  public func startListenHotkey(completion: @escaping ([String : String]?, FlutterError?) -> Void) {
-    listener = NSEvent.addLocalMonitorForEvents(matching: .keyDown) { (event) -> NSEvent? in
-      let modifiers = event.pluginModifiers().joined(separator: ";");
-      let keyCode = event.characters ?? ""
-      let args: [String: String] = ["modifiers": modifiers, "keyCode": keyCode];
-      completion(args, nil);
-      return event
-    };
-  }
-  
-  public func endListenHotkey() {
-    if listener != nil {
-      return NSEvent.removeMonitor(listener)
+    public func readClipboardData(forType: String, error: AutoreleasingUnsafeMutablePointer<FlutterError?>) -> FlutterStandardTypedData? {
+        if let data = NSPasteboard.general.data(forType: .init(rawValue: forType)) {
+            return FlutterStandardTypedData(bytes: data)
+        }
+        return nil
     }
-  }
+    
+    public func setClipboardDataData(_ data: FlutterStandardTypedData, dataType: String, error: AutoreleasingUnsafeMutablePointer<FlutterError?>) -> NSNumber? {
+        NSPasteboard.general.declareTypes([.init(rawValue: dataType)], owner: nil)
+        let success = NSPasteboard.general.setData(data.data, forType: .init(rawValue: dataType));
+        return NSNumber(booleanLiteral: success)
+    }
   
     private func checkAccess(prompt: Bool = false) -> Bool {
       let checkOptionPromptKey = kAXTrustedCheckOptionPrompt.takeUnretainedValue() as String
@@ -134,24 +129,6 @@ public class AppService: NSObject, PBCService {
                 } else {
                     icon = ""
                 }
-//                let bundlePath = path + "/Contents/Info.plist"
-//                let dict = NSDictionary(contentsOfFile: bundlePath)!
-//                var iconPath = ""
-//                if let iconName = dict["CFBundleIconFile"] {
-//                    iconPath = path + "/Contents/Resources/" + (iconName as! String)
-//                  if (!iconPath.hasSuffix(".icns")) {
-//                    iconPath += ".icns"
-//                  }
-//                }
-//                if let iconName = dict["CFBundleIconName"] {
-//                    iconPath = path + "/Contents/Resources/" + (iconName as! String)
-//                  if (!iconPath.hasSuffix(".icns")) {
-//                    iconPath += ".icns"
-//                  }
-//                }
-//                if !FileManager.default.fileExists(atPath: iconPath) {
-//                    iconPath = ""
-//                }
                 let app = PBCInstalledApplication()
                 app.name = name
                 app.path = path

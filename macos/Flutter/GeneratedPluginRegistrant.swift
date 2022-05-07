@@ -5,6 +5,7 @@
 import FlutterMacOS
 import Foundation
 
+import clipboard_watcher
 import hotkey_manager
 import package_info_plus_macos
 import path_provider_macos
@@ -14,6 +15,7 @@ import sqflite
 import window_manager
 
 func RegisterGeneratedPlugins(registry: FlutterPluginRegistry) {
+  ClipboardWatcherPlugin.register(with: registry.registrar(forPlugin: "ClipboardWatcherPlugin"))
   HotkeyManagerPlugin.register(with: registry.registrar(forPlugin: "HotkeyManagerPlugin"))
   FLTPackageInfoPlusPlugin.register(with: registry.registrar(forPlugin: "FLTPackageInfoPlusPlugin"))
   PathProviderPlugin.register(with: registry.registrar(forPlugin: "PathProviderPlugin"))

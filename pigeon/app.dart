@@ -18,6 +18,7 @@ abstract class Service {
 
   void pasteToFrontestApp();
 
-  @async
-  Map<String, String> startListenHotkey();
+  Uint8List? readClipboardData(String forType);
+
+  bool setClipboardData(Uint8List data, String dataType);
 }
