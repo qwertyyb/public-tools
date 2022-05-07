@@ -4,7 +4,8 @@ const path = require('path')
 const { exec } = require('child_process')
 const { promisify } = require('util');
 const { installPlugin } = require("../../core");
-const { getPlugin } = require("../../core/plugin");
+const { getPlugin, removePlugin } = require("../../core/plugin");
+const console = require("console");
 
 const p = (promise) => promise.then(res => ([null, res])).catch(err => ([err, null]))
 
@@ -57,6 +58,7 @@ const downloadStatus = {}
 
 let data = {
   selectedPlugin: null,
+  localPlugin: null,
   downloadStatus: {},
   downloading: false,
   installed: false,
@@ -65,6 +67,19 @@ let data = {
 
 const renderHtml = () => {
   with(data) {
+    console.log('needUpdate', needUpdate)
+    console.log(
+      installed
+      ? (needUpdate ? '更新' : '已安装')
+      : (downloadStatus[selectedPlugin.id]
+        ? '下载中'
+        : '下载'))
+    console.log(`
+    <text fontSize="12">${
+      installed
+      ? (needUpdate ? '更新' : '已安装')
+      : (downloadStatus[selectedPlugin.id] ? '下载中' : '下载')
+    }</text>`)
     return `<div>
     <flutter-container>
       <column crossAxisAlignment="start">
@@ -72,35 +87,45 @@ const renderHtml = () => {
           <padding top="10" left="10" right="10" bottom="10">
             <image imageUrl="${selectedPlugin.icon}" width="80" height="80"></image>
           </padding>
-          <column crossAxisAlignment="start">
-            <text fontSize="16" fontWeight="bold">${selectedPlugin.title}</text>
-            <text fontSize="12" color="black54">${selectedPlugin.subtitle}</text>
-            <padding top="12">
-              ${installed
-                ? `<outlined-button disabled>
-                    <row crossAxisAlignment="center">
-                      <icon size="12"
-                        icon="download"></icon>
-                      <text fontSize="12">已安装</text>
-                    </row>
-                  <outlined-button>`
-                : `<elevated-button onPressed="download" data-name="${selectedPlugin.id}">
-                    <row crossAxisAlignment="center">
-                      <icon size="12"
-                        icon="${downloadStatus[selectedPlugin.id] ? 'downloading' : 'download'}"></icon>
-                      <text fontSize="12">${
-                        installed
-                        ? needUpdate
-                          ? '更新'
-                          : '已安装'
-                        : downloadStatus[selectedPlugin.id]
-                          ? '下载中'
-                          : '下载'}</text>
-                    </row>
-                  </elevated-button>`
-                }
-            </padding>
-          </column>
+          <expanded>
+            <column crossAxisAlignment="start">
+              <row>
+                <text fontSize="16" fontWeight="bold">${selectedPlugin.title}</text>
+                <padding left="18">
+                  <text fontSize="12" color="black54">${selectedPlugin.version}</text>
+                </padding>
+              </row>
+              <text fontSize="12" color="black54">${selectedPlugin.subtitle}</text>
+              <padding top="12">
+                <row>
+                ${installed && !needUpdate
+                  ? `<outlined-button disabled>
+                      <row crossAxisAlignment="center">
+                        <icon size="12"
+                          icon="download"></icon>
+                        <text fontSize="12">已安装</text>
+                      </row>
+                    <outlined-button>`
+                  : `<elevated-button onPressed="download" data-name="${selectedPlugin.id}">
+                      <row crossAxisAlignment="center">
+                        <icon size="12"
+                          icon="${downloadStatus[selectedPlugin.id] ? 'downloading' : 'download'}"></icon>
+                        <text fontSize="12">${
+                          installed
+                          ? (needUpdate ? '更新' : '已安装')
+                          : (downloadStatus[selectedPlugin.id] ? '下载中' : '下载')
+                        }</text>
+                      </row>
+                    </elevated-button>
+                    ${installed && needUpdate
+                      ? `<padding left="10"><text color="black54" fontSize="12">已安装${localPlugin.version}</text></padding>`
+                      : ''}
+                    `
+                  }
+                  </row>
+              </padding>
+            </column>
+          </expanded>
         </row>
         <divider></divider>
         <padding top="10" left="10" bottom="10">
@@ -143,6 +168,7 @@ const storePlugin = utils => ({
       })
     const list = plugins.map(plugin => {
       return {
+        ...plugin,
         id: plugin.name,
         title: plugin.title,
         subtitle: plugin.subtitle || plugin.title,
@@ -160,13 +186,16 @@ const storePlugin = utils => ({
     const plugin = getPlugin(result.id)
     const installed = !!plugin
     const needUpdate = plugin?.version !== selectedPlugin.version
+    console.log(plugin)
     data = {
       ...data,
       selectedPlugin,
       downloading,
       installed,
-      needUpdate
+      needUpdate,
+      localPlugin: plugin,
     }
+    console.log(data);
     return renderHtml();
   },
   onResultTap(result) {
@@ -205,9 +234,11 @@ const storePlugin = utils => ({
         utils.updatePreview(renderHtml())
         return
       }
+      removePlugin(name)
       installPlugin(pluginPath)
       data.downloadStatus[name] = false
       data.installed = true
+      data.localPlugin = getPlugin(name)
       utils.updatePreview(renderHtml())
       utils.toast('插件已下载')
     },
