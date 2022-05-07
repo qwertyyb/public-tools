@@ -1,0 +1,12 @@
+{
+    "configurations": [
+        {
+            "name": "Mac",
+            "includePath": [
+                "${workspaceFolder}/**",
+                "${workspaceFolder}/remote/core/node_modules/node-addon-api"
+            ]
+        }
+    ],
+    "version": 4
+}

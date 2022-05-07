@@ -1,6 +1,6 @@
 {
   "name": "@public-tools/core",
-  "version": "1.0.16",
+  "version": "1.0.17",
   "main": "index.js",
   "repository": {
     "type": "git",
@@ -10,6 +10,7 @@
     "public-tools": "./src/bin/public-tools.js"
   },
   "scripts": {
+    "install": "prebuild-install || node-gyp rebuild --loglevel=silent",
     "test": "echo \"Error: no test specified\" && exit 1",
     "start": "node src/bin/public-tools.js"
   },
@@ -20,9 +21,11 @@
     "axios": "^0.26.1",
     "chokidar": "^3.5.3",
     "macos-open-file-dialog": "^1.0.1",
+    "node-addon-api": "^5.0.0",
+    "node-gyp": "^9.0.0",
+    "prebuild-install": "^7.1.0",
     "uuid": "^8.3.2",
     "ws": "^8.5.0"
   },
-  "devDependencies": {},
   "description": ""
 }
