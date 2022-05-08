@@ -1,5 +1,6 @@
 const fs = require('fs');
 const path = require('path')
+const pinyin = require('@napi-rs/pinyin')
 const ws = require('./ws')
 const MessageData = require('./message-data')
 const { createUtils } = require('./utils');
@@ -122,6 +123,12 @@ const notify = () => {
   invoke(MessageData.makeEventMessage('updateCommands', { commands: getCommands() }));
 }
 
+const getKeywords = (title, keywords) => {
+  const pinyinArr = pinyin.pinyin(title);
+  const pyStr = pinyinArr.map(i => i[0]).join('');
+  return [...new Set([...keywords, pyStr, pinyinArr.join('')])];
+}
+
 const baseAddPlugin = (configPath) => {
   if (!fs.existsSync(configPath)) {
     throw new Error(`文件 ${configPath} 不存在`)
@@ -135,7 +142,7 @@ const baseAddPlugin = (configPath) => {
   const plugin = pluginCreator(createUtils(config.name, plugins));
 
   const { name, title, subtitle = '', description = '', icon, mode, keywords } = config;
-  plugins.set(name, { ...plugin, pluginPath: configPath, id: name, title, subtitle, description, icon, mode, keywords, version: config.version });
+  plugins.set(name, { ...plugin, pluginPath: configPath, id: name, title, subtitle, description, icon, mode, keywords: getKeywords(title, keywords), version: config.version });
   console.log(`插件${name}注册成功`);
   return plugins.get(name)
 }
