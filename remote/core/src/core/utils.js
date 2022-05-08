@@ -3,22 +3,22 @@ const { invoke } = require('./ws')
 
 const createCommonUtils = () => ({
   toast(content) {
-    invoke(MessageData.makeEventMessage('toast', { content }))
+    return invoke(MessageData.makeEventMessage('toast', { content }))
   },
   hideApp() {
-    invoke(MessageData.makeEventMessage('hideApp'))
+    return invoke(MessageData.makeEventMessage('hideApp'))
   },
   showApp() {
-    invoke(MessageData.makeEventMessage('showApp'))
+    return invoke(MessageData.makeEventMessage('showApp'))
   },
 })
 
 const createPluginUtils = (name, plugins) => ({
   updateResults(results) {
-    invoke(MessageData.makeEventMessage('updateResults', { results, command: plugins.get(name) }))
+    return invoke(MessageData.makeEventMessage('updateResults', { results, command: plugins.get(name) }))
   },
   updatePreview(html) {
-    invoke(MessageData.makeEventMessage('updatePreview', { html, command: plugins.get(name) }))
+    return invoke(MessageData.makeEventMessage('updatePreview', { html, command: plugins.get(name) }))
   }
 })
 

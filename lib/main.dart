@@ -4,7 +4,6 @@ import 'package:sentry_flutter/sentry_flutter.dart';
 
 import 'package:oktoast/oktoast.dart';
 import 'package:window_manager/window_manager.dart';
-import 'core/plugin_manager.dart';
 import 'pages/command_page.dart';
 import 'pages/main_page.dart';
 
@@ -35,7 +34,10 @@ class MainApp extends StatelessWidget {
   Widget build(BuildContext context) {
     return OKToast(
       child: MaterialApp(
-        title: 'Flutter Demo',
+        debugShowCheckedModeBanner: false,
+        color: Color.fromARGB(255, 0, 0, 0),
+        title: "hello",
+        navigatorKey: navigatorKey,
         theme: ThemeData(
           // This is the theme of your application.
           //
@@ -48,61 +50,23 @@ class MainApp extends StatelessWidget {
           // is not restarted.
           primarySwatch: Colors.blue,
         ),
-        home: HomePage(title: 'Public'),
+        onGenerateRoute: (settings) {
+          if (settings.name == 'command') {
+            final args = settings.arguments as CommandPageParams?;
+            return PageRouteBuilder(
+              settings: settings,
+              transitionDuration: Duration.zero,
+              reverseTransitionDuration: Duration.zero,
+              pageBuilder: (_, __, ___) => CommandPage(
+                plugin: args!.plugin,
+                command: args.command,
+              ),
+            );
+          }
+          return null;
+        },
+        home: MainPage(),
       ),
-    );
-  }
-}
-
-class HomePage extends StatefulWidget {
-  HomePage({Key? key, this.title}) : super(key: key);
-
-  // This widget is the home page of your application. It is stateful, meaning
-  // that it has a State object (defined below) that contains fields that affect
-  // how it looks.
-
-  // This class is the configuration for the state. It holds the values (in this
-  // case the title) provided by the parent (in this case the App widget) and
-  // used by the build method of the State. Fields in a Widget subclass are
-  // always marked "final".
-
-  final String? title;
-
-  @override
-  _HomePageState createState() => _HomePageState();
-}
-
-class _HomePageState extends State<HomePage> {
-  PluginManager? pluginManager = PluginManager.instance;
-
-  @override
-  Widget build(BuildContext context) {
-    // This method is rerun every time setState is called, for instance as done
-    // by the _incrementCounter method above.
-    //
-    // The Flutter framework has been optimized to make rerunning build methods
-    // fast, so that you can just rebuild anything that needs updating rather
-    // than having to individually change instances of widgets.
-    return MaterialApp(
-      color: Color.fromARGB(255, 0, 0, 0),
-      title: "hello",
-      navigatorKey: navigatorKey,
-      onGenerateRoute: (settings) {
-        if (settings.name == 'command') {
-          final args = settings.arguments as CommandPageParams?;
-          return PageRouteBuilder(
-            settings: settings,
-            transitionDuration: Duration.zero,
-            reverseTransitionDuration: Duration.zero,
-            pageBuilder: (_, __, ___) => CommandPage(
-              plugin: args!.plugin,
-              command: args.command,
-            ),
-          );
-        }
-        return null;
-      },
-      home: MainPage(),
     );
   }
 }
