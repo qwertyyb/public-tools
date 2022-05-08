@@ -1,16 +1,7 @@
-import 'package:path_provider/path_provider.dart';
-
 import 'nodejs.dart';
 
-Future<String> _getPnpmStorePath() async {
-  final supportDir = await getApplicationSupportDirectory();
-  return '${supportDir.path}/pnpm-store';
-}
-
 Future<int> _installPnpm() async {
-  final process = await runWithBin('npm', ['install', '-g', 'pnpm']);
-  final storePath = await _getPnpmStorePath();
-  await runWithBin('pnpm', ['pnpm', 'config', 'set', 'store-dir', storePath]);
+  final process = await runWithBin('npm', ['install', '-g', 'pnpm@6']);
   return process.exitCode;
 }
 
