@@ -2,7 +2,7 @@ const fs = require('fs');
 const path = require('path')
 const ws = require('./ws')
 const MessageData = require('./message-data')
-const { createUtils } = require('./utils')
+const { createUtils } = require('./utils');
 
 const invoke = ws.invoke
 
@@ -152,6 +152,16 @@ const addPlugins = (configPaths) => {
   notify();
 }
 
+const reloadPlugin = (configPath) => {
+  const dirName = path.dirname(configPath);
+  Object.keys(require.cache).forEach(modulePath => {
+    if (modulePath.startsWith(dirName)) {
+      delete require.cache[modulePath];
+    }
+  })
+  addPlugin(configPath);
+}
+
 const removePlugin = (name) => {
   if (!plugins.has(name)) return;
   plugins.delete(name);
@@ -164,6 +174,7 @@ const removePlugin = (name) => {
 module.exports = {
   addPlugin,
   addPlugins,
+  reloadPlugin,
   removePlugin,
   getPlugins: () => Array.from(plugins.values()),
   getPlugin: name => plugins.get(name),
