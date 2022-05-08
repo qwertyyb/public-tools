@@ -2,10 +2,7 @@ const { removePlugin, addPlugin } = require('./plugin')
 const { getStorage, setStorage } = require('./storage')
 
 const installPlugin = (pluginPath) => {
-  const unregister = addPlugin(pluginPath)
-  if (unregister.msg) {
-    return unregister
-  }
+  addPlugin(pluginPath)
   const config = getStorage()
   config.plugins = [...config.plugins, {
     pluginPath,

@@ -2,16 +2,20 @@ import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:window_manager/window_manager.dart';
 
+typedef void OnKey();
+
 class _TextInput extends StatelessWidget {
   final TextEditingController? controller;
 
-  final void Function()? onArrowDown;
+  final OnKey? onArrowDown;
 
-  final void Function()? onArrowUp;
+  final OnKey? onArrowUp;
 
-  final void Function()? onEnter;
+  final OnKey? onEnter;
 
-  final void Function()? onEmptyDelete;
+  final OnKey? onEmptyDelete;
+
+  final OnKey? onSpace;
 
   final FocusNode _focusNode;
 
@@ -21,6 +25,7 @@ class _TextInput extends StatelessWidget {
     this.onEnter,
     this.onArrowUp,
     this.onEmptyDelete,
+    this.onSpace,
   }) : _focusNode = FocusNode(
           canRequestFocus: false,
           onKey: (node, event) {
@@ -41,6 +46,8 @@ class _TextInput extends StatelessWidget {
       this.onEnter!();
     } else if (event.isKeyPressed(LogicalKeyboardKey.arrowUp)) {
       this.onArrowUp!();
+    } else if (event.isKeyPressed(LogicalKeyboardKey.space)) {
+      this.onSpace?.call();
     } else if (event.isKeyPressed(LogicalKeyboardKey.backspace) &&
         controller!.text.length <= 0) {
       // onKey事件在textfield value change之前，所以这里需要延迟一下
@@ -72,12 +79,13 @@ class _TextInput extends StatelessWidget {
 }
 
 class InputBar extends StatelessWidget {
-  final Function? onEnter;
-  final Function? selectNext;
-  final Function? selectPrev;
+  final OnKey? onEnter;
+  final OnKey? selectNext;
+  final OnKey? selectPrev;
   final Widget? inputPrefix;
   final Widget? inputSuffix;
-  final Function? onEmptyDelete;
+  final OnKey? onEmptyDelete;
+  final OnKey? onSpace;
 
   final TextEditingController? controller;
 
@@ -89,6 +97,7 @@ class InputBar extends StatelessWidget {
     this.inputPrefix,
     this.inputSuffix,
     this.onEmptyDelete,
+    this.onSpace,
   });
 
   void _onPointerDown(PointerDownEvent event) {
@@ -101,10 +110,11 @@ class InputBar extends StatelessWidget {
       Expanded(
         child: _TextInput(
           controller: controller,
-          onEnter: onEnter as void Function()?,
-          onArrowDown: selectNext as void Function()?,
-          onArrowUp: selectPrev as void Function()?,
-          onEmptyDelete: onEmptyDelete as void Function()?,
+          onEnter: onEnter,
+          onArrowDown: selectNext,
+          onArrowUp: selectPrev,
+          onEmptyDelete: onEmptyDelete,
+          onSpace: onSpace,
         ),
       ),
     ];

@@ -4,7 +4,7 @@ const path = require('path')
 const { exec } = require('child_process')
 const { promisify } = require('util');
 const { installPlugin } = require("../../core");
-const { getPlugin } = require("../../core/plugin");
+const { getPlugin, removePlugin, reloadPlugin } = require("../../core/plugin");
 
 const p = (promise) => promise.then(res => ([null, res])).catch(err => ([err, null]))
 
@@ -55,16 +55,29 @@ const installPluginWithPnpm = async (pluginName) => {
 let cachedList = [];
 const downloadStatus = {}
 
+const Status = {
+  DOWNLOADING: 'downloading',
+  INSTALLED: 'installed',
+  NEED_UPDATE: 'need_update',
+  NEED_INSTALL: 'need_install',
+}
+const StatusLabel = {
+  [Status.DOWNLOADING]: '下载中',
+  [Status.INSTALLED]: '已安装',
+  [Status.NEED_UPDATE]: '更新',
+  [Status.NEED_INSTALL]: '安装',
+}
+
 let data = {
   selectedPlugin: null,
+  localPlugin: null,
   downloadStatus: {},
-  downloading: false,
-  installed: false,
-  needUpdate: false
+  status: Status.NEED_INSTALL,
 }
 
 const renderHtml = () => {
   with(data) {
+    console.log(status)
     return `<div>
     <flutter-container>
       <column crossAxisAlignment="start">
@@ -72,35 +85,43 @@ const renderHtml = () => {
           <padding top="10" left="10" right="10" bottom="10">
             <image imageUrl="${selectedPlugin.icon}" width="80" height="80"></image>
           </padding>
-          <column crossAxisAlignment="start">
-            <text fontSize="16" fontWeight="bold">${selectedPlugin.title}</text>
-            <text fontSize="12" color="black54">${selectedPlugin.subtitle}</text>
-            <padding top="12">
-              ${installed
-                ? `<outlined-button disabled>
-                    <row crossAxisAlignment="center">
-                      <icon size="12"
-                        icon="download"></icon>
-                      <text fontSize="12">已安装</text>
-                    </row>
-                  <outlined-button>`
-                : `<elevated-button onPressed="download" data-name="${selectedPlugin.id}">
-                    <row crossAxisAlignment="center">
-                      <icon size="12"
-                        icon="${downloadStatus[selectedPlugin.id] ? 'downloading' : 'download'}"></icon>
-                      <text fontSize="12">${
-                        installed
-                        ? needUpdate
-                          ? '更新'
-                          : '已安装'
-                        : downloadStatus[selectedPlugin.id]
-                          ? '下载中'
-                          : '下载'}</text>
-                    </row>
-                  </elevated-button>`
-                }
-            </padding>
-          </column>
+          <expanded>
+            <column crossAxisAlignment="start">
+              <row>
+                <text fontSize="16" fontWeight="bold">${selectedPlugin.title}</text>
+                <padding left="18">
+                  <text fontSize="12" color="black54">${selectedPlugin.version}</text>
+                </padding>
+              </row>
+              <text fontSize="12" color="black54">${selectedPlugin.subtitle}</text>
+              <padding top="12">
+                <row>
+                ${status === Status.INSTALLED
+                  ? `<outlined-button disabled>
+                      <row crossAxisAlignment="center">
+                        <icon size="12"
+                          icon="download"></icon>
+                        <text fontSize="12">已安装</text>
+                      </row>
+                    <outlined-button>`
+                  : `<elevated-button onPressed="download" data-name="${selectedPlugin.id}">
+                      <row crossAxisAlignment="center">
+                        <icon size="12"
+                          icon="${downloadStatus[selectedPlugin.id] ? 'downloading' : 'download'}"></icon>
+                        <text fontSize="12">${
+                          StatusLabel[status]
+                        }</text>
+                      </row>
+                    </elevated-button>
+                    ${status === Status.NEED_UPDATE
+                      ? `<padding left="10"><text color="black54" fontSize="12">已安装${localPlugin?.version}</text></padding>`
+                      : ''}
+                    `
+                  }
+                  </row>
+              </padding>
+            </column>
+          </expanded>
         </row>
         <divider></divider>
         <padding top="10" left="10" bottom="10">
@@ -143,6 +164,7 @@ const storePlugin = utils => ({
       })
     const list = plugins.map(plugin => {
       return {
+        ...plugin,
         id: plugin.name,
         title: plugin.title,
         subtitle: plugin.subtitle || plugin.title,
@@ -156,17 +178,27 @@ const storePlugin = utils => ({
   },
   onResultSelected(result) {
     const selectedPlugin = cachedList.find(item => item.id === result.id)
-    const downloading = downloadStatus[selectedPlugin.id]
+    const downloading = data.downloadStatus[selectedPlugin.id]
     const plugin = getPlugin(result.id)
     const installed = !!plugin
     const needUpdate = plugin?.version !== selectedPlugin.version
+    const status = downloading
+      ? STATUS.DOWNLOADING
+      : (installed
+          ? (needUpdate
+              ? Status.NEED_UPDATE
+              : Status.INSTALLED)
+          : Status.NEED_INSTALL)
     data = {
       ...data,
       selectedPlugin,
       downloading,
       installed,
-      needUpdate
+      needUpdate,
+      status,
+      localPlugin: plugin,
     }
+    console.log(data);
     return renderHtml();
   },
   onResultTap(result) {
@@ -183,7 +215,7 @@ const storePlugin = utils => ({
       const [initErr] = await initPluginsDir()
       if (initErr) {
         utils.toast(initErr.message || initErr)
-        data.downloadStatus[name] = false
+        data.status = Status.NEED_INSTALL
         utils.updatePreview(renderHtml())
         return
       }
@@ -193,7 +225,7 @@ const storePlugin = utils => ({
         const [installPnpmErr] = await installPnpm()
         if (installPnpmErr) {
           utils.toast(installPnpmErr.message || installPnpmErr)
-          data.downloadStatus[name] = false
+          data.status = Status.NEED_INSTALL
           utils.updatePreview(renderHtml())
         }
       }
@@ -201,13 +233,13 @@ const storePlugin = utils => ({
       const [installErr, pluginPath] = await installPluginWithPnpm(name)
       if (installErr) {
         utils.toast(installErr.message || installErr)
-        data.downloadStatus[name] = false
+        data.status = Status.NEED_INSTALL
         utils.updatePreview(renderHtml())
         return
       }
-      installPlugin(pluginPath)
-      data.downloadStatus[name] = false
-      data.installed = true
+      reloadPlugin(pluginPath)
+      data.status = Status.INSTALLED
+      data.localPlugin = getPlugin(name)
       utils.updatePreview(renderHtml())
       utils.toast('插件已下载')
     },

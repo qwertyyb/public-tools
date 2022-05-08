@@ -28,9 +28,10 @@ const getWs = () => {
     return ws
   }
   createWs()
-  event.send = async (...args) => {
+  event.invoke = async (obj) => {
     await wsReady
-    return ws.send(...args)
+    console.log('invoke', JSON.stringify(obj, null, 2));
+    return ws.send(JSON.stringify(obj))
   }
   return event
 }

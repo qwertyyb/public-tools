@@ -1,7 +1,7 @@
 import 'nodejs.dart';
 
 Future<int> _installPnpm() async {
-  final process = await runWithBin('npm', ['install', '-g', 'pnpm']);
+  final process = await runWithBin('npm', ['install', '-g', 'pnpm@6']);
   return process.exitCode;
 }
 

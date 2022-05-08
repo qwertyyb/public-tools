@@ -34,7 +34,8 @@ class Plugin extends BaseListItem {
 
 class PluginResult<T> {
   Plugin plugin;
+  double point = 0;
   T value;
 
-  PluginResult({required this.plugin, required this.value});
+  PluginResult({required this.plugin, required this.value, this.point = 0});
 }

@@ -1,7 +1,11 @@
 const fs = require('fs');
 const path = require('path')
+const pinyin = require('@napi-rs/pinyin')
 const ws = require('./ws')
 const MessageData = require('./message-data')
+const { createUtils } = require('./utils');
+
+const invoke = ws.invoke
 
 let curPlugin = null;
 const plugins = new Map();
@@ -9,11 +13,6 @@ const plugins = new Map();
 const setCurPlugin = (targetPluginName) => {
   curPlugin = plugins.get(targetPluginName);
   return curPlugin
-}
-
-const invoke = (obj) => {
-  console.log('invoke', JSON.stringify(obj, null, 2));
-  return ws.send(JSON.stringify(obj))
 }
 
 const getCommands = () => {
@@ -96,24 +95,6 @@ ws.on('message',async  (message) => {
   return invoke(messageData.makeReplyMessage({}))
 })
 
-const createUtils = (name) => ({
-  toast(content) {
-    invoke(MessageData.makeEventMessage('toast', { content }))
-  },
-  hideApp() {
-    invoke(MessageData.makeEventMessage('hideApp'))
-  },
-  showApp() {
-    invoke(MessageData.makeEventMessage('showApp'))
-  },
-  updateResults(results) {
-    invoke(MessageData.makeEventMessage('updateResults', { results, command: plugins.get(name) }))
-  },
-  updatePreview(html) {
-    invoke(MessageData.makeEventMessage('updatePreview', { html, command: plugins.get(name) }))
-  }
-})
-
 const validatePluginConfig = config => {
   const { name, title, icon, mode, keywords } = config;
   const required = []
@@ -138,30 +119,54 @@ const validatePluginConfig = config => {
   return { pass: required.length <= 0, msg: `${required.join('、')} 为必填项` };
 }
 
-const addPlugin = (configPath) => {
-  try {
-    if (!fs.existsSync(configPath)) {
-      throw new Error(`文件 ${configPath} 不存在`)
-    }
-    const config = require(configPath);
-    const { pass, msg } = validatePluginConfig(config);
-    if (!pass) {
-      createUtils().toast(msg);
-      return { msg };
-    }
-    const pluginCreator = require(path.dirname(configPath));
-    const plugin = pluginCreator(createUtils(config.name));
+const notify = () => {
+  invoke(MessageData.makeEventMessage('updateCommands', { commands: getCommands() }));
+}
 
-    const { name, title, subtitle = '', description = '', icon, mode, keywords } = config;
-    plugins.set(name, { ...plugin, pluginPath: configPath, id: name, title, subtitle, description, icon, mode, keywords });
-    console.log(`插件${name}注册成功`);
-    invoke(MessageData.makeEventMessage('updateCommands', { commands: getCommands() }));
-    return {};
-  } catch(err) {
-    console.error(err);
-    createUtils().toast(err.message);
-    return { msg: err.message };
+const getKeywords = (title, keywords) => {
+  const pinyinArr = pinyin.pinyin(title);
+  const pyStr = pinyinArr.map(i => i[0]).join('');
+  return [...new Set([...keywords, pyStr, pinyinArr.join('')])];
+}
+
+const baseAddPlugin = (configPath) => {
+  if (!fs.existsSync(configPath)) {
+    throw new Error(`文件 ${configPath} 不存在`)
   }
+  const config = require(configPath);
+  const { pass, msg } = validatePluginConfig(config);
+  if (!pass) {
+    throw new Error(msg);
+  }
+  const pluginCreator = require(path.dirname(configPath));
+  const plugin = pluginCreator(createUtils(config.name, plugins));
+
+  const { name, title, subtitle = '', description = '', icon, mode, keywords } = config;
+  plugins.set(name, { ...plugin, pluginPath: configPath, id: name, title, subtitle, description, icon, mode, keywords: getKeywords(title, keywords), version: config.version });
+  console.log(`插件${name}注册成功`);
+  return plugins.get(name)
+}
+
+const addPlugin = configPath => {
+  baseAddPlugin(configPath);
+  notify();
+}
+
+const addPlugins = (configPaths) => {
+  configPaths.forEach(configPath => {
+    baseAddPlugin(configPath);
+  })
+  notify();
+}
+
+const reloadPlugin = (configPath) => {
+  const dirName = path.dirname(configPath);
+  Object.keys(require.cache).forEach(modulePath => {
+    if (modulePath.startsWith(dirName)) {
+      delete require.cache[modulePath];
+    }
+  })
+  addPlugin(configPath);
 }
 
 const removePlugin = (name) => {
@@ -173,15 +178,10 @@ const removePlugin = (name) => {
   }
 }
 
-process.on('uncaughtException', (err) => {
-  console.error(err)
-});
-process.on('unhandledRejection', (err) => {
-  console.error(err)
-})
-
 module.exports = {
   addPlugin,
+  addPlugins,
+  reloadPlugin,
   removePlugin,
   getPlugins: () => Array.from(plugins.values()),
   getPlugin: name => plugins.get(name),

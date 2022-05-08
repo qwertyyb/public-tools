@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 
+import '../utils/logger.dart';
 import 'result_item_view.dart';
 
 class SearchResultList<T> extends StatefulWidget {

@@ -136,14 +136,6 @@ class RemotePluginServer {
     // ignore: close_sinks
     final streamController = StreamController<MessageData>();
     _messages[message.replyId] = streamController;
-    Future.delayed(Duration(seconds: 5), () {
-      if (_messages[message.replyId] != null) {
-        _messages[message.replyId]!
-            .add(MessageData(type: 'error', payload: {'message': 'timeout'}));
-        _messages[message.replyId]!.close();
-        _messages.remove(message.replyId);
-      }
-    });
     _socket!.add(json.encode(message));
     final result = await streamController.stream.first;
     if (result.type == 'error') {

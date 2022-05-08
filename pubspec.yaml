@@ -32,6 +32,8 @@ dependencies:
   window_manager: ^0.2.0
   logger: ^1.1.0
   sentry_flutter: ^6.4.0
+  clipboard_watcher: ^0.1.2
+  sqflite_migration: ^0.3.0
   flutter:
     sdk: flutter
 
@@ -44,7 +46,7 @@ dependencies:
   collection: ^1.15.0-nullsafety.4
 
 dev_dependencies:
-  pigeon: ^2.0.3
+  pigeon: ^3.0.3
   flutter_test:
     sdk: flutter
 
