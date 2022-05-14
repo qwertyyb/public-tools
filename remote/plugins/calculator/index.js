@@ -1,9 +1,19 @@
-const math = require('mathjs')
+const { create, all } = require('mathjs')
 const clibpoard = require('simple-mac-clipboard')
+
+const config = {
+    epsilon: 1e-12,
+    matrix: 'Matrix',
+    number: 'BigNumber', // 可选值：number BigNumber
+    precision: 64,
+    predictable: false,
+    randomSeed: null
+}
+const math = create(all, config)
 
 const calc = (str) => {
   try {
-    return math.evaluate(str)
+    return math.format(math.evaluate(str))
   } catch(err) {
     return NaN
   }

@@ -48,9 +48,18 @@ final migrations = [
 final config = MigrationConfig(
     initializationScript: initialScript, migrationScripts: migrations);
 
+Future<Database>? lastOpenDatabase;
+
 Future<Database> getDatabase() async {
-  var path = await Config.getDatabasePath();
-  return openDatabaseWithMigration(path, config);
+  if (lastOpenDatabase != null) return lastOpenDatabase!;
+
+  Future<Database> openDatabase() async {
+    var path = await Config.getDatabasePath();
+    return openDatabaseWithMigration(path, config);
+  }
+
+  lastOpenDatabase = openDatabase();
+  return lastOpenDatabase!;
 }
 
 class _PasteItem {
