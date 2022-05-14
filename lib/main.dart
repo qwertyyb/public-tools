@@ -1,6 +1,5 @@
 import 'package:flutter/material.dart';
 import 'package:hotkey_manager/hotkey_manager.dart';
-import 'package:sentry_flutter/sentry_flutter.dart';
 
 import 'package:oktoast/oktoast.dart';
 import 'package:window_manager/window_manager.dart';
@@ -16,16 +15,7 @@ void main() async {
   // For hot reload, `unregisterAll()` needs to be called.
   hotKeyManager.unregisterAll();
 
-  await SentryFlutter.init(
-    (options) {
-      options.dsn =
-          'https://a6a92efa2ef846f4941d726885cab675@o1198024.ingest.sentry.io/6320659';
-      // Set tracesSampleRate to 1.0 to capture 100% of transactions for performance monitoring.
-      // We recommend adjusting this value in production.
-      options.tracesSampleRate = 1.0;
-    },
-    appRunner: () => runApp(MainApp()),
-  );
+  runApp(MainApp());
 }
 
 class MainApp extends StatelessWidget {
