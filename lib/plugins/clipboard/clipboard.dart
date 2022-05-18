@@ -38,19 +38,25 @@ final initialScript = [
 '''
 ];
 
-final migrations = [
+final migrations = <String>[
   '''
   alter table clipboardHistory add column binary blob;
-  alter table clipboardHistory add column createdAt NUMERIC default '2022-05-06 21:25:00';
+  ''',
   '''
+  alter table clipboardHistory add column createdAt NUMERIC;
+  ''',
 ];
 
 final config = MigrationConfig(
     initializationScript: initialScript, migrationScripts: migrations);
 
+Future<Database>? database;
+
 Future<Database> getDatabase() async {
+  if (database != null) return database!;
   var path = await Config.getDatabasePath();
-  return openDatabaseWithMigration(path, config);
+  database = openDatabaseWithMigration(path, config);
+  return database!;
 }
 
 class _PasteItem {
@@ -276,7 +282,7 @@ class CustomClipboardListener extends ClipboardListener {
     final data =
         await platformService.readClipboardData(ClipboardDataType.string);
     if (data != null) {
-      return onChange(ContentType.text, data, String.fromCharCodes(data));
+      return onChange(ContentType.text, data, Utf8Decoder().convert(data));
     }
   }
 }
