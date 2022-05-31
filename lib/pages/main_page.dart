@@ -19,6 +19,8 @@ class MainPage extends StatefulWidget {
 class MainPageState extends State<MainPage> {
   static MainPageState? current;
 
+  PluginManager pluginManger = PluginManager.instance;
+
   GlobalKey<SearchListState<PluginResult<PluginCommand>>> searchListKey =
       GlobalKey<SearchListState<PluginResult<PluginCommand>>>();
 
