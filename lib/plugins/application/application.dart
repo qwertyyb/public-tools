@@ -31,7 +31,7 @@ Future<List<PluginCommand>> _getInstalledApps() async {
           onEnter: () async {
             logger.i('enter ${app.name}');
             platformService.hideApp();
-            Process.run("open", ["-a", app.name!]);
+            Process.run("open", ["-a", app.path!]);
           },
         ),
       )
