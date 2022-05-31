@@ -44,6 +44,7 @@ final migrations = <String>[
   ''',
   '''
   alter table clipboardHistory add column createdAt NUMERIC;
+  update clipboardHistory set created = 0;
   ''',
 ];
 
