@@ -1,6 +1,6 @@
 {
   "name": "qrcode",
-  "version": "0.0.2",
+  "version": "0.0.3",
   "title": "二维码",
   "subtitle": "识别或生成二维码",
   "description": "识别或生成二维码",
