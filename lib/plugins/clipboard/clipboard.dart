@@ -127,6 +127,7 @@ class PasteItemHelper {
         orderBy: 'updatedAt desc',
         columns: columns,
         where: where,
+        limit: 60,
         whereArgs: whereArgs);
     return results.map((e) {
       return _PasteItem.fromMap(e);
@@ -181,8 +182,17 @@ class PasteItemHelper {
 var lastKeyword = '';
 
 Future<List<SearchResult>> search(String keyword) async {
-  var list = await PasteItemHelper.instance!
-      .query(where: 'text like ?', whereArgs: ['%' + keyword + '%']);
+  var list = await PasteItemHelper.instance!.query(
+    where: 'text like ?',
+    columns: [
+      'id',
+      'createdAt',
+      'updatedAt',
+      'summary',
+      'contentType',
+    ],
+    whereArgs: ['%' + keyword + '%'],
+  );
   return list.map((e) {
     return SearchResult(
         id: (e.id ?? '').toString(),
@@ -225,7 +235,7 @@ final _command = PluginCommand(
     return Future.value(
       HighlightView(
         // The original code to be highlighted
-        result.description!,
+        Utf8Decoder().convert(selected!.binary!),
 
         // Specify language
         // It is recommended to give it a value for performance
@@ -251,7 +261,7 @@ final _command = PluginCommand(
     logger.i(selected?.contentType);
     if (selected?.contentType == ContentType.text) {
       await platformService.setClipboardData(
-        Uint8List.fromList(utf8.encode(result.title)),
+        selected!.binary!,
         ClipboardDataType.string,
       );
     } else if (selected?.contentType == ContentType.image) {
@@ -276,13 +286,18 @@ class CustomClipboardListener extends ClipboardListener {
     final imgdata =
         await platformService.readClipboardData(ClipboardDataType.tiff);
     if (imgdata != null) {
-      final image = await decodeImageFromList(imgdata);
-      final summary = 'Image(${image.width}x${image.height})';
-      return onChange(ContentType.image, imgdata, summary);
+      try {
+        final image = await decodeImageFromList(imgdata);
+        final summary = 'Image(${image.width}x${image.height})';
+        return onChange(ContentType.image, imgdata, summary);
+      } catch (err) {
+        print("decodeImageError");
+      }
     }
     final data =
         await platformService.readClipboardData(ClipboardDataType.string);
     if (data != null) {
+      print(Utf8Decoder(allowMalformed: true).convert(data));
       return onChange(ContentType.text, data, Utf8Decoder().convert(data));
     }
   }
