@@ -142,9 +142,10 @@ const baseAddPlugin = (configPath) => {
   const plugin = pluginCreator(createUtils(config.name, plugins));
 
   const { name, title, subtitle = '', description = '', icon, mode, keywords } = config;
-  plugins.set(name, { ...plugin, pluginPath: configPath, id: name, title, subtitle, description, icon, mode, keywords: getKeywords(title, keywords), version: config.version });
-  console.log(`插件${name}注册成功`);
-  return plugins.get(name)
+  let id = name.startsWith('@public-tools/') ? name : `@public-tools/plugin-${name}`;
+  plugins.set(id, { ...plugin, pluginPath: configPath, id, title, subtitle, description, icon, mode, keywords: getKeywords(title, keywords), version: config.version });
+  console.log(`插件${id}注册成功`);
+  return plugins.get(id)
 }
 
 const addPlugin = configPath => {

@@ -4,6 +4,7 @@ import 'package:collection/collection.dart' show IterableExtension;
 import 'package:flutter/material.dart';
 import 'package:oktoast/oktoast.dart';
 import 'package:public_tools/pigeon/instance.dart';
+import 'package:public_tools/plugins/remote/webview_preview.dart';
 import 'package:window_manager/window_manager.dart';
 
 import '../../core/plugin.dart';
@@ -48,7 +49,11 @@ PluginCommand _createCommandItem(element) {
         "command": element,
         "result": result.toJson(),
       });
+
       if (data["html"] == null) return null;
+
+      _server.previewHtml = data["html"];
+      return WebviewPreview(html: data["html"]);
 
       return SingleChildScrollView(
         child: HTMLRuntime(
