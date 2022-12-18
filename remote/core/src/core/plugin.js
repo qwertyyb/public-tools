@@ -113,9 +113,9 @@ const validatePluginConfig = config => {
   if (!keywords || !keywords.length) {
     required.push('keywords')
   }
-  if (name && plugins.get(name)) {
-    return { pass: false, msg: `插件${name}已存在` }
-  }
+  // if (name && plugins.get(name)) {
+  //   return { pass: false, msg: `插件${name}已存在` }
+  // }
   return { pass: required.length <= 0, msg: `${required.join('、')} 为必填项` };
 }
 

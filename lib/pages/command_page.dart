@@ -72,7 +72,7 @@ class CommandPageState extends State<CommandPage> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      backgroundColor: Color.fromARGB(0, 0, 0, 0),
+      backgroundColor: Colors.white,
       body: Container(
         // Center is a layout widget. It takes a single child and positions it
         // in the middle of the parent.

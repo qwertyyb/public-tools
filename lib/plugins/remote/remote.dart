@@ -9,14 +9,12 @@ import 'package:window_manager/window_manager.dart';
 
 import '../../core/plugin.dart';
 import '../../core/plugin_command.dart';
-import '../../html_render/render.dart';
 import '../../utils/logger.dart';
-import '../../pigeon/instance.dart';
 import 'runtime.dart';
 import 'server.dart';
 
 late RemotePluginServer _server;
-GlobalKey<HTMLRuntimeState> _previewKey = GlobalKey<HTMLRuntimeState>();
+GlobalKey<WebviewPreviewState> _previewKey = GlobalKey<WebviewPreviewState>();
 
 PluginCommand _createCommandItem(element) {
   final command = PluginCommand.fromJsonAndFunction(
@@ -53,20 +51,17 @@ PluginCommand _createCommandItem(element) {
       if (data["html"] == null) return null;
 
       _server.previewHtml = data["html"];
-      return WebviewPreview(html: data["html"]);
-
-      return SingleChildScrollView(
-        child: HTMLRuntime(
-          data['html'],
-          key: _previewKey,
-          onEvent: (handlerName, eventData) {
-            _server.invoke('event', {
-              'event': 'domEvent',
-              'handlerName': handlerName,
-              'eventData': eventData,
-            });
-          },
-        ),
+      _previewKey.currentState?.updateHTML(data["html"]);
+      return WebviewPreview(
+        html: data["html"],
+        key: _previewKey,
+        onEvent: ((handlerName, args) {
+          _server.invoke('event', {
+            'event': 'domEvent',
+            'handlerName': handlerName,
+            'eventData': args,
+          });
+        }),
       );
     },
   );

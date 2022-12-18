@@ -1,33 +1,47 @@
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 
+typedef dynamic InvokeDomEvent(String handlerName, dynamic args);
+
 class WebviewPreview extends StatefulWidget {
   final String? url;
   final String? html;
+  final InvokeDomEvent? onEvent;
 
-  WebviewPreview({this.url, this.html});
+  WebviewPreview({this.url, this.html, this.onEvent, Key? key})
+      : super(key: key);
 
   @override
   State<StatefulWidget> createState() {
-    return _WebviewPreviewState();
+    return WebviewPreviewState();
   }
 }
 
-class _WebviewPreviewState extends State<WebviewPreview> {
+class WebviewPreviewState extends State<WebviewPreview> {
   GlobalKey _key = GlobalKey();
   MethodChannel channel = MethodChannel("webview");
+  String? html;
 
   void updateWebviewRect(Map<String, double> rect) {
     channel.invokeMethod("setRect", rect);
   }
 
+  void updateHTML(String html) {
+    this.html = html;
+    channel.invokeMethod("setHTML", this.html);
+  }
+
   @override
   void initState() {
+    this.html = this.widget.html;
     if (this.widget.url != null) {
       channel.invokeMethod("setUrl", this.widget.url!);
-    } else if (this.widget.html != null) {
-      channel.invokeMethod("setHTML", this.widget.html);
+    } else if (this.html != null) {
+      channel.invokeMethod("setHTML", this.html);
     }
+    channel.setMethodCallHandler((call) async {
+      return this.widget.onEvent?.call(call.method, call.arguments);
+    });
     super.initState();
   }
 
@@ -35,8 +49,8 @@ class _WebviewPreviewState extends State<WebviewPreview> {
   void didUpdateWidget(covariant WebviewPreview oldWidget) {
     if (this.widget.url != null) {
       channel.invokeMethod("setUrl", this.widget.url!);
-    } else if (this.widget.html != null) {
-      channel.invokeMethod("setHTML", this.widget.html);
+    } else if (this.html != null) {
+      channel.invokeMethod("setHTML", this.html);
     }
     super.didUpdateWidget(oldWidget);
   }

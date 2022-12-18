@@ -18,10 +18,10 @@
         </div>
         <p class="subtitle" style="opacity:0.54;font-size:12px;margin-top:10px">${selectedPlugin.subtitle}</p>
         ${
-          status === 'installed' || status === 'downloading'
+          (status === 'installed' || status === 'downloading')
             ? `<button style="margin-top:auto;height:24px;line-height:24px;width:100px" disabled>
               ${status === 'installed' ? '已安装' : '下载中' }</button>`
-            : `<button style="margin-top:auto;height:24px;line-height:24px;width:100px">
+            : `<button style="margin-top:auto;height:24px;line-height:24px;width:100px" id="install-btn" data-name="${selectedPlugin.name}">
               ${ status === 'need_update' ? '更新' : '安装'}
             </button>`
         }
@@ -44,3 +44,14 @@
     </div>
   </div>
 </div>
+<script>
+  document.getElementById('install-btn').addEventListener('click', event => {
+    const { name } = event.currentTarget.dataset
+    window.webkit.messageHandlers.PublicJSBridgeInvoke.postMessage({
+      funcName: 'download',
+      args: {
+        name
+      }
+    })
+  })
+</script>

@@ -68,7 +68,11 @@ let data = {
 }
 
 const template = fs.readFileSync(path.join(__dirname, './preview.html'), 'utf8')
-const renderHtml = new Function('state', `with(state) { return \`${template}\` }`)
+const renderHtml = (state = data) => {
+  console.log(state)
+  const func = new Function('state', `with(state) { return \`${template}\` }`)
+  return func(state)
+}
 
 const storePlugin = utils => ({
   async onSearch(keyword) {
@@ -99,7 +103,7 @@ const storePlugin = utils => ({
     const installed = !!plugin
     const needUpdate = plugin?.version !== selectedPlugin.version
     const status = downloading
-      ? STATUS.DOWNLOADING
+      ? Status.DOWNLOADING
       : (installed
           ? (needUpdate
               ? Status.NEED_UPDATE
@@ -121,11 +125,12 @@ const storePlugin = utils => ({
     return null;
   },
   methods: {
-    async download(e) {
-      console.log('download plugin: ', e)
-      const { name } = e.target.dataset;
+    async download(dataset) {
+      console.log('download plugin: ', dataset)
+      const { name } = dataset;
       if (data.downloadStatus[name]) return;
       data.downloadStatus[name] = true;
+      data.status = Status.DOWNLOADING;
       utils.updatePreview(renderHtml())
 
       const [initErr] = await initPluginsDir()
