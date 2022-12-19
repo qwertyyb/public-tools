@@ -32,7 +32,7 @@ class _TextInput extends StatelessWidget {
             // 防止按向上或向下箭头时，光标移动
             if (event.isKeyPressed(LogicalKeyboardKey.arrowDown) ||
                 event.isKeyPressed(LogicalKeyboardKey.arrowUp) ||
-                event.isKeyPressed(LogicalKeyboardKey.enter)) {
+                event.logicalKey == LogicalKeyboardKey.enter) {
               return KeyEventResult.handled;
             }
             return KeyEventResult.ignored;
@@ -40,10 +40,22 @@ class _TextInput extends StatelessWidget {
         );
 
   void _onKey(RawKeyEvent event) {
+    if (event is RawKeyUpEvent) {
+      return;
+    }
     if (event.isKeyPressed(LogicalKeyboardKey.arrowDown)) {
       this.onArrowDown!();
-    } else if (event.isKeyPressed(LogicalKeyboardKey.enter)) {
+    } else if (event.logicalKey == LogicalKeyboardKey.enter) {
       this.onEnter!();
+    } else if (event.logicalKey == LogicalKeyboardKey.escape) {
+      // 按下esc键
+      Future.delayed(Duration.zero, () {
+        if (controller!.text.length <= 0) {
+          this.onEmptyDelete?.call();
+        } else {
+          controller!.clear();
+        }
+      });
     } else if (event.isKeyPressed(LogicalKeyboardKey.arrowUp)) {
       this.onArrowUp!();
     } else if (event.isKeyPressed(LogicalKeyboardKey.space)) {

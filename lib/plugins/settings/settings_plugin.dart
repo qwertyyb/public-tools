@@ -63,6 +63,7 @@ Timer? _timer;
 void _startListenEvents() {
   _eventChannel.receiveBroadcastStream().listen((event) async {
     if (event == 'DID_HIDE') {
+      windowManager.hide();
       final prefs = await SharedPreferences.getInstance();
       final duration = prefs.getInt(SettingKey.exitCommandDuration) ?? 10;
       if (duration < 0) return;

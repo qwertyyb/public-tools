@@ -220,16 +220,8 @@ final _command = PluginCommand(
   onResultPreview: (SearchResult result) async {
     final selected = await PasteItemHelper.instance!.get(int.parse(result.id));
     if (selected?.contentType == ContentType.image) {
-      return Padding(
-        padding: EdgeInsets.only(top: 60),
-        child: Column(
-          children: [
-            Image.memory(
-              selected!.binary!,
-              width: 300,
-            )
-          ],
-        ),
+      return SizedBox(
+        child: Image.memory(selected!.binary!, fit: BoxFit.contain),
       );
     }
     return Future.value(
