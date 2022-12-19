@@ -3,8 +3,7 @@ const fs = require('fs')
 const path = require('path')
 const { exec } = require('child_process')
 const { promisify } = require('util');
-const { installPlugin } = require("../../core");
-const { getPlugin, removePlugin, reloadPlugin } = require("../../core/plugin");
+const { getPlugin, reloadPlugin } = require("../../core/plugin");
 
 const p = (promise) => promise.then(res => ([null, res])).catch(err => ([err, null]))
 
@@ -53,19 +52,12 @@ const installPluginWithPnpm = async (pluginName) => {
 }
 
 let cachedList = [];
-const downloadStatus = {}
 
 const Status = {
   DOWNLOADING: 'downloading',
   INSTALLED: 'installed',
   NEED_UPDATE: 'need_update',
   NEED_INSTALL: 'need_install',
-}
-const StatusLabel = {
-  [Status.DOWNLOADING]: '下载中',
-  [Status.INSTALLED]: '已安装',
-  [Status.NEED_UPDATE]: '更新',
-  [Status.NEED_INSTALL]: '安装',
 }
 
 let data = {
@@ -75,83 +67,11 @@ let data = {
   status: Status.NEED_INSTALL,
 }
 
-const renderHtml = () => {
-  with(data) {
-    console.log(status)
-    return `<div>
-    <flutter-container>
-      <column crossAxisAlignment="start">
-        <row>
-          <padding top="10" left="10" right="10" bottom="10">
-            <image imageUrl="${selectedPlugin.icon}" width="80" height="80"></image>
-          </padding>
-          <expanded>
-            <column crossAxisAlignment="start">
-              <row>
-                <text fontSize="16" fontWeight="bold">${selectedPlugin.title}</text>
-                <padding left="18">
-                  <text fontSize="12" color="black54">${selectedPlugin.version}</text>
-                </padding>
-              </row>
-              <text fontSize="12" color="black54">${selectedPlugin.subtitle}</text>
-              <padding top="12">
-                <row>
-                ${status === Status.INSTALLED
-                  ? `<outlined-button disabled>
-                      <row crossAxisAlignment="center">
-                        <icon size="12"
-                          icon="download"></icon>
-                        <text fontSize="12">已安装</text>
-                      </row>
-                    <outlined-button>`
-                  : `<elevated-button onPressed="download" data-name="${selectedPlugin.id}">
-                      <row crossAxisAlignment="center">
-                        <icon size="12"
-                          icon="${downloadStatus[selectedPlugin.id] ? 'downloading' : 'download'}"></icon>
-                        <text fontSize="12">${
-                          StatusLabel[status]
-                        }</text>
-                      </row>
-                    </elevated-button>
-                    ${status === Status.NEED_UPDATE
-                      ? `<padding left="10"><text color="black54" fontSize="12">已安装${localPlugin?.version}</text></padding>`
-                      : ''}
-                    `
-                  }
-                  </row>
-              </padding>
-            </column>
-          </expanded>
-        </row>
-        <divider></divider>
-        <padding top="10" left="10" bottom="10">
-          <sizedbox height="160">
-            <list-view scrollDirection="horizontal">
-              <padding right="8">
-                <image imageUrl="https://via.placeholder.com/240x160" width="240" height="160"></image>
-              </padding>
-              <padding right="8">
-                <image imageUrl="https://via.placeholder.com/240x160" width="240" height="160"></image>
-              </padding>
-              <padding>
-                <image imageUrl="https://via.placeholder.com/240x160" width="240" height="160"></image>
-              </padding>
-            </list-view>
-          </sizedbox>
-        </padding>
-        <padding left="10">
-          <text>${selectedPlugin.description}</text>
-        </padding>
-        <padding top="10" left="10" bottom="10">
-          <row>
-            <text fontSize="16" fontWeight="bold">关键词: </text>
-            <text color="black54">${(selectedPlugin?.keywords || []).join('、')}</text>
-          </row>
-        </padding>
-      </column>
-    </flutter-container>
-  </div>`
-  }
+const template = fs.readFileSync(path.join(__dirname, './preview.html'), 'utf8')
+const renderHtml = (state = data) => {
+  console.log(state)
+  const func = new Function('state', `with(state) { return \`${template}\` }`)
+  return func(state)
 }
 
 const storePlugin = utils => ({
@@ -183,7 +103,7 @@ const storePlugin = utils => ({
     const installed = !!plugin
     const needUpdate = plugin?.version !== selectedPlugin.version
     const status = downloading
-      ? STATUS.DOWNLOADING
+      ? Status.DOWNLOADING
       : (installed
           ? (needUpdate
               ? Status.NEED_UPDATE
@@ -199,17 +119,18 @@ const storePlugin = utils => ({
       localPlugin: plugin,
     }
     console.log(data);
-    return renderHtml();
+    return renderHtml(data);
   },
   onResultTap(result) {
     return null;
   },
   methods: {
-    async download(e) {
-      console.log('download plugin: ', e)
-      const { name } = e.target.dataset;
+    async download(dataset) {
+      console.log('download plugin: ', dataset)
+      const { name } = dataset;
       if (data.downloadStatus[name]) return;
       data.downloadStatus[name] = true;
+      data.status = Status.DOWNLOADING;
       utils.updatePreview(renderHtml())
 
       const [initErr] = await initPluginsDir()

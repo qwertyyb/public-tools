@@ -4,18 +4,17 @@ import 'package:collection/collection.dart' show IterableExtension;
 import 'package:flutter/material.dart';
 import 'package:oktoast/oktoast.dart';
 import 'package:public_tools/pigeon/instance.dart';
+import 'package:public_tools/plugins/remote/webview_preview.dart';
 import 'package:window_manager/window_manager.dart';
 
 import '../../core/plugin.dart';
 import '../../core/plugin_command.dart';
-import '../../html_render/render.dart';
 import '../../utils/logger.dart';
-import '../../pigeon/instance.dart';
 import 'runtime.dart';
 import 'server.dart';
 
 late RemotePluginServer _server;
-GlobalKey<HTMLRuntimeState> _previewKey = GlobalKey<HTMLRuntimeState>();
+GlobalKey<WebviewPreviewState> _previewKey = GlobalKey<WebviewPreviewState>();
 
 PluginCommand _createCommandItem(element) {
   final command = PluginCommand.fromJsonAndFunction(
@@ -48,20 +47,21 @@ PluginCommand _createCommandItem(element) {
         "command": element,
         "result": result.toJson(),
       });
+
       if (data["html"] == null) return null;
 
-      return SingleChildScrollView(
-        child: HTMLRuntime(
-          data['html'],
-          key: _previewKey,
-          onEvent: (handlerName, eventData) {
-            _server.invoke('event', {
-              'event': 'domEvent',
-              'handlerName': handlerName,
-              'eventData': eventData,
-            });
-          },
-        ),
+      _server.previewHtml = data["html"];
+      _previewKey.currentState?.updateHTML(data["html"]);
+      return WebviewPreview(
+        html: data["html"],
+        key: _previewKey,
+        onEvent: ((handlerName, args) {
+          _server.invoke('event', {
+            'event': 'domEvent',
+            'handlerName': handlerName,
+            'eventData': args,
+          });
+        }),
       );
     },
   );

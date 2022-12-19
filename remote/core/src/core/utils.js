@@ -15,9 +15,11 @@ const createCommonUtils = () => ({
 
 const createPluginUtils = (name, plugins) => ({
   updateResults(results) {
+    name = name.startsWith('@public-tools/') ? name : `@public-tools/plugin-${name}`
     return invoke(MessageData.makeEventMessage('updateResults', { results, command: plugins.get(name) }))
   },
   updatePreview(html) {
+    name = name.startsWith('@public-tools/') ? name : `@public-tools/plugin-${name}`
     return invoke(MessageData.makeEventMessage('updatePreview', { html, command: plugins.get(name) }))
   }
 })

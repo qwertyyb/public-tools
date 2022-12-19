@@ -120,28 +120,29 @@ const plugin = utils => ({
     const selectedPlugin = devPlugins.get(result.id)
     if (!selectedPlugin) return null;
     return `
-      <flutter-container>
-        <column crossaxisalignment="start">
-          <padding top="12" bottom="12">
-            <row>
-              <text fontWeight="bold" fontSize="24">${result.title}</text>
-              <spacer></spacer>
-              <text-button onpressed="removePlugin" data-name="${result.id}" foregroundColor="red">
-                <row>
-                  <icon size="16" icon="delete"></icon>
-                  <text>移除</text>
-                </row>
-              </text-button>
-            </row>
-          </padding>
-          <row mainAxisAlignment="start">
-            <text fontWeight="bold" fontSize="16">关键词:</text>
-            <padding left="12" right="12">
-              <text color="black54">${selectedPlugin.config.keywords.join('、')}</text>
-            </padding>
-          </row>
-        </column>
-      </flutter-container>
+      <div>
+        <div style="display:flex;flex-direction:column">
+          <div style="display:flex;justify-content:space-between;align-items:center">
+            <h1 style="margin: 3px">${result.title}</h1>
+            <button id="remove-btn"
+              data-name="${result.id}"
+              style="background:#f00;border:none;outline:none;color:#fff;height:30px;border-radius:4px">移除</button>
+          </div>
+          <div style="display:flex">
+            <p><b>关键词: </b><span>${selectedPlugin.config.keywords.join('、')}</span></p>
+          </div>
+        </div>
+      </div>
+      <script>
+        const removePlugin = (e) => {
+          console.log(e)
+          const { name } = e.currentTarget.dataset
+          console.log('name')
+          if (!name) return;
+          window.webkit.messageHandlers.PublicJSBridgeInvoke.postMessage({ funcName: 'removePlugin', args: { name } })
+        }
+        document.getElementById('remove-btn').addEventListener('click', removePlugin)
+      </script>
     `
   },
   onResultTap(result) {
@@ -156,8 +157,9 @@ const plugin = utils => ({
     }
   },
   methods: {
-    removePlugin(event) {
-      const { name } = event.target.dataset;
+    removePlugin(dataset) {
+      const { name } = dataset;
+      if (!name) return;
       removeDevPlugin(name)
       utils.updateResults(getSearchResultList())
       utils.toast(`已成功移除插件${name}`)
