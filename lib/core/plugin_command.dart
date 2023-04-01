@@ -23,7 +23,7 @@ class SearchResult extends BaseListItem {
           id: id,
         );
 
-  SearchResult.fromJson(json) : super.fromJson(json);
+  SearchResult.fromJson(Map<String, dynamic> json) : super.fromJson(json);
 }
 
 class PluginCommand extends BaseListItem {
