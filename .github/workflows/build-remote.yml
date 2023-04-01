@@ -1,4 +1,4 @@
-name: release store
+name: build remote
 
 
 on:

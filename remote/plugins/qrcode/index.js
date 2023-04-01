@@ -61,7 +61,7 @@ const plugin = (utils) => ({
       const url = await new Promise(resolve => QRCode.toDataURL(result.title, {}, (err, url) => {
         resolve(url)
       }))
-      return `<div style="margin-left:100px"><img src="${url}" width="200" height="200"/></div>`
+      return `<div style="height:100vh;width:100vw;display:flex"><img src="${url}" style="width:80vw;height:80vh;margin:auto" /></div>`
     }
     return null
   },

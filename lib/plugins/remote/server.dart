@@ -2,7 +2,6 @@ import 'dart:async';
 import 'dart:convert';
 import 'dart:io';
 
-import 'package:path_provider/path_provider.dart';
 import 'package:uuid/uuid.dart';
 
 import '../../utils/logger.dart';
@@ -74,6 +73,7 @@ class RemotePluginServer {
 
   final Function onReady;
   final Function onDisconnect;
+  String previewHtml = "";
   Map<String?, StreamController<MessageData>> _messages = {};
 
   RemotePluginServer({required this.onReady, required this.onDisconnect}) {
@@ -85,6 +85,13 @@ class RemotePluginServer {
     this._server!.listen(
       (HttpRequest req) async {
         logger.i('新的链接: ${req.uri}');
+        if (req.uri.path == '/preview') {
+          req.response.statusCode = 200;
+          req.response.headers.contentType = ContentType.html;
+          req.response.write(this.previewHtml);
+          req.response.close();
+          return;
+        }
         if (req.uri.path != '/ws' || this._socket != null) {
           req.response.statusCode = 403;
           req.response.write('a client has already connected');

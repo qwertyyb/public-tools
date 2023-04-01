@@ -1,0 +1,22 @@
+{
+  "name": "web-push",
+  "version": "0.0.1",
+  "title": "Web Push",
+  "subtitle": "Web推送",
+  "description": "Web推送通知",
+  "icon": "https://s1.ax1x.com/2023/04/01/ppWkp0e.png",
+  "mode": "listView",
+  "main": "index.js",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "keywords": [
+    "web push",
+    "推送"
+  ],
+  "author": "",
+  "license": "ISC",
+  "dependencies": {
+    "web-push": "^3.5.0"
+  }
+}

@@ -1,8 +1,10 @@
 import Cocoa
 import FlutterMacOS
+import WebKit
 
 class BlurryContainerViewController: NSViewController {
   let flutterViewController = FlutterViewController()
+  var webviewController: WebviewController!
 
   init() {
     super.init(nibName: nil, bundle: nil)
@@ -21,6 +23,7 @@ class BlurryContainerViewController: NSViewController {
       blurView.material = .fullScreenUI
     }
     self.view = blurView
+    self.webviewController = WebviewController(controller: flutterViewController)
   }
 
   override func viewDidLoad() {
@@ -31,6 +34,7 @@ class BlurryContainerViewController: NSViewController {
     flutterViewController.view.frame = self.view.bounds
     flutterViewController.view.autoresizingMask = [.width, .height]
     self.view.addSubview(flutterViewController.view)
+    self.view.addSubview(self.webviewController.view)
   }
 }
 
@@ -70,6 +74,7 @@ class MainFlutterWindow: NSWindow, FlutterStreamHandler {
     }
 
     RegisterGeneratedPlugins(registry: blurryContainerViewController.flutterViewController)
+    
     
     PBCServiceSetup(blurryContainerViewController.flutterViewController.engine.binaryMessenger, AppService())
     

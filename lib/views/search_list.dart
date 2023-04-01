@@ -1,6 +1,7 @@
 import 'dart:async';
 
 import 'package:flutter/material.dart';
+import 'package:public_tools/views/result_preview.dart';
 
 import '../utils/logger.dart';
 import 'input_bar.dart';
@@ -216,14 +217,7 @@ class SearchListState<T> extends State<SearchList<T>> {
                       if (preview != null)
                         Expanded(
                           flex: 3,
-                          child: Container(
-                            height: double.infinity,
-                            padding: EdgeInsets.zero,
-                            color: Color.fromARGB(49, 165, 165, 165),
-                            child: SizedBox(
-                              child: preview!,
-                            ),
-                          ),
+                          child: ResultPreview(preview),
                         )
                     ],
                   ),

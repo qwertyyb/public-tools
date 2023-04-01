@@ -113,9 +113,9 @@ const validatePluginConfig = config => {
   if (!keywords || !keywords.length) {
     required.push('keywords')
   }
-  if (name && plugins.get(name)) {
-    return { pass: false, msg: `插件${name}已存在` }
-  }
+  // if (name && plugins.get(name)) {
+  //   return { pass: false, msg: `插件${name}已存在` }
+  // }
   return { pass: required.length <= 0, msg: `${required.join('、')} 为必填项` };
 }
 
@@ -142,9 +142,10 @@ const baseAddPlugin = (configPath) => {
   const plugin = pluginCreator(createUtils(config.name, plugins));
 
   const { name, title, subtitle = '', description = '', icon, mode, keywords } = config;
-  plugins.set(name, { ...plugin, pluginPath: configPath, id: name, title, subtitle, description, icon, mode, keywords: getKeywords(title, keywords), version: config.version });
-  console.log(`插件${name}注册成功`);
-  return plugins.get(name)
+  let id = name.startsWith('@public-tools/') ? name : `@public-tools/plugin-${name}`;
+  plugins.set(id, { ...plugin, pluginPath: configPath, id, title, subtitle, description, icon, mode, keywords: getKeywords(title, keywords), version: config.version });
+  console.log(`插件${id}注册成功`);
+  return plugins.get(id)
 }
 
 const addPlugin = configPath => {
