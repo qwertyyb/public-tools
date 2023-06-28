@@ -10,6 +10,7 @@ import 'package:window_manager/window_manager.dart';
 import '../../core/plugin.dart';
 import '../../core/plugin_command.dart';
 import '../../utils/logger.dart';
+import 'remote_search_result.dart';
 import 'runtime.dart';
 import 'server.dart';
 
@@ -28,13 +29,14 @@ PluginCommand _createCommandItem(element) {
       final data = await _server
           .invoke('onSearch', {"keyword": keyword, "command": element});
       return data["results"]
-          .map<SearchResult>((element) => SearchResult.fromJson(element))
+          .map<RemoteSearchResult>(
+              (element) => RemoteSearchResult.fromJson(element))
           .toList();
     },
     onResultTap: (SearchResult result) async {
       _server.invoke('onResultTap', {
         "command": element,
-        "result": result.toJson(),
+        "result": (result as RemoteSearchResult).raw,
       });
     },
     onExit: () async {
