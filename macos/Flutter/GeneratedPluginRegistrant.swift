@@ -7,9 +7,9 @@ import Foundation
 
 import clipboard_watcher
 import hotkey_manager
-import path_provider_macos
+import path_provider_foundation
 import screen_retriever
-import shared_preferences_macos
+import shared_preferences_foundation
 import sqflite
 import window_manager
 

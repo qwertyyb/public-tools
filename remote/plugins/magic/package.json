@@ -1,0 +1,16 @@
+{
+  "name": "magic",
+  "version": "1.0.0",
+  "title": "魔方平台",
+  "subtitle": "快速打开魔方平台",
+  "description": "",
+  "main": "index.js",
+  "icon": "https://vfiles.gtimg.cn/vupload/20220707/cebede1657173105152.png",
+  "mode": "listView",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "keywords": ["mg", "magic", "mf"],
+  "author": "",
+  "license": "ISC"
+}
