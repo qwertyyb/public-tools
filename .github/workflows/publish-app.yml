@@ -42,15 +42,32 @@ jobs:
           number=`date +%Y%m%d%H%M%S`
           flutter build macos --build-name=$version --build-number=$number
 
-      - name: "Notarize Release Build"
-        uses: devbotsxyz/xcode-notarize@v1
-        with:
-          product-path: "build/macos/Build/Products/Release/public tools.app"
-          appstore-connect-username: ${{ secrets.NOTARIZATION_USERNAME }}
-          appstore-connect-password: ${{ secrets.NOTARIZATION_PASSWORD }}
-
       - name: zip *.app
         run: ditto -c -k --sequesterRsrc --keepParent "build/macos/Build/Products/Release/public tools.app" "build/macos/Build/Products/Release/public tools.zip"
+
+      - name: "Notarize Release Build"
+        env:
+          AC_USERNAME: ${{ secrets.NOTARIZATION_USERNAME }}
+          AC_PASSWORD: ${{ secrets.NOTARIZATION_PASSWORD }}
+          TEAM_ID: ${{ secrets.TEAM_ID }}
+        run: |
+          echo "notarize app"
+          notarize_response=`xcrun notarytool submit "build/macos/Build/Products/Release/public tools.zip" --apple-id "$AC_USERNAME" --password "$AC_PASSWORD" --team-id "$TEAM_ID" --wait --progress`
+          echo "$notarize_response"
+
+          echo "check status"
+
+          t=`echo "$notarize_response" | grep "status: Accepted"`
+          f=`echo "$notarize_response" | grep "Invalid"`
+          if [[ "$t" != "" ]]; then
+              echo "notarization done!"
+              xcrun stapler staple "build/macos/Build/Products/Release/public tools.app"
+              echo "stapler done!"
+          fi
+          if [[ "$f" != "" ]]; then
+              echo "notarization failed"
+              exit 1
+          fi
 
       - uses: actions/upload-artifact@v2
         with:
